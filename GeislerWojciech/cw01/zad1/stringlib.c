@@ -5,15 +5,14 @@
 #include "stringlib.h"
 
 
-char **create(size_t count, size_t block_size) {
+char **create(size_t count) {
     char** array = calloc(count, sizeof(char*));
-//    for(int i = 0; i < count; ++i) {
-//        array[i] = calloc(block_size, sizeof(char));
-//    }
     return array;
 }
 
-void free_array(char** array, size_t size) {
+
+
+void free_array(char **array, size_t size) {
     for(int i = 0; i < size; ++i){
         if(array[i] != NULL) {
             free(array[i]);
