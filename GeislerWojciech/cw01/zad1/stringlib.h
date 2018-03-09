@@ -12,4 +12,12 @@ void free_array(char **array, size_t size);
 void set_value(char** array, size_t pos, char* data);
 
 
+char* create_block(char** array, size_t pos, size_t size);
+
+void fill(char* block, char* value, size_t size);
+
+void fill_random(char* block, size_t size);
+
+size_t find_nearest(char** array, size_t size, size_t target);
+
 #endif //TASK_STRINGLIB_H
