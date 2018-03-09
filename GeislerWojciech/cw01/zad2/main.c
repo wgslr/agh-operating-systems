@@ -4,7 +4,7 @@
 #include <time.h>
 #include "../zad1/stringlib.h"
 
-#define BLOCKS 10
+#define BLOCKS 3
 #define LEN 2
 
 void print(char **array);
@@ -36,3 +36,22 @@ void print_arr(char** array, int size) {
         }
     }
 }
+
+void experiment() {
+    char* arr = malloc(BLOCKS * LEN * sizeof(char));
+    for(int i = 0; i < BLOCKS * LEN; ++i) {
+        *(arr + i) = 'A' + i;
+    }
+
+    for(int i = 0; i < BLOCKS * LEN; ++i) {
+        printf("&arr[%d] = %c\n", i, &arr[i]);
+        printf("arr[%d] = %c\n", i, arr[i]);
+    }
+
+    for(int i = 0; i < BLOCKS; ++i) {
+        for(int j = 0; j < LEN; ++j) {
+            printf("arr[%d][%d] = %c\n", i, j, arr[i][j]);
+        }
+    }
+}
+
