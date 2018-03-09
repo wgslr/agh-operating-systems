@@ -19,6 +19,11 @@ char* create_block(char** array, size_t pos, size_t size) {
     array[pos] = malloc(size * sizeof(char));
 }
 
+void delete_block(char** array, size_t pos) {
+    free(array[pos]);
+    array[pos] = NULL;
+}
+
 void fill(char* block, char* value, size_t size) {
     memcpy(block, value, size);
 }

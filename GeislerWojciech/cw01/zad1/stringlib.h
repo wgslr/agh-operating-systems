@@ -20,4 +20,6 @@ void fill_random(char* block, size_t size);
 
 size_t find_nearest(char** array, size_t size, size_t target);
 
+void delete_block(char** array, size_t pos);
+
 #endif //TASK_STRINGLIB_H
