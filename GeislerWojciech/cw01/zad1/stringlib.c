@@ -2,13 +2,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <Host.h>
+#include <limits.h>
 #include "stringlib.h"
 
 //const char MIN_CHAR = 'A';
 //const char MAX_CHAR = 'z';
 const char MIN_CHAR = 'A';
 const char MAX_CHAR = 'C';
+
+static_array static_create() {
+    static_array created;
+    return created;
+}
 
 char **create(size_t count) {
     char** array = calloc(count, sizeof(char*));
@@ -40,6 +45,34 @@ int sum_block(char* block) {
         sum += block[i];
     }
     return sum;
+}
+
+size_t find_nearest_struct(static_array* array, size_t size, size_t target) {
+    printf("Static\n");
+    printf("%p\n", &array);
+    printf("%p\n", array->array);
+    printf("%p\n\n", &(array->array));
+
+    printf("%d\n", sum_block(array->array[target]));
+//    find_nearest(array->array, 1024, 3);
+
+    int target_sum = sum_block(array->array[target]);
+
+    size_t best_pos = 0;
+    int best_diff = INT_MAX;
+
+    for(int i = 0; i < size; ++i){
+        if(i == target)
+            continue;
+        int sum = sum_block(array->array[i]);
+        printf("Struct sum of %u: %d\n", i, sum);
+
+        if(abs(sum - target_sum) < best_diff) {
+            best_diff = abs(sum - target_sum);
+            best_pos = i;
+        }
+    }
+    return best_pos;
 }
 
 size_t find_nearest(char** array, size_t size, size_t target) {
