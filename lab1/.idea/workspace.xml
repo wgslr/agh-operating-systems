@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="true">
-    <generated />
+    <generated>
+      <config projectName="task" targetName="task" />
+    </generated>
   </component>
   <component name="CMakeSettings" AUTO_RELOAD="true">
     <configurations>
@@ -18,13 +20,64 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="FavoritesManager">
+    <favorites_list name="task" />
+  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="stddef.h" pinned="false" current-in-tab="true">
+      <file leaf-file-name="stddef.h" pinned="false" current-in-tab="false">
         <entry file="file:///usr/lib/gcc/x86_64-pc-linux-gnu/7.3.0/include/stddef.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="386">
-              <caret line="412" column="0" lean-forward="true" selection-start-line="412" selection-start-column="0" selection-end-line="412" selection-end-column="0" />
+            <state relative-caret-position="7416">
+              <caret line="412" column="0" lean-forward="false" selection-start-line="412" selection-start-column="0" selection-end-line="412" selection-end-column="0" />
+              <folding>
+                <marker date="1517001363000" expanded="true" signature="9107:9721" ph="/.../" />
+                <marker date="1517001363000" expanded="false" signature="9784:10301" ph="..." />
+                <marker date="1517001363000" expanded="true" signature="10316:10483" ph="/.../" />
+                <marker date="1517001363000" expanded="false" signature="10532:10708" ph="..." />
+                <marker date="1517001363000" expanded="false" signature="12994:13784" ph="..." />
+                <marker date="1517001363000" expanded="false" signature="13865:13956" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="stringlib.c" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/GeislerWojciech/cw01/zad1/stringlib.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="630">
+              <caret line="39" column="21" lean-forward="false" selection-start-line="39" selection-start-column="21" selection-end-line="39" selection-end-column="21" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CMakeLists.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="108">
+              <caret line="6" column="53" lean-forward="false" selection-start-line="6" selection-start-column="53" selection-end-line="6" selection-end-column="53" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="stringlib.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/GeislerWojciech/cw01/zad1/stringlib.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="144">
+              <caret line="8" column="8" lean-forward="false" selection-start-line="8" selection-start-column="8" selection-end-line="8" selection-end-column="8" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="main.c" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/GeislerWojciech/cw01/zad2/main.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="416">
+              <caret line="33" column="0" lean-forward="false" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -74,7 +127,7 @@
       <file leaf-file-name="limits.h" pinned="false" current-in-tab="false">
         <entry file="file:///usr/lib/gcc/x86_64-pc-linux-gnu/7.3.0/include-fixed/limits.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2142">
+            <state relative-caret-position="901">
               <caret line="119" column="8" lean-forward="false" selection-start-line="119" selection-start-column="8" selection-end-line="119" selection-end-column="8" />
               <folding>
                 <marker date="1517001363000" expanded="false" signature="2914:2952" ph="..." />
@@ -90,7 +143,19 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="738">
               <caret line="41" column="13" lean-forward="false" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="13" />
-              <folding />
+              <folding>
+                <marker date="1516223377000" expanded="false" signature="1865:2003" ph="..." />
+                <marker date="1516223377000" expanded="false" signature="5390:5906" ph="..." />
+                <marker date="1516223377000" expanded="false" signature="6009:6157" ph="..." />
+                <marker date="1516223377000" expanded="false" signature="6374:6480" ph="..." />
+                <marker date="1516223377000" expanded="false" signature="11845:11993" ph="..." />
+                <marker date="1516223377000" expanded="false" signature="13410:13664" ph="..." />
+                <marker date="1516223377000" expanded="false" signature="13818:14854" ph="..." />
+                <marker date="1516223377000" expanded="false" signature="14885:15013" ph="..." />
+                <marker date="1516223377000" expanded="false" signature="15040:15512" ph="..." />
+                <marker date="1516223377000" expanded="false" signature="15543:16340" ph="..." />
+                <marker date="1516223377000" expanded="false" signature="17358:17500" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -103,10 +168,10 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/GeislerWojciech/cw01/zad2/main.c" />
         <option value="$PROJECT_DIR$/GeislerWojciech/cw01/zad1/stringlib.h" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/GeislerWojciech/cw01/zad1/stringlib.c" />
+        <option value="$PROJECT_DIR$/GeislerWojciech/cw01/zad2/main.c" />
       </list>
     </option>
   </component>
@@ -118,8 +183,6 @@
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds">
-    <option name="x" value="1280" />
-    <option name="y" value="-1" />
     <option name="width" value="1920" />
     <option name="height" value="1061" />
   </component>
@@ -144,18 +207,32 @@
           <expand>
             <path>
               <item name="task" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
-              <item name="task" type="462c0819:PsiDirectoryNode" />
+              <item name="lab1" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="task" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
-              <item name="task" type="462c0819:PsiDirectoryNode" />
+              <item name="lab1" type="462c0819:PsiDirectoryNode" />
               <item name="GeislerWojciech" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="task" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
-              <item name="task" type="462c0819:PsiDirectoryNode" />
+              <item name="lab1" type="462c0819:PsiDirectoryNode" />
               <item name="GeislerWojciech" type="462c0819:PsiDirectoryNode" />
               <item name="cw01" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="task" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="lab1" type="462c0819:PsiDirectoryNode" />
+              <item name="GeislerWojciech" type="462c0819:PsiDirectoryNode" />
+              <item name="cw01" type="462c0819:PsiDirectoryNode" />
+              <item name="zad1" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="task" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="lab1" type="462c0819:PsiDirectoryNode" />
+              <item name="GeislerWojciech" type="462c0819:PsiDirectoryNode" />
+              <item name="cw01" type="462c0819:PsiDirectoryNode" />
+              <item name="zad2" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -167,6 +244,7 @@
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="settings.editor.selected.configurable" value="CMakeSettings" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -180,10 +258,17 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
-    <configuration name="Build All" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Project" RUN_TARGET_NAME="task" EXPLICIT_BUILD_TARGET_NAME="all">
+  <component name="RunManager" selected="Application.task">
+    <configuration name="Build All" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="task" RUN_TARGET_NAME="task" EXPLICIT_BUILD_TARGET_NAME="all">
       <envs />
     </configuration>
+    <configuration name="task" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="-n 3 -b 4" PASS_PARENT_ENVS_2="true" PROJECT_NAME="task" TARGET_NAME="task" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="task" RUN_TARGET_NAME="task">
+      <envs />
+    </configuration>
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="Application.Build All" />
+      <item index="1" class="java.lang.String" itemvalue="Application.task" />
+    </list>
   </component>
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
@@ -204,28 +289,30 @@
       <workItem from="1520805215470" duration="1164000" />
       <workItem from="1520807339423" duration="2787000" />
       <workItem from="1520865666438" duration="1625000" />
+      <workItem from="1520867681384" duration="1644000" />
+      <workItem from="1520883751399" duration="2261000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="21194000" />
+    <option name="totallyTimeSpent" value="25099000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1280" y="-1" width="1920" height="1061" extended-state="0" />
+    <frame x="0" y="0" width="1920" height="1061" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1717119" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14509395" sideWeight="0.4939394" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="CMake" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32848233" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32746115" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32746115" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31606218" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31606218" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39956802" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32953367" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14509395" sideWeight="0.5060606" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39896372" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32746115" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -242,9 +329,39 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="15" />
+      <option name="time" value="19" />
     </breakpoint-manager>
-    <watches-manager />
+    <watches-manager>
+      <configuration name="CMakeRunConfiguration">
+        <watch expression="size" />
+        <watch expression="array[i]" />
+        <watch expression="*(array[1])" language="ObjectiveC" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>*(array[1])</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>array[1]</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>array[i+1]</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>array[i]</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
@@ -326,7 +443,19 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="697">
           <caret line="41" column="13" lean-forward="false" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="13" />
-          <folding />
+          <folding>
+            <marker date="1516223377000" expanded="false" signature="1865:2003" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="5390:5906" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6009:6157" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6374:6480" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="11845:11993" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13410:13664" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13818:14854" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="14885:15013" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15040:15512" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15543:16340" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="17358:17500" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -425,7 +554,19 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="697">
           <caret line="41" column="13" lean-forward="false" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="13" />
-          <folding />
+          <folding>
+            <marker date="1516223377000" expanded="false" signature="1865:2003" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="5390:5906" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6009:6157" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6374:6480" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="11845:11993" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13410:13664" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13818:14854" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="14885:15013" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15040:15512" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15543:16340" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="17358:17500" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -516,7 +657,19 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="697">
           <caret line="41" column="13" lean-forward="false" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="13" />
-          <folding />
+          <folding>
+            <marker date="1516223377000" expanded="false" signature="1865:2003" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="5390:5906" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6009:6157" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6374:6480" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="11845:11993" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13410:13664" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13818:14854" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="14885:15013" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15040:15512" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15543:16340" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="17358:17500" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -607,7 +760,19 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="738">
           <caret line="41" column="13" lean-forward="false" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="13" />
-          <folding />
+          <folding>
+            <marker date="1516223377000" expanded="false" signature="1865:2003" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="5390:5906" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6009:6157" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6374:6480" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="11845:11993" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13410:13664" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13818:14854" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="14885:15013" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15040:15512" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15543:16340" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="17358:17500" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -690,7 +855,19 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="738">
           <caret line="41" column="13" lean-forward="false" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="13" />
-          <folding />
+          <folding>
+            <marker date="1516223377000" expanded="false" signature="1865:2003" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="5390:5906" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6009:6157" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6374:6480" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="11845:11993" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13410:13664" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13818:14854" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="14885:15013" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15040:15512" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15543:16340" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="17358:17500" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -781,7 +958,19 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="697">
           <caret line="41" column="13" lean-forward="false" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="13" />
-          <folding />
+          <folding>
+            <marker date="1516223377000" expanded="false" signature="1865:2003" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="5390:5906" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6009:6157" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6374:6480" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="11845:11993" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13410:13664" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13818:14854" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="14885:15013" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15040:15512" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15543:16340" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="17358:17500" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -794,18 +983,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.c" />
-    <entry file="file:///usr/lib/gcc/x86_64-pc-linux-gnu/7.3.0/include-fixed/limits.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2142">
-          <caret line="119" column="8" lean-forward="false" selection-start-line="119" selection-start-column="8" selection-end-line="119" selection-end-column="8" />
-          <folding>
-            <marker date="1517001363000" expanded="false" signature="2914:2952" ph="..." />
-            <marker date="1517001363000" expanded="false" signature="3625:3662" ph="..." />
-            <marker date="1517001363000" expanded="false" signature="4313:4634" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/include/stdlib.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="12978">
@@ -845,30 +1022,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/include/string.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="738">
-          <caret line="41" column="13" lean-forward="false" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/GeislerWojciech/cw01/zad1/stringlib.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="7" column="23" lean-forward="false" selection-start-line="7" selection-start-column="23" selection-end-line="7" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/GeislerWojciech/cw01/zad1/stringlib.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="108">
@@ -877,18 +1030,73 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/GeislerWojciech/cw01/zad2/main.c">
+    <entry file="file://$PROJECT_DIR$/GeislerWojciech/cw01/zad1/stringlib.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="19" column="0" lean-forward="false" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+        <state relative-caret-position="144">
+          <caret line="8" column="8" lean-forward="false" selection-start-line="8" selection-start-column="8" selection-end-line="8" selection-end-column="8" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file:///usr/lib/gcc/x86_64-pc-linux-gnu/7.3.0/include/stddef.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="386">
-          <caret line="412" column="0" lean-forward="true" selection-start-line="412" selection-start-column="0" selection-end-line="412" selection-end-column="0" />
+        <state relative-caret-position="7416">
+          <caret line="412" column="0" lean-forward="false" selection-start-line="412" selection-start-column="0" selection-end-line="412" selection-end-column="0" />
+          <folding>
+            <marker date="1517001363000" expanded="true" signature="9107:9721" ph="/.../" />
+            <marker date="1517001363000" expanded="false" signature="9784:10301" ph="..." />
+            <marker date="1517001363000" expanded="true" signature="10316:10483" ph="/.../" />
+            <marker date="1517001363000" expanded="false" signature="10532:10708" ph="..." />
+            <marker date="1517001363000" expanded="false" signature="12994:13784" ph="..." />
+            <marker date="1517001363000" expanded="false" signature="13865:13956" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/string.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="738">
+          <caret line="41" column="13" lean-forward="false" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="13" />
+          <folding>
+            <marker date="1516223377000" expanded="false" signature="1865:2003" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="5390:5906" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6009:6157" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="6374:6480" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="11845:11993" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13410:13664" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="13818:14854" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="14885:15013" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15040:15512" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="15543:16340" ph="..." />
+            <marker date="1516223377000" expanded="false" signature="17358:17500" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/lib/gcc/x86_64-pc-linux-gnu/7.3.0/include-fixed/limits.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="901">
+          <caret line="119" column="8" lean-forward="false" selection-start-line="119" selection-start-column="8" selection-end-line="119" selection-end-column="8" />
+          <folding>
+            <marker date="1517001363000" expanded="false" signature="2914:2952" ph="..." />
+            <marker date="1517001363000" expanded="false" signature="3625:3662" ph="..." />
+            <marker date="1517001363000" expanded="false" signature="4313:4634" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GeislerWojciech/cw01/zad1/stringlib.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="630">
+          <caret line="39" column="21" lean-forward="false" selection-start-line="39" selection-start-column="21" selection-end-line="39" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GeislerWojciech/cw01/zad2/main.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="416">
+          <caret line="33" column="0" lean-forward="false" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
           <folding />
         </state>
       </provider>

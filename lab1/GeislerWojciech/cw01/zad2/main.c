@@ -4,60 +4,60 @@
 #include <time.h>
 #include "../zad1/stringlib.h"
 
-#define BLOCKS 4
-#define LEN 5
+void print(char **array, size_t size);
 
-void print(char **array);
-
-void experiment();
-void experiment2();
-
-char** static_cr(size_t blocks, size_t size);
-
-int main() {
+int main(int argc, char *argv[]) {
     srand(time(NULL));
-//
-//    char** arr = create(BLOCKS);
-//    for(int i = 0; i < BLOCKS; ++i) {
-//        create_block(arr, i, LEN);
-//        fill_random(arr[i], LEN);
-//    }
-//
-//    print_arr(arr, BLOCKS);
-//
-//    printf("Magic begin\n");
-//    struct static_array st = static_create();
-//    printf("Magic end\n");
-//
-//    strcpy(st.array[0], "abc");
-//    strcpy(st.array[1], "def");
-//    strcpy(st.array[2], "ghi");
-//    strcpy(st.array[3], "wxyz");
-//
-//    printf("%u\n", find_nearest(arr, BLOCKS, 2));
-//    printf("%u\n", sizeof(struct static_array));
-//    printf("%u\n", &st);
-//    printf("%u\n", &st.array);
-//    printf("%u\n", find_nearest_struct(&(st), BLOCKS, 2));
-////    printf("%u\n", find_nearest(&st.array, BLOCKS, 2));
-//
-//    char** st2 = static_cr(BLOCKS, 5);
-//    find_nearest(st2, MAX_BLOCKS, 2);
 
+    size_t blocks = 0;
+    size_t block_size = 0;
+
+    printf("Arguments: %d\n", argc);
+
+    for(int i = 1; i < argc; i += 2) {
+        if(argv[i][0] != '-' || i + 1 >= argc) {
+            fprintf(stderr, "Incorrect arguments format in arg %d\n", i);
+            return(1);
+        }
+        switch(argv[i][1]) {
+            case 'n':
+                blocks = strtoul(argv[i + 1], NULL, 10);
+                break;
+            case 'b':
+                block_size = strtoul(argv[i + 1], NULL, 10);
+                break;
+        }
+    }
+
+    fprintf(stderr, "Creating array of %u blocks sized %u\n", blocks, block_size);
+
+
+    char** arr = get_static();
+
+    printf("%u %u %u\n", &arr, &arr[0], &arr[1]);
+
+    fill_random(&arr[0], 5);
+    fill_random(&arr[1], 5);
+    fill_random(&arr[3], 7);
+
+    print_arr(&arr, 10);
 
     return 0;
 }
 
 
-char** static_cr(size_t blocks, size_t block_size) {
-    static char array[MAX_BLOCKS][MAX_BLOCKS_SIZE];
-    return (char**) &array;
-}
-
-void print_arr(char** array, int size) {
+void print_arr(char** array, size_t size) {
     for(int i = 0; i < size; ++i) {
         if(array[i] != NULL) {
-            printf("%d: %s\n", i, array[i]);
+            printf("%d: %p: %s\n", i, array[i], array[i]);
+        } else {
+            printf("\n");
         }
     }
+}
+
+void print_help() {
+    printf("Required options:\n"
+                   "-n blocks count\n"
+                   "-b block size\n");
 }

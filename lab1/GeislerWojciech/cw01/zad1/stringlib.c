@@ -11,6 +11,7 @@ const char MAX_CHAR = 'z';
 char st_array[MAX_BLOCKS][MAX_BLOCKS_SIZE];
 
 char** get_static() {
+    printf("%u %u %u\n", &st_array, &st_array[0], &st_array[1]);
     for(size_t i = 0; i < MAX_BLOCKS; ++i) {
         st_array[i][0] = '\0';
     }
@@ -49,9 +50,10 @@ void fill_str(char* block, char* value) {
 }
 
 void fill_random(char* block, size_t size) {
-    for(int i = 0; i < size; ++i) {
+    for(int i = 0; i < size - 1; ++i) {
         block[i] = (char) (rand() % (MAX_CHAR - MIN_CHAR + 1) + MIN_CHAR);
     }
+    block[size - 1] = '\0';
 }
 
 
