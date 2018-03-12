@@ -2,29 +2,38 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdbool.h>
 #include "../zad1/stringlib.h"
 
 void print(char **array, size_t size);
+
+void print_help() ;
 
 int main(int argc, char *argv[]) {
     srand(time(NULL));
 
     size_t blocks = 0;
     size_t block_size = 0;
+    bool use_static = false;
 
     printf("Arguments: %d\n", argc);
 
-    for(int i = 1; i < argc; i += 2) {
-        if(argv[i][0] != '-' || i + 1 >= argc) {
+    for(int i = 1; i < argc; ++i) {
+        if(argv[i][0] != '-') {
             fprintf(stderr, "Incorrect arguments format in arg %d\n", i);
             return(1);
         }
         switch(argv[i][1]) {
+            case 'h':
+                print_help();
+                return(0);
             case 'n':
                 blocks = strtoul(argv[i + 1], NULL, 10);
+                ++i;
                 break;
             case 'b':
                 block_size = strtoul(argv[i + 1], NULL, 10);
+                ++i;
                 break;
         }
     }
@@ -46,6 +55,9 @@ int main(int argc, char *argv[]) {
 }
 
 
+
+/** Helpers **/
+
 void print_arr(char** array, size_t size) {
     for(int i = 0; i < size; ++i) {
         if(array[i] != NULL) {
@@ -57,7 +69,10 @@ void print_arr(char** array, size_t size) {
 }
 
 void print_help() {
-    printf("Required options:\n"
+    printf("Options:\n"
                    "-n blocks count\n"
-                   "-b block size\n");
+                   "-b block size\n"
+                   "-m mode (0 - dynamic; 1 - static)\n");
 }
+
+
