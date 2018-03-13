@@ -8,47 +8,69 @@
 const char MIN_CHAR = 'A';
 const char MAX_CHAR = 'z';
 
-char st_array[MAX_BLOCKS][MAX_BLOCKS_SIZE];
+char static_content[MAX_BLOCKS][MAX_BLOCKS_SIZE];
 
-char** get_static() {
-    printf("%u %u %u\n", &st_array, &st_array[0], &st_array[1]);
-    for(size_t i = 0; i < MAX_BLOCKS; ++i) {
-        st_array[i][0] = '\0';
+array* create(size_t blocks_count, bool use_static) {
+    array* arr = malloc(sizeof(arr));
+    arr->use_static = use_static;
+    arr->blocks = blocks_count;
+    if(!use_static) {
+        arr->content = calloc(blocks_count, sizeof(char*));
+    } else {
+        arr->content = NULL;
     }
-    return (char**) &st_array;
+    return arr;
 }
 
+void delete(array* arr) {
+    if(!arr->use_static) {
+        for(size_t i = 0; i < arr->blocks; ++i) {
+            if(arr->content[i] != 0) {
 
-char** create(size_t count) {
-    char** array = calloc(count, sizeof(char*));
-    return array;
-}
-
-char** delete(char** array, size_t size) {
-    for(size_t i = 0; i < size; ++i) {
-        free(array[i]);
+            }
+            free(arr->content[i]);
+        }
+        free(arr->content);
+        free(arr);
     }
-    free(array);
 }
 
-char* create_block(char** array, size_t pos, size_t size) {
-    array[pos] = malloc(size * sizeof(char));
+// returns pointer to the created block
+char* create_block(array* arr, size_t pos, size_t size) {
+    if(!arr->use_static) {
+        arr->content[pos] = calloc(size, sizeof(char));
+        return arr->content[pos];
+    } else {
+        // simulate calloc
+        memset(static_content[pos], '\0', size);
+        return &static_content[pos][0];
+    }
 }
 
-void delete_block(char** array, size_t pos) {
-    free(array[pos]);
-    array[pos] = NULL;
+void delete_block(array* arr, size_t pos) {
+    if(!arr->use_static) {
+        free(arr->content[pos]);
+        arr->content[pos] = NULL;
+    } else {
+        arr->content[pos][0] = 0;
+    }
 }
 
+// Fills given block with contents from `value`
+// assuming its size to be `size`.
 void fill(char* block, char* value, size_t size) {
     memcpy(block, value, size);
 }
 
+// Fills given block with contents from `value`
+// detecting its size as for a null-terminated string.
 void fill_str(char* block, char* value) {
     size_t size = strlen(value);
     memcpy(block, value, size);
 }
 
+// Fills given block of `size` characters with
+// random characters from a subset of ASCII.
 void fill_random(char* block, size_t size) {
     for(int i = 0; i < size - 1; ++i) {
         block[i] = (char) (rand() % (MAX_CHAR - MIN_CHAR + 1) + MIN_CHAR);

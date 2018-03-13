@@ -5,12 +5,20 @@
 #ifndef TASK_STRINGLIB_H
 #define TASK_STRINGLIB_H
 
+#include <stdbool.h>
+
 #define MAX_BLOCKS 1000000
 #define MAX_BLOCKS_SIZE 1000
 
+typedef struct array {
+    char** content;
+    size_t blocks;
+    bool use_static;
+} array;
+
 char** get_static();
 
-char** create(size_t count);
+array* create(size_t count, bool use_static);
 
 char** delete(char** array, size_t size);
 
