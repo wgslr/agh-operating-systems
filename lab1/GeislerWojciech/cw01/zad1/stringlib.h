@@ -16,13 +16,15 @@ typedef struct array {
     bool use_static;
 } array;
 
-array* arr_create(size_t blocks_count, bool use_static);
+array* create_array(size_t blocks_count, bool use_static);
 
-char** arr_delete(array* arr, size_t size);
+char** delete_array(array* arr, size_t size);
 
 char* create_block(array* arr, size_t pos, size_t size);
 
 void delete_block(array* arr, size_t pos);
+
+char* get_block(array* arr, size_t pos);
 
 void fill(char* block, char* value, size_t size);
 

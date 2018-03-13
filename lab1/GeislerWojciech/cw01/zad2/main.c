@@ -1,15 +1,18 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
 #include "../zad1/stringlib.h"
 
-void print(char **array, size_t size);
+void print(char** array, size_t size);
 
-void print_help() ;
+void print_help();
 
-int main(int argc, char *argv[]) {
+void time_create_dynamic(size_t blocks, size_t block_size);
+
+int main(int argc, char* argv[]) {
     srand(time(NULL));
 
     size_t blocks = 0;
@@ -21,12 +24,12 @@ int main(int argc, char *argv[]) {
     for(int i = 1; i < argc; ++i) {
         if(argv[i][0] != '-') {
             fprintf(stderr, "Incorrect arguments format in arg %d\n", i);
-            return(1);
+            return (1);
         }
         switch(argv[i][1]) {
             case 'h':
                 print_help();
-                return(0);
+                return (0);
             case 'n':
                 blocks = strtoul(argv[i + 1], NULL, 10);
                 ++i;
@@ -35,36 +38,65 @@ int main(int argc, char *argv[]) {
                 block_size = strtoul(argv[i + 1], NULL, 10);
                 ++i;
                 break;
+            case 'm':
+                use_static = (bool) strtoul(argv[i + 1], NULL, 10);
+                ++i;
+                break;
         }
     }
 
-    fprintf(stderr, "Creating array of %u blocks sized %u\n", blocks, block_size);
+//    fprintf(stderr, "Creating array of %u blocks sized %u\n", blocks, block_size);
+//
+//    array* arr = create_array(blocks, use_static);
+//    create_block(arr, 0, block_size);
+//    fill_random(get_block(arr, 0), block_size);
+//    printf("%s\n", get_block(arr, 0));
 
-
-    char** arr = get_static();
-
-    printf("%u %u %u\n", &arr, &arr[0], &arr[1]);
-
-    fill_random(&arr[0], 5);
-    fill_random(&arr[1], 5);
-    fill_random(&arr[3], 7);
-
-    print_arr(&arr, 10);
+    time_create_dynamic(blocks, block_size);
 
     return 0;
 }
 
+void time_create_dynamic(size_t blocks, size_t block_size) {
+    struct timespec real_start;
+    clock_gettime(CLOCK_REALTIME, &real_start);
+
+//    for(int cnt = 0; cnt < 1; ++cnt) {
+    array* arr = create_array(blocks, false);
+    for(int i = 0; i < blocks; ++i) {
+        create_block(arr, i, block_size);
+    }
+//    }
+
+
+    struct timespec real_end;
+    clock_gettime(CLOCK_REALTIME, &real_end);
+    print_timing(&real_start, &real_end, "Real time");
+}
 
 
 /** Helpers **/
 
-void print_arr(char** array, size_t size) {
-    for(int i = 0; i < size; ++i) {
-        if(array[i] != NULL) {
-            printf("%d: %p: %s\n", i, array[i], array[i]);
-        } else {
-            printf("\n");
+void print_timing(const struct timespec* start, const struct timespec* end, const char* description) {
+//    long double diff_ms = (end->tv_sec - start->tv_sec) * 1000 + (end->tv_nsec - start->tv_nsec) / 1000.0;
+
+    printf("Start: %llds %lldns, End: %llds %lldns\n", (long long int) start->tv_sec, (long long int) start->tv_nsec,
+           (long long int) end->tv_sec, (long long int) end->tv_nsec);
+    long double diff_us = (end->tv_sec - start->tv_sec) * 1000000.0 + (end->tv_nsec - start->tv_nsec) / 1000.0;
+//    long double diff_ms = diff_ns / 1000;
+    printf("%s: %.3Lf s = %.3Lf ms = %.3Lf us\n", description, diff_us / 1000000, diff_us / 1000, diff_us);
+}
+
+void print_arr(const array* arr, size_t size) {
+    if(!arr->use_static) {
+        for(int i = 0; i < size; ++i) {
+            if(arr->content[i] != NULL) {
+                printf("%d: %p: %s\n", i, arr->content[i], arr->content[i]);
+            } else {
+                printf("\n");
+            }
         }
+
     }
 }
 

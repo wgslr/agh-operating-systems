@@ -10,7 +10,7 @@ const char MAX_CHAR = 'z';
 
 char static_content[MAX_BLOCKS][MAX_BLOCKS_SIZE];
 
-array* arr_create(size_t blocks_count, bool use_static) {
+array* create_array(size_t blocks_count, bool use_static) {
     array* arr = malloc(sizeof(arr));
     arr->use_static = use_static;
     arr->blocks = blocks_count;
@@ -22,7 +22,7 @@ array* arr_create(size_t blocks_count, bool use_static) {
     return arr;
 }
 
-char** arr_delete(array* arr, size_t size) {
+char** delete_array(array* arr, size_t size) {
     if(!arr->use_static) {
         for(size_t i = 0; i < arr->blocks; ++i) {
             if(arr->content[i] != 0) {
