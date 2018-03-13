@@ -3,7 +3,7 @@
 *.so
 
 # CLion
-*/.idea/
+*/.idea
 
 # CMake
 cmake-build-debug/
