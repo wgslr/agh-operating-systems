@@ -10,7 +10,7 @@ const char MAX_CHAR = 'z';
 
 char static_content[MAX_BLOCKS][MAX_BLOCKS_SIZE];
 
-array* create(size_t blocks_count, bool use_static) {
+array* arr_create(size_t blocks_count, bool use_static) {
     array* arr = malloc(sizeof(arr));
     arr->use_static = use_static;
     arr->blocks = blocks_count;
@@ -22,7 +22,7 @@ array* create(size_t blocks_count, bool use_static) {
     return arr;
 }
 
-void delete(array* arr) {
+char** arr_delete(array* arr, size_t size) {
     if(!arr->use_static) {
         for(size_t i = 0; i < arr->blocks; ++i) {
             if(arr->content[i] != 0) {
@@ -32,6 +32,14 @@ void delete(array* arr) {
         }
         free(arr->content);
         free(arr);
+    }
+}
+
+char* get_block(array* arr, size_t pos) {
+    if(!arr->use_static) {
+        return arr->content[pos];
+    } else {
+        return static_content[pos];
     }
 }
 
@@ -87,9 +95,9 @@ size_t find_nearest(char** array, size_t size, size_t target) {
 
     for(size_t i = 0; i < size; ++i) {
         if(i != target) {
-            int sum = sum_block(array[i]);
-            if(abs(sum - target_sum) < best_diff) {
-                best_diff = abs(sum - target_sum);
+            int diff = abs(sum_block(array[i]) - target_sum);
+            if(diff < best_diff) {
+                best_diff = diff;
                 best_pos = i;
             }
         }
@@ -97,6 +105,7 @@ size_t find_nearest(char** array, size_t size, size_t target) {
     return best_pos;
 }
 
+// Calculates sum of character values in a zero-terminated block
 int sum_block(char* block) {
     int sum = 0;
     for(int i = 0; block[i] != '\0'; ++i) {

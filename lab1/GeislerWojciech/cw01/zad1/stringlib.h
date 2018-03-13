@@ -16,23 +16,19 @@ typedef struct array {
     bool use_static;
 } array;
 
-char** get_static();
+array* arr_create(size_t blocks_count, bool use_static);
 
-array* create(size_t count, bool use_static);
+char** arr_delete(array* arr, size_t size);
 
-char** delete(char** array, size_t size);
+char* create_block(array* arr, size_t pos, size_t size);
 
-char* create_block(char** array, size_t pos, size_t size);
-
-void delete_block(char** array, size_t pos);
+void delete_block(array* arr, size_t pos);
 
 void fill(char* block, char* value, size_t size);
 
 void fill_str(char* block, char* value);
 
 void fill_random(char* block, size_t size);
-
-int sum_block(char* block);
 
 size_t find_nearest(char** array, size_t size, size_t target);
 
