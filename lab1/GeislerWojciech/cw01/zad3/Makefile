@@ -1,9 +1,9 @@
 CC=gcc
 OPTS=-Wall -Wextra
 
-.PHONY: all clean
+.PHONY: all clean test test_dynamic test_shared test_static test_all
 
-all: static dynamic
+all: static shared dynamic 
 
 static: main.c libchararray.a
 	$(CC) $^ -o $@ 
@@ -21,6 +21,29 @@ libchararray.so: chararray.c
 libchararray.a: chararray.c
 	$(CC) -c $^
 	ar cr $@ chararray.o
+
+test_all:
+	$(MAKE) test_static
+	$(MAKE) test_shared
+	$(MAKE) test_dynamic
+
+test:
+	echo $(EXEC) >> results3a.txt
+	./$(EXEC) 1000 100 0 create_table >> results3a.txt
+	./$(EXEC) 1000 100 1 create_table >> results3a.txt
+	./$(EXEC) 1000 100 0 add 1000 remove 1000 remove_and_add 1000 >> results3a.txt
+	./$(EXEC) 1000 100 1 add 1000 remove 1000 remove_and_add 1000 >> results3a.txt
+	./$(EXEC) 1000 100 0 search_element 500 >> results3a.txt
+	./$(EXEC) 1000 100 1 search_element 500 >> results3a.txt
+
+test_dynamic: EXEC=dynamic
+test_dynamic: test
+
+test_shared: EXEC=shared
+test_shared: test
+
+test_static: EXEC=static
+test_static: test
 
 clean:
 	-rm *.o *.so *.a 

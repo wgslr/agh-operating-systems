@@ -1,0 +1,315 @@
+static
+Measuring dynamic creation time for table of 1000 blocks sized 100 in 5000 cycles...
+Total timing of 5000 actions:
+  User time:  0.16969 s =  169.69200 ms = 169692.00000 us = 169692000.00000 ns
+System time:  0.12263 s =  122.62900 ms = 122629.00000 us = 122629000.00000 ns
+  Real time:  0.29324 s =  293.23893 ms = 293238.92700 us = 293238927.00000 ns
+Timing of one action averaged over 5000 retries:
+  User time:  0.00003 s =    0.03394 ms =     33.93800 us =   33938.00000 ns
+System time:  0.00002 s =    0.02452 ms =     24.52500 us =   24525.00000 ns
+  Real time:  0.00006 s =    0.05865 ms =     58.64700 us =   58647.00000 ns
+
+Measuring static creation time for table of 1000 blocks sized 100 in 5000 cycles...
+Total timing of 5000 actions:
+  User time:  0.05503 s =   55.02500 ms =  55025.00000 us = 55025000.00000 ns
+System time:  0.00058 s =    0.58300 ms =    583.00000 us =  583000.00000 ns
+  Real time:  0.05574 s =   55.73564 ms =  55735.63800 us = 55735638.00000 ns
+Timing of one action averaged over 5000 retries:
+  User time:  0.00001 s =    0.01100 ms =     11.00500 us =   11005.00000 ns
+System time:  0.00000 s =    0.00012 ms =      0.11600 us =     116.00000 ns
+  Real time:  0.00001 s =    0.01115 ms =     11.14700 us =   11147.00000 ns
+
+Measuring time of creating 1000 dynamically allocated blocks...
+Total timing of 1000 actions:
+  User time:  0.00008 s =    0.07900 ms =     79.00000 us =   79000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00008 s =    0.07911 ms =     79.10600 us =   79106.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00008 ms =      0.07900 us =      79.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00000 s =    0.00008 ms =      0.07900 us =      79.00000 ns
+
+Measuring time of deleting 1000 dynamically allocated blocks...
+Total timing of 1000 actions:
+  User time:  0.00002 s =    0.02200 ms =     22.00000 us =   22000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00002 s =    0.02124 ms =     21.23800 us =   21238.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00002 ms =      0.02200 us =      22.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00000 s =    0.00002 ms =      0.02100 us =      21.00000 ns
+
+Measuring time of adding and removing dynamically allocated block 1000 times...
+Total timing of 1000 actions:
+  User time:  0.00004 s =    0.04200 ms =     42.00000 us =   42000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00004 s =    0.04190 ms =     41.90100 us =   41901.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00004 ms =      0.04200 us =      42.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00000 s =    0.00004 ms =      0.04100 us =      41.00000 ns
+
+Measuring time of creating 1000 statically allocated blocks...
+Total timing of 1000 actions:
+  User time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+System time:  0.00036 s =    0.36400 ms =    364.00000 us =  364000.00000 ns
+  Real time:  0.00037 s =    0.37335 ms =    373.35500 us =  373355.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+System time:  0.00000 s =    0.00036 ms =      0.36400 us =     364.00000 ns
+  Real time:  0.00000 s =    0.00037 ms =      0.37300 us =     373.00000 ns
+
+Measuring time of deleting 1000 statically allocated blocks...
+Total timing of 1000 actions:
+  User time:  0.00001 s =    0.00600 ms =      6.00000 us =    6000.00000 ns
+System time:  0.00001 s =    0.00700 ms =      7.00000 us =    7000.00000 ns
+  Real time:  0.00001 s =    0.01356 ms =     13.56000 us =   13560.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00001 ms =      0.00600 us =       6.00000 ns
+System time:  0.00000 s =    0.00001 ms =      0.00700 us =       7.00000 ns
+  Real time:  0.00000 s =    0.00001 ms =      0.01300 us =      13.00000 ns
+
+Measuring time of adding and removing statically allocated block 1000 times...
+Total timing of 1000 actions:
+  User time:  0.00001 s =    0.00800 ms =      8.00000 us =    8000.00000 ns
+System time:  0.00001 s =    0.00900 ms =      9.00000 us =    9000.00000 ns
+  Real time:  0.00002 s =    0.01771 ms =     17.71500 us =   17715.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00001 ms =      0.00800 us =       8.00000 ns
+System time:  0.00000 s =    0.00001 ms =      0.00900 us =       9.00000 ns
+  Real time:  0.00000 s =    0.00002 ms =      0.01700 us =      17.00000 ns
+
+Measuring search time among 1000 blocks sized 100...
+Result: block 517 has value most similar to block 500
+
+Timings with dynamic allocation - Total timing of 10000 actions:
+  User time:  1.12246 s = 1122.45600 ms = 1122456.00000 us = 1122456000.00000 ns
+System time:  0.01638 s =   16.37700 ms =  16377.00000 us = 16377000.00000 ns
+  Real time:  1.15906 s = 1159.05681 ms = 1159056.81100 us = 1159056811.00000 ns
+Timing of one action averaged over 10000 retries:
+  User time:  0.00011 s =    0.11224 ms =    112.24500 us =  112245.00000 ns
+System time:  0.00000 s =    0.00164 ms =      1.63700 us =    1637.00000 ns
+  Real time:  0.00012 s =    0.11590 ms =    115.90500 us =  115905.00000 ns
+
+Measuring search time among 1000 blocks sized 100...
+Result: block 113 has value most similar to block 500
+
+Timings with static allocation - Total timing of 10000 actions:
+  User time:  0.25717 s =  257.17100 ms = 257171.00000 us = 257171000.00000 ns
+System time:  0.00001 s =    0.00800 ms =      8.00000 us =    8000.00000 ns
+  Real time:  0.25759 s =  257.58532 ms = 257585.32000 us = 257585320.00000 ns
+Timing of one action averaged over 10000 retries:
+  User time:  0.00003 s =    0.02572 ms =     25.71700 us =   25717.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00003 s =    0.02576 ms =     25.75900 us =   25759.00000 ns
+
+shared
+Measuring dynamic creation time for table of 1000 blocks sized 100 in 5000 cycles...
+Total timing of 5000 actions:
+  User time:  0.17052 s =  170.52000 ms = 170520.00000 us = 170520000.00000 ns
+System time:  0.12081 s =  120.80500 ms = 120805.00000 us = 120805000.00000 ns
+  Real time:  0.29395 s =  293.95215 ms = 293952.15100 us = 293952151.00000 ns
+Timing of one action averaged over 5000 retries:
+  User time:  0.00003 s =    0.03410 ms =     34.10400 us =   34104.00000 ns
+System time:  0.00002 s =    0.02416 ms =     24.16100 us =   24161.00000 ns
+  Real time:  0.00006 s =    0.05879 ms =     58.79000 us =   58790.00000 ns
+
+Measuring static creation time for table of 1000 blocks sized 100 in 5000 cycles...
+Total timing of 5000 actions:
+  User time:  0.05394 s =   53.93500 ms =  53935.00000 us = 53935000.00000 ns
+System time:  0.00054 s =    0.54400 ms =    544.00000 us =  544000.00000 ns
+  Real time:  0.05479 s =   54.78745 ms =  54787.44600 us = 54787446.00000 ns
+Timing of one action averaged over 5000 retries:
+  User time:  0.00001 s =    0.01079 ms =     10.78700 us =   10787.00000 ns
+System time:  0.00000 s =    0.00011 ms =      0.10800 us =     108.00000 ns
+  Real time:  0.00001 s =    0.01096 ms =     10.95700 us =   10957.00000 ns
+
+Measuring time of creating 1000 dynamically allocated blocks...
+Total timing of 1000 actions:
+  User time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+System time:  0.00009 s =    0.09400 ms =     94.00000 us =   94000.00000 ns
+  Real time:  0.00010 s =    0.10348 ms =    103.47500 us =  103475.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+System time:  0.00000 s =    0.00009 ms =      0.09400 us =      94.00000 ns
+  Real time:  0.00000 s =    0.00010 ms =      0.10300 us =     103.00000 ns
+
+Measuring time of deleting 1000 dynamically allocated blocks...
+Total timing of 1000 actions:
+  User time:  0.00002 s =    0.01600 ms =     16.00000 us =   16000.00000 ns
+System time:  0.00001 s =    0.00800 ms =      8.00000 us =    8000.00000 ns
+  Real time:  0.00003 s =    0.02535 ms =     25.35400 us =   25354.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00002 ms =      0.01600 us =      16.00000 ns
+System time:  0.00000 s =    0.00001 ms =      0.00800 us =       8.00000 ns
+  Real time:  0.00000 s =    0.00003 ms =      0.02500 us =      25.00000 ns
+
+Measuring time of adding and removing dynamically allocated block 1000 times...
+Total timing of 1000 actions:
+  User time:  0.00003 s =    0.03300 ms =     33.00000 us =   33000.00000 ns
+System time:  0.00002 s =    0.01700 ms =     17.00000 us =   17000.00000 ns
+  Real time:  0.00005 s =    0.04879 ms =     48.78700 us =   48787.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00003 ms =      0.03300 us =      33.00000 ns
+System time:  0.00000 s =    0.00002 ms =      0.01700 us =      17.00000 ns
+  Real time:  0.00000 s =    0.00005 ms =      0.04800 us =      48.00000 ns
+
+Measuring time of creating 1000 statically allocated blocks...
+Total timing of 1000 actions:
+  User time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+System time:  0.00040 s =    0.40500 ms =    405.00000 us =  405000.00000 ns
+  Real time:  0.00042 s =    0.41630 ms =    416.29800 us =  416298.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+System time:  0.00000 s =    0.00040 ms =      0.40500 us =     405.00000 ns
+  Real time:  0.00000 s =    0.00042 ms =      0.41600 us =     416.00000 ns
+
+Measuring time of deleting 1000 statically allocated blocks...
+Total timing of 1000 actions:
+  User time:  0.00001 s =    0.00800 ms =      8.00000 us =    8000.00000 ns
+System time:  0.00000 s =    0.00400 ms =      4.00000 us =    4000.00000 ns
+  Real time:  0.00001 s =    0.01317 ms =     13.16600 us =   13166.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00001 ms =      0.00800 us =       8.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00400 us =       4.00000 ns
+  Real time:  0.00000 s =    0.00001 ms =      0.01300 us =      13.00000 ns
+
+Measuring time of adding and removing statically allocated block 1000 times...
+Total timing of 1000 actions:
+  User time:  0.00001 s =    0.01100 ms =     11.00000 us =   11000.00000 ns
+System time:  0.00000 s =    0.00500 ms =      5.00000 us =    5000.00000 ns
+  Real time:  0.00002 s =    0.01719 ms =     17.19200 us =   17192.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00001 ms =      0.01100 us =      11.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00500 us =       5.00000 ns
+  Real time:  0.00000 s =    0.00002 ms =      0.01700 us =      17.00000 ns
+
+Measuring search time among 1000 blocks sized 100...
+Result: block 181 has value most similar to block 500
+
+Timings with dynamic allocation - Total timing of 10000 actions:
+  User time:  0.40051 s =  400.51000 ms = 400510.00000 us = 400510000.00000 ns
+System time:  0.00376 s =    3.75900 ms =   3759.00000 us = 3759000.00000 ns
+  Real time:  0.41065 s =  410.65405 ms = 410654.05100 us = 410654051.00000 ns
+Timing of one action averaged over 10000 retries:
+  User time:  0.00004 s =    0.04005 ms =     40.05100 us =   40051.00000 ns
+System time:  0.00000 s =    0.00037 ms =      0.37500 us =     375.00000 ns
+  Real time:  0.00004 s =    0.04107 ms =     41.06600 us =   41066.00000 ns
+
+Measuring search time among 1000 blocks sized 100...
+Result: block 587 has value most similar to block 500
+
+Timings with static allocation - Total timing of 10000 actions:
+  User time:  2.21778 s = 2217.78200 ms = 2217782.00000 us = 2217782000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  2.22201 s = 2222.00869 ms = 2222008.69100 us = 2222008691.00000 ns
+Timing of one action averaged over 10000 retries:
+  User time:  0.00022 s =    0.22178 ms =    221.77800 us =  221778.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00022 s =    0.22220 ms =    222.20000 us =  222200.00000 ns
+
+dynamic
+Measuring dynamic creation time for table of 1000 blocks sized 100 in 5000 cycles...
+Total timing of 5000 actions:
+  User time:  0.17768 s =  177.67600 ms = 177676.00000 us = 177676000.00000 ns
+System time:  0.11700 s =  117.00100 ms = 117001.00000 us = 117001000.00000 ns
+  Real time:  0.29714 s =  297.13832 ms = 297138.31800 us = 297138318.00000 ns
+Timing of one action averaged over 5000 retries:
+  User time:  0.00004 s =    0.03554 ms =     35.53500 us =   35535.00000 ns
+System time:  0.00002 s =    0.02340 ms =     23.40000 us =   23400.00000 ns
+  Real time:  0.00006 s =    0.05943 ms =     59.42700 us =   59427.00000 ns
+
+Measuring static creation time for table of 1000 blocks sized 100 in 5000 cycles...
+Total timing of 5000 actions:
+  User time:  0.05712 s =   57.11500 ms =  57115.00000 us = 57115000.00000 ns
+System time:  0.00045 s =    0.44800 ms =    448.00000 us =  448000.00000 ns
+  Real time:  0.05810 s =   58.09625 ms =  58096.24700 us = 58096247.00000 ns
+Timing of one action averaged over 5000 retries:
+  User time:  0.00001 s =    0.01142 ms =     11.42300 us =   11423.00000 ns
+System time:  0.00000 s =    0.00009 ms =      0.08900 us =      89.00000 ns
+  Real time:  0.00001 s =    0.01162 ms =     11.61900 us =   11619.00000 ns
+
+Measuring time of creating 1000 dynamically allocated blocks...
+Total timing of 1000 actions:
+  User time:  0.00006 s =    0.06100 ms =     61.00000 us =   61000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00006 s =    0.06121 ms =     61.21000 us =   61210.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00006 ms =      0.06100 us =      61.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00000 s =    0.00006 ms =      0.06100 us =      61.00000 ns
+
+Measuring time of deleting 1000 dynamically allocated blocks...
+Total timing of 1000 actions:
+  User time:  0.00003 s =    0.03300 ms =     33.00000 us =   33000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00003 s =    0.03488 ms =     34.88000 us =   34880.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00003 ms =      0.03300 us =      33.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00000 s =    0.00003 ms =      0.03400 us =      34.00000 ns
+
+Measuring time of adding and removing dynamically allocated block 1000 times...
+Total timing of 1000 actions:
+  User time:  0.00003 s =    0.03000 ms =     30.00000 us =   30000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00003 s =    0.03043 ms =     30.42700 us =   30427.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00003 ms =      0.03000 us =      30.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00000 s =    0.00003 ms =      0.03000 us =      30.00000 ns
+
+Measuring time of creating 1000 statically allocated blocks...
+Total timing of 1000 actions:
+  User time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+System time:  0.00026 s =    0.26200 ms =    262.00000 us =  262000.00000 ns
+  Real time:  0.00026 s =    0.26286 ms =    262.85700 us =  262857.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+System time:  0.00000 s =    0.00026 ms =      0.26200 us =     262.00000 ns
+  Real time:  0.00000 s =    0.00026 ms =      0.26200 us =     262.00000 ns
+
+Measuring time of deleting 1000 statically allocated blocks...
+Total timing of 1000 actions:
+  User time:  0.00001 s =    0.00800 ms =      8.00000 us =    8000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00001 s =    0.00853 ms =      8.52700 us =    8527.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00001 ms =      0.00800 us =       8.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00000 s =    0.00001 ms =      0.00800 us =       8.00000 ns
+
+Measuring time of adding and removing statically allocated block 1000 times...
+Total timing of 1000 actions:
+  User time:  0.00001 s =    0.01100 ms =     11.00000 us =   11000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00001 s =    0.01113 ms =     11.12900 us =   11129.00000 ns
+Timing of one action averaged over 1000 retries:
+  User time:  0.00000 s =    0.00001 ms =      0.01100 us =      11.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00000 s =    0.00001 ms =      0.01100 us =      11.00000 ns
+
+Measuring search time among 1000 blocks sized 100...
+Result: block 400 has value most similar to block 500
+
+Timings with dynamic allocation - Total timing of 10000 actions:
+  User time:  0.88428 s =  884.28000 ms = 884280.00000 us = 884280000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.88632 s =  886.32417 ms = 886324.17300 us = 886324173.00000 ns
+Timing of one action averaged over 10000 retries:
+  User time:  0.00009 s =    0.08843 ms =     88.42800 us =   88428.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00009 s =    0.08863 ms =     88.63300 us =   88633.00000 ns
+
+Measuring search time among 1000 blocks sized 100...
+Result: block 299 has value most similar to block 500
+
+Timings with static allocation - Total timing of 10000 actions:
+  User time:  0.66997 s =  669.97400 ms = 669974.00000 us = 669974000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.67138 s =  671.38217 ms = 671382.17500 us = 671382175.00000 ns
+Timing of one action averaged over 10000 retries:
+  User time:  0.00007 s =    0.06700 ms =     66.99700 us =   66997.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00007 s =    0.06714 ms =     67.13900 us =   67139.00000 ns
+
