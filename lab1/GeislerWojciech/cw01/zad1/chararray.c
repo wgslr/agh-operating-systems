@@ -100,7 +100,7 @@ size_t find_nearest(const array* arr, size_t target) {
     }
 
     if(!arr->use_static) {
-        for(size_t i = 0; i < arr->blocks && best_diff > 0; ++i) {
+        for(size_t i = 0; i < arr->blocks; ++i) {
             if(i != target) {
                 int diff = abs(sum_block(arr->content[i]) - target_sum);
 
@@ -112,7 +112,7 @@ size_t find_nearest(const array* arr, size_t target) {
         }
     } else {
         // Duplicated code to avoid if(use_static) in every loop cycle
-        for(size_t i = 0; i < arr->blocks && best_diff > 0; ++i) {
+        for(size_t i = 0; i < arr->blocks; ++i) {
             if(i != target) {
                 int diff = abs(sum_block(static_content[i]) - target_sum);
 

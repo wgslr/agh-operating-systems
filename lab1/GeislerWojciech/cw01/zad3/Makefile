@@ -1,6 +1,7 @@
 CC=gcc
-OPTS=-Wall -Wextra
 RESULTS=results3a.txt
+OLEVEL=0
+OPTS=-Wall -Wextra -O$(OLEVEL)
 
 .PHONY: all clean test test_dynamic test_shared test_static test_all
 
@@ -21,15 +22,16 @@ libchararray.so: chararray.c
 
 libchararray.a: chararray.c
 	$(CC) -c $^
-	ar cr $@ chararray.o
+	$(AR) cr $@ chararray.o
 
-test_all:
+test_all: 
 	$(MAKE) test_static
 	$(MAKE) test_shared
 	$(MAKE) test_dynamic
 
 test:
-	echo $(EXEC) >> $(RESULTS)
+	echo Library: $(EXEC) >> $(RESULTS)
+	echo O-level: $(OLEVEL) >> $(RESULTS)
 	./$(EXEC) 1000 100 0 create_table >> $(RESULTS)
 	./$(EXEC) 1000 100 1 create_table >> $(RESULTS)
 	./$(EXEC) 1000 100 0 add 1000 remove 1000 remove_and_add 1000 >> $(RESULTS)
@@ -38,13 +40,13 @@ test:
 	./$(EXEC) 1000 100 1 search_element 500 >> $(RESULTS)
 
 test_dynamic: EXEC=dynamic
-test_dynamic: test
+test_dynamic: dynamic test
 
 test_shared: EXEC=shared
-test_shared: test
+test_shared: shared test
 
 test_static: EXEC=static
-test_static: test
+test_static: static test
 
 clean:
-	-rm *.o *.so *.a 
+	-rm *.o *.so *.a static dynamic shared

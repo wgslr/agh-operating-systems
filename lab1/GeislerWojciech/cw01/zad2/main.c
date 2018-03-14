@@ -47,23 +47,17 @@ typedef struct functions {
     size_t (* find_nearest)(const array*, size_t);
 } functions;
 
-void print(char** array, size_t size);
-
-void print_help();
-
-void time_create(size_t blocks, size_t block_size, bool use_static, functions funcs);
-
 timespec timeval_to_timespec(timeval time);
 
 timestamp get_timestamp();
 
-// Creates array with every block created and filled with random contents
 array* create_filled(size_t blocks, size_t block_size, bool use_static, functions funcs);
 
 void print_timing(timestamp start, timestamp end, unsigned int cycles);
 
-/** Helpers **/
 void print_timediff(timespec start, timespec end, const char* description, unsigned cycles);
+
+void time_create(size_t blocks, size_t block_size, bool use_static, functions funcs);
 
 void time_delete(const array* arr, size_t blocks, functions funcs);
 
@@ -72,6 +66,9 @@ void time_search(array* arr, size_t target, functions funcs);
 void time_add(const array* arr, size_t blocks, functions funcs);
 
 void time_add_delete(const array* arr, unsigned cycles, functions funcs);
+
+void print_help();
+
 
 int main(int argc, char* argv[]) {
     srand(time(NULL));
