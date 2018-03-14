@@ -31,6 +31,8 @@ timestamp get_timestamp();
 // Creates array with every block created and filled with random contents
 array* create_filled(size_t blocks, size_t block_size, bool use_static) ;
 
+void print_timing(timestamp start, timestamp end, unsigned long cycles) ;
+
 int main(int argc, char* argv[]) {
     srand(time(NULL));
 
@@ -68,6 +70,8 @@ int main(int argc, char* argv[]) {
     time_search(create_filled(blocks, block_size, false), 0);
     time_search(create_filled(blocks, block_size, true), 0);
 
+    time_add(blocks, block_size);
+
     return 0;
 }
 
@@ -104,8 +108,25 @@ void time_search(array* arr, size_t target) {
     }
     timestamp end = get_timestamp();
     printf("Block %lu has value most similar to block %lu\n", result, target);
+
+    printf("Timings with %s allocation:\n", arr->use_static ? "static" : "dynamic");
     print_timing(start, end, TIME_CYCLES);
 }
+
+void time_add(size_t blocks, size_t block_size) {
+    printf("Measuring time of adding %lu blocks:\n", blocks);
+    array* arr = create_array(blocks, block_size, false);
+
+    timestamp start = get_timestamp();
+    for(int i = 0; i < blocks; ++i){
+        create_block(arr, i);
+    }
+    timestamp end = get_timestamp();
+
+    print_timing(start, end, 1);
+    print_timing(start, end, 1000000);
+}
+
 
 /** Timing functions **/
 
@@ -124,12 +145,13 @@ timestamp get_timestamp() {
 }
 
 
-void print_timing(timestamp start, timestamp end, unsigned cycles) {
+void print_timing(timestamp start, timestamp end, unsigned long cycles) {
     if(cycles > 1)
         printf("Times averaged over %d cycles:\n", cycles);
     print_timediff(start.user, end.user, "User time", cycles);
     print_timediff(start.system, end.system, "System time", cycles);
     print_timediff(start.real, end.real, "Real time", cycles);
+    printf("\n");
 }
 
 
@@ -144,7 +166,7 @@ timeval timespec_to_timeval(timespec time) {
 /** Helpers **/
 void print_timediff(struct timeval start, struct timeval end, const char* description, unsigned cycles) {
     long double diff_us = (end.tv_sec - start.tv_sec) * 1000000.0 / cycles + (end.tv_usec - start.tv_usec) / cycles;
-    printf("%11s: %8.3Lf s = %10.3Lf ms = %10.3Lf us\n", description, diff_us / 1000000, diff_us / 1000, diff_us);
+    printf("%11s: %8.5Lf s = %10.5Lf ms = %10.5Lf us\n", description, diff_us / 1000000, diff_us / 1000, diff_us);
 }
 
 void print_arr(const array* arr, size_t size) {
