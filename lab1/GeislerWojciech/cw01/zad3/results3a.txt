@@ -1,4 +1,4 @@
-static
+== Statically linked library ==
 Measuring dynamic creation time for table of 1000 blocks sized 100 in 5000 cycles...
 Total timing of 5000 actions:
   User time:  0.16969 s =  169.69200 ms = 169692.00000 us = 169692000.00000 ns
@@ -103,7 +103,7 @@ Timing of one action averaged over 10000 retries:
 System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
   Real time:  0.00003 s =    0.02576 ms =     25.75900 us =   25759.00000 ns
 
-shared
+== Shared library ==
 Measuring dynamic creation time for table of 1000 blocks sized 100 in 5000 cycles...
 Total timing of 5000 actions:
   User time:  0.17052 s =  170.52000 ms = 170520.00000 us = 170520000.00000 ns
@@ -208,7 +208,7 @@ Timing of one action averaged over 10000 retries:
 System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
   Real time:  0.00022 s =    0.22220 ms =    222.20000 us =  222200.00000 ns
 
-dynamic
+== Dynamically loaded library ==
 Measuring dynamic creation time for table of 1000 blocks sized 100 in 5000 cycles...
 Total timing of 5000 actions:
   User time:  0.17768 s =  177.67600 ms = 177676.00000 us = 177676000.00000 ns
@@ -313,3 +313,7 @@ Timing of one action averaged over 10000 retries:
 System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
   Real time:  0.00007 s =    0.06714 ms =     67.13900 us =   67139.00000 ns
 
+
+== Komentarz ==
+We wszystkich wykonywanych testach tablic alokowana statycznie jest przyniosła
+krótsze czasy wykoniania, zarówno przy tworzeniu jak odczycie.

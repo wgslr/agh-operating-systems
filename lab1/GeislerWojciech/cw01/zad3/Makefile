@@ -1,5 +1,6 @@
 CC=gcc
 OPTS=-Wall -Wextra
+RESULTS=results3a.txt
 
 .PHONY: all clean test test_dynamic test_shared test_static test_all
 
@@ -28,13 +29,13 @@ test_all:
 	$(MAKE) test_dynamic
 
 test:
-	echo $(EXEC) >> results3a.txt
-	./$(EXEC) 1000 100 0 create_table >> results3a.txt
-	./$(EXEC) 1000 100 1 create_table >> results3a.txt
-	./$(EXEC) 1000 100 0 add 1000 remove 1000 remove_and_add 1000 >> results3a.txt
-	./$(EXEC) 1000 100 1 add 1000 remove 1000 remove_and_add 1000 >> results3a.txt
-	./$(EXEC) 1000 100 0 search_element 500 >> results3a.txt
-	./$(EXEC) 1000 100 1 search_element 500 >> results3a.txt
+	echo $(EXEC) >> $(RESULTS)
+	./$(EXEC) 1000 100 0 create_table >> $(RESULTS)
+	./$(EXEC) 1000 100 1 create_table >> $(RESULTS)
+	./$(EXEC) 1000 100 0 add 1000 remove 1000 remove_and_add 1000 >> $(RESULTS)
+	./$(EXEC) 1000 100 1 add 1000 remove 1000 remove_and_add 1000 >> $(RESULTS)
+	./$(EXEC) 1000 100 0 search_element 500 >> $(RESULTS)
+	./$(EXEC) 1000 100 1 search_element 500 >> $(RESULTS)
 
 test_dynamic: EXEC=dynamic
 test_dynamic: test
