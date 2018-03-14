@@ -13,7 +13,7 @@
 
 #define ALLOWED_MEMORY 500000000.0 // 500 MiB
 
-const int TIME_CYCLES = 10000;
+unsigned TIME_CYCLES = 10000;
 
 typedef struct timeval timeval;
 typedef struct timespec timespec;
@@ -185,7 +185,7 @@ void time_search(array* arr, size_t target, functions funcs) {
     printf("Measuring search time among %lu blocks sized %lu...\n", arr->blocks, arr->block_size);
 
     timestamp start = get_timestamp();
-    for(int t = 0; t < TIME_CYCLES; ++t) {
+    for(unsigned t = 0; t < TIME_CYCLES; ++t) {
         result = (*funcs.find_nearest)(arr, target);
     }
     timestamp end = get_timestamp();
