@@ -23,7 +23,7 @@ char** delete_array(array* arr, size_t size);
 
 char* create_block(const array* arr, size_t pos);
 
-void delete_block(array* arr, size_t pos);
+void delete_block(const array* arr, size_t pos);
 
 char* get_block(array* arr, size_t pos);
 

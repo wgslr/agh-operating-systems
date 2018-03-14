@@ -56,12 +56,12 @@ char* create_block(const array* arr, size_t pos) {
     }
 }
 
-void delete_block(array* arr, size_t pos) {
+void delete_block(const array* arr, size_t pos) {
     if(!arr->use_static) {
         free(arr->content[pos]);
         arr->content[pos] = NULL;
     } else {
-        arr->content[pos][0] = 0;
+        static_content[pos][0] = 0;
     }
 }
 

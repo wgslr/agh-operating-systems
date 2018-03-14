@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
+#include <assert.h>
 #include "../zad1/stringlib.h"
 
 const int TIME_CYCLES = 1000;
@@ -73,7 +74,10 @@ int main(int argc, char* argv[]) {
     time_search(create_filled(blocks, block_size, false), 0);
     time_search(create_filled(blocks, block_size, true), 0);
 
-    time_add(blocks, block_size);
+    time_add(create_array(blocks, block_size, false), blocks );
+    time_delete(create_filled(blocks, block_size, false), blocks);
+    time_add_delete(create_array(blocks, block_size, false), TIME_CYCLES);
+    time_add_delete(create_array(blocks, block_size, true), TIME_CYCLES);
 
     return 0;
 }
@@ -116,20 +120,49 @@ void time_search(array* arr, size_t target) {
     print_timing(start, end, TIME_CYCLES);
 }
 
-void time_add(size_t blocks, size_t block_size) {
-    printf("Measuring time of adding %lu blocks:\n", blocks);
-    array* arr = create_array(blocks, block_size, false);
+void time_delete(const array* arr, size_t blocks) {
+    assert(blocks <= arr->blocks);
+
+    printf("Measuring time of deleting %lu blocks:\n", blocks);
 
     timestamp start = get_timestamp();
-    for(int i = 0; i < blocks; ++i) {
+    for(size_t i = 0; i < blocks; ++i) {
+        delete_block(arr, i);
+    }
+    timestamp end = get_timestamp();
+
+    print_timing(start, end, 1);
+    print_timing(start, end, blocks);
+}
+
+void time_add(const array* arr, size_t blocks) {
+    assert(blocks <= arr->blocks);
+
+    printf("Measuring time of adding %lu blocks:\n", blocks);
+
+    timestamp start = get_timestamp();
+    for(size_t i = 0; i < blocks; ++i) {
         create_block(arr, i);
     }
     timestamp end = get_timestamp();
 
     print_timing(start, end, 1);
-    print_timing(start, end, 1000000);
+    print_timing(start, end, blocks);
 }
 
+time_add_delete(const array* arr, unsigned cycles){
+    printf("Measuring time of adding and removing %s allocated block %u times:\n", arr->use_static ? "statically" : "dynamically", cycles);
+
+    timestamp start = get_timestamp();
+    for(unsigned i = 0; i < cycles; ++i){
+        create_block(arr, 0);
+        delete_block(arr, 0);
+    }
+    timestamp end = get_timestamp();
+
+    print_timing(start, end, 1);
+    print_timing(start, end, cycles);
+}
 
 /** Timing functions **/
 
