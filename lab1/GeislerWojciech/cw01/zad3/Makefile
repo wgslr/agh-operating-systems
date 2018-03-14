@@ -8,8 +8,11 @@ all: static dynamic
 static: main.c libchararray.a
 	$(CC) $^ -o $@ 
 
-dynamic: main.c libchararray.so
+shared: main.c libchararray.so
 	$(CC) $< -o $@ -L . -l chararray
+
+dynamic: main.c libchararray.so
+	$(CC) $< -o $@ -ldl -DDL
 
 libchararray.so: chararray.c
 	$(CC) -fPIC -c $^ $(OPTS)
