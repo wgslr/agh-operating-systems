@@ -13,9 +13,9 @@ typedef struct timeval timeval;
 typedef struct timespec timespec;
 
 typedef struct timing {
-    timeval system;
-    timeval user;
-    timeval real;
+    timespec system;
+    timespec user;
+    timespec real;
 } timestamp;
 
 void print(char** array, size_t size);
@@ -24,14 +24,17 @@ void print_help();
 
 void time_create_dynamic(size_t blocks, size_t block_size);
 
-struct timeval timespec_to_timeval(struct timespec time);
+timespec timeval_to_timespec(timeval time);
 
 timestamp get_timestamp();
 
 // Creates array with every block created and filled with random contents
-array* create_filled(size_t blocks, size_t block_size, bool use_static) ;
+array* create_filled(size_t blocks, size_t block_size, bool use_static);
 
-void print_timing(timestamp start, timestamp end, unsigned long cycles) ;
+void print_timing(timestamp start, timestamp end, unsigned long cycles);
+
+/** Helpers **/
+void print_timediff(timespec start, timespec end, const char* description, unsigned cycles);
 
 int main(int argc, char* argv[]) {
     srand(time(NULL));
@@ -118,7 +121,7 @@ void time_add(size_t blocks, size_t block_size) {
     array* arr = create_array(blocks, block_size, false);
 
     timestamp start = get_timestamp();
-    for(int i = 0; i < blocks; ++i){
+    for(int i = 0; i < blocks; ++i) {
         create_block(arr, i);
     }
     timestamp end = get_timestamp();
@@ -136,11 +139,11 @@ timestamp get_timestamp() {
     struct timespec real;
 
     clock_gettime(CLOCK_REALTIME, &real);
-    ts.real = timespec_to_timeval(real);
+    ts.real = real;
 
     getrusage(RUSAGE_SELF, &ru);
-    ts.system = ru.ru_stime;
-    ts.user = ru.ru_utime;
+    ts.system = timeval_to_timespec(ru.ru_stime);
+    ts.user = timeval_to_timespec(ru.ru_utime);
     return ts;
 }
 
@@ -155,18 +158,19 @@ void print_timing(timestamp start, timestamp end, unsigned long cycles) {
 }
 
 
-timeval timespec_to_timeval(timespec time) {
-    struct timeval tv;
-    tv.tv_sec = time.tv_sec;
-    tv.tv_usec = time.tv_nsec / 1000;
-    return tv;
+timespec timeval_to_timespec(timeval time) {
+    timespec ts;
+    ts.tv_sec = time.tv_sec;
+    ts.tv_nsec = time.tv_usec * 1000;
+    return ts;
 }
 
 
 /** Helpers **/
-void print_timediff(struct timeval start, struct timeval end, const char* description, unsigned cycles) {
-    long double diff_us = (end.tv_sec - start.tv_sec) * 1000000.0 / cycles + (end.tv_usec - start.tv_usec) / cycles;
-    printf("%11s: %8.5Lf s = %10.5Lf ms = %10.5Lf us\n", description, diff_us / 1000000, diff_us / 1000, diff_us);
+void print_timediff(timespec start, timespec end, const char* description, unsigned cycles) {
+    long double diff_ns = (end.tv_sec - start.tv_sec) * 1000000000.0 / cycles + (end.tv_nsec - start.tv_nsec) / cycles;
+    printf("%11s: %8.5Lf s = %10.5Lf ms = %12.5Lf us = %13.5Lf ns\n", description,
+           diff_ns / 1000000000, diff_ns / 1000000, diff_ns / 1000, diff_ns);
 }
 
 void print_arr(const array* arr, size_t size) {
