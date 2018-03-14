@@ -1,6 +1,7 @@
 # C
 *.o
 *.so
+*.a
 
 # CLion
 */.idea
