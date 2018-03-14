@@ -201,11 +201,11 @@ timestamp get_timestamp() {
 
 void print_timing(timestamp start, timestamp end, unsigned int cycles) {
     if(cycles > 1) {
-        printf("Total timing of %lu actions:\n", cycles);
+        printf("Total timing of %u actions:\n", cycles);
         print_timediff(start.user, end.user, "User time", 1);
         print_timediff(start.system, end.system, "System time", 1);
         print_timediff(start.real, end.real, "Real time", 1);
-        printf("Timing of one action averaged over %lu retries:\n", cycles);
+        printf("Timing of one action averaged over %u retries:\n", cycles);
     }
     print_timediff(start.user, end.user, "User time", cycles);
     print_timediff(start.system, end.system, "System time", cycles);
@@ -221,25 +221,19 @@ timespec timeval_to_timespec(timeval time) {
 }
 
 
-/** Helpers **/
 void print_timediff(timespec start, timespec end, const char* description, unsigned cycles) {
     long double diff_ns = (end.tv_sec - start.tv_sec) * 1000000000.0 / cycles + (end.tv_nsec - start.tv_nsec) / cycles;
     printf("%11s: %8.5Lf s = %10.5Lf ms = %12.5Lf us = %13.5Lf ns\n", description,
            diff_ns / 1000000000, diff_ns / 1000000, diff_ns / 1000, diff_ns);
 }
 
-void print_arr(const array* arr, size_t size) {
-    if(!arr->use_static) {
-        for(int i = 0; i < size; ++i) {
-            if(arr->content[i] != NULL) {
-                printf("%d: %p: %s\n", i, arr->content[i], arr->content[i]);
-            } else {
-                printf("\n");
-            }
-        }
-    }
-}
-
 void print_help() {
-    printf("Invocation: main <blocks_count> <block_size> <static_allocation> <command> <command_args...>\n");
+    printf("Invocation: main <blocks_count> <block_size> <static_allocation> <command> <command_args...>\n"
+                   "Available commands:\n"
+                   "- create_table\n"
+                   "- search_element <index>\n"
+                   "- remove <index>\n"
+                   "- add <index>\n"
+                   "- remove_and_add <retries>\n"
+    );
 }

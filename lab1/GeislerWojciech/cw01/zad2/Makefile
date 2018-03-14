@@ -2,7 +2,7 @@ CC=gcc
 OPTS=-Wall -Wextra
 
 main: main.c libchararray.a
-	$(CC) $< -o $@ -L . -l chararray
+	$(CC) $< -o $@ -L . -l chararray $(OPTS)
 
 libchararray.so: chararray.c
 	$(CC) -fPIC -c $^ $(OPTS)
