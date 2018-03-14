@@ -59,30 +59,37 @@ int main(int argc, char* argv[]) {
         }
     }
 
-//    fprintf(stderr, "Creating array of %u blocks sized %u\n", blocks, block_size);
-//
-//    array* arr = create_array(blocks, use_static);
-//    create_block(arr, 0, block_size);
-//    fill_random(get_block(arr, 0), block_size);
-//    printf("%s\n", get_block(arr, 0));
-
     time_create_dynamic(blocks, block_size);
 
     return 0;
 }
 
+// Creates array with every block created and filled with random contents
+array create_filled(size_t blocks, size_t block_size) {
+    array arr = create_array(blocks, block_size, false);
+    for(int i = 0; i< blocks; ++i){
+        create_block(&arr, i);
+        fill_random(get_block(&arr, i), arr.block_size);
+    }
+    return arr;
+}
+
 void time_create_dynamic(size_t blocks, size_t block_size) {
     timestamp start = get_timestamp();
 
-    for(int cnt = 0; cnt < 1; ++cnt) {
-        array* arr = create_array(blocks, false);
+    unsigned cycles = (unsigned) (10000000.0 / blocks / block_size *  500); // how many times fits in 5 GiB
+
+    for(int cnt = 0; cnt < cycles; ++cnt) {
+        array arr = create_array(blocks, block_size, false);
         for(int i = 0; i < blocks; ++i) {
-            create_block(arr, i, block_size);
+            create_block(&arr, i);
         }
     }
 
-    print_timing(start, get_timestamp());
+    print_timing(start, get_timestamp(), cycles);
 }
+
+/** Timing functions **/
 
 timestamp get_timestamp() {
     timestamp ts;
@@ -99,17 +106,26 @@ timestamp get_timestamp() {
 }
 
 
-
-/** Helpers **/
-
-void print_timing(timestamp start, timestamp end) {
-    print_timediff(start.user, end.user, "User time");
-    print_timediff(start.system, end.system, "System time");
-    print_timediff(start.real, end.real, "Real time");
+void print_timing(timestamp start, timestamp end, unsigned cycles) {
+    if(cycles > 1)
+        printf("Times averaged over %d cycles:\n", cycles);
+    print_timediff(start.user, end.user, "User time", cycles);
+    print_timediff(start.system, end.system, "System time", cycles);
+    print_timediff(start.real, end.real, "Real time", cycles);
 }
 
-void print_timediff(struct timeval start, struct timeval end, const char* description) {
-    long double diff_us = (end.tv_sec - start.tv_sec) * 1000000.0 + (end.tv_usec - start.tv_usec);
+
+timeval timespec_to_timeval(timespec time) {
+    struct timeval tv;
+    tv.tv_sec = time.tv_sec;
+    tv.tv_usec = time.tv_nsec / 1000;
+    return tv;
+}
+
+
+/** Helpers **/
+void print_timediff(struct timeval start, struct timeval end, const char* description, unsigned cycles) {
+    long double diff_us = (end.tv_sec - start.tv_sec) * 1000000.0 / cycles + (end.tv_usec - start.tv_usec) / cycles;
     printf("%11s: %8.3Lf s = %10.3Lf ms = %10.3Lf us\n", description, diff_us / 1000000, diff_us / 1000, diff_us);
 }
 
@@ -130,11 +146,4 @@ void print_help() {
                    "-n blocks count\n"
                    "-b block size\n"
                    "-m mode (0 - dynamic; 1 - static)\n");
-}
-
-timeval timespec_to_timeval(timespec time) {
-    struct timeval tv;
-    tv.tv_sec = time.tv_sec;
-    tv.tv_usec = time.tv_nsec / 1000;
-    return tv;
 }

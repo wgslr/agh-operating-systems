@@ -10,14 +10,15 @@ const char MAX_CHAR = 'z';
 
 char static_content[MAX_BLOCKS][MAX_BLOCKS_SIZE];
 
-array* create_array(size_t blocks_count, bool use_static) {
-    array* arr = malloc(sizeof(arr));
-    arr->use_static = use_static;
-    arr->blocks = blocks_count;
+array create_array(size_t blocks_count, size_t block_size, bool use_static) {
+    array arr;
+    arr.use_static = use_static;
+    arr.blocks = blocks_count;
+    arr.block_size = block_size;
     if(!use_static) {
-        arr->content = calloc(blocks_count, sizeof(char*));
+        arr.content = calloc(blocks_count, sizeof(char*));
     } else {
-        arr->content = NULL;
+        arr.content = NULL;
     }
     return arr;
 }
@@ -44,13 +45,13 @@ char* get_block(array* arr, size_t pos) {
 }
 
 // returns pointer to the created block
-char* create_block(array* arr, size_t pos, size_t size) {
+char* create_block(const array* arr, size_t pos) {
     if(!arr->use_static) {
-        arr->content[pos] = calloc(size, sizeof(char));
+        arr->content[pos] = calloc(arr->block_size, sizeof(char));
         return arr->content[pos];
     } else {
-        // simulate calloc
-        memset(static_content[pos], '\0', size);
+        // simulate memory zeroed by calloc
+        memset(static_content[pos], '\0', arr->block_size);
         return &static_content[pos][0];
     }
 }
