@@ -1,0 +1,58 @@
+Times averaged over 5000 cycles:
+  User time:  0.00034 s =    0.34165 ms =    341.65100 us =  341651.00000 ns
+System time:  0.00025 s =    0.25229 ms =    252.29400 us =  252294.00000 ns
+  Real time:  0.00060 s =    0.59892 ms =    598.91800 us =  598918.00000 ns
+
+Block 46 has value most similar to block 0
+Timings with dynamic allocation:
+Times averaged over 1000 cycles:
+  User time:  0.00001 s =    0.01031 ms =     10.30700 us =   10307.00000 ns
+System time:  0.00000 s =    0.00024 ms =      0.24300 us =     243.00000 ns
+  Real time:  0.00001 s =    0.01056 ms =     10.56400 us =   10564.00000 ns
+
+Block 129 has value most similar to block 0
+Timings with static allocation:
+Times averaged over 1000 cycles:
+  User time:  0.00003 s =    0.02902 ms =     29.02100 us =   29021.00000 ns
+System time:  0.00000 s =    0.00006 ms =      0.06100 us =      61.00000 ns
+  Real time:  0.00003 s =    0.02912 ms =     29.12300 us =   29123.00000 ns
+
+Measuring time of adding 10000 blocks:
+  User time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+System time:  0.00059 s =    0.59000 ms =    590.00000 us =  590000.00000 ns
+  Real time:  0.00059 s =    0.59237 ms =    592.37400 us =  592374.00000 ns
+
+Times averaged over 10000 cycles:
+  User time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+System time:  0.00000 s =    0.00006 ms =      0.05900 us =      59.00000 ns
+  Real time:  0.00000 s =    0.00006 ms =      0.05900 us =      59.00000 ns
+
+Measuring time of deleting 10000 blocks:
+  User time:  0.00010 s =    0.09900 ms =     99.00000 us =   99000.00000 ns
+System time:  0.00007 s =    0.07100 ms =     71.00000 us =   71000.00000 ns
+  Real time:  0.00017 s =    0.16956 ms =    169.55800 us =  169558.00000 ns
+
+Times averaged over 10000 cycles:
+  User time:  0.00000 s =    0.00001 ms =      0.00900 us =       9.00000 ns
+System time:  0.00000 s =    0.00001 ms =      0.00700 us =       7.00000 ns
+  Real time:  0.00000 s =    0.00002 ms =      0.01600 us =      16.00000 ns
+
+Measuring time of adding and removing dynamically allocated block 1000 times:
+  User time:  0.00006 s =    0.06200 ms =     62.00000 us =   62000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00006 s =    0.06193 ms =     61.93000 us =   61930.00000 ns
+
+Times averaged over 1000 cycles:
+  User time:  0.00000 s =    0.00006 ms =      0.06200 us =      62.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00000 s =    0.00006 ms =      0.06100 us =      61.00000 ns
+
+Measuring time of adding and removing statically allocated block 1000 times:
+  User time:  0.00001 s =    0.01100 ms =     11.00000 us =   11000.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00001 s =    0.01084 ms =     10.83600 us =   10836.00000 ns
+
+Times averaged over 1000 cycles:
+  User time:  0.00000 s =    0.00001 ms =      0.01100 us =      11.00000 ns
+System time:  0.00000 s =    0.00000 ms =      0.00000 us =       0.00000 ns
+  Real time:  0.00000 s =    0.00001 ms =      0.01000 us =      10.00000 ns
