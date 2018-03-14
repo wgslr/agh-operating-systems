@@ -34,7 +34,7 @@ timestamp get_timestamp();
 // Creates array with every block created and filled with random contents
 array* create_filled(size_t blocks, size_t block_size, bool use_static);
 
-void print_timing(timestamp start, timestamp end, unsigned long cycles);
+void print_timing(timestamp start, timestamp end, unsigned int cycles);
 
 /** Helpers **/
 void print_timediff(timespec start, timespec end, const char* description, unsigned cycles);
@@ -42,6 +42,10 @@ void print_timediff(timespec start, timespec end, const char* description, unsig
 void time_delete(const array* arr, size_t blocks);
 
 void time_search(array* arr, size_t target);
+
+void time_add(const array* arr, size_t blocks);
+
+void time_add_delete(const array* arr, unsigned cycles);
 
 int main(int argc, char* argv[]) {
     srand(time(NULL));
@@ -56,11 +60,7 @@ int main(int argc, char* argv[]) {
     bool use_static = argv[3][0] != '0';
 
     int arg = 4;
-    for(int i = 0; i < 3; ++i, ++arg) { // 3 commands are expected
-        if(arg >= argc) {
-            fprintf(stderr, "Too few arguments!\n");
-            return (2);
-        }
+    for(int i = 0; i < 3 && arg < argc; ++i, ++arg) { // 3 commands are expected
         const char* command = argv[arg];
         if(strcmp(command, "create_table") == 0) {
             time_create(blocks, block_size, use_static);
@@ -82,14 +82,14 @@ int main(int argc, char* argv[]) {
         }
         printf("\n");
     }
-    
+
     return 0;
 }
 
 // Creates array with every block created and filled with random contents
 array* create_filled(size_t blocks, size_t block_size, bool use_static) {
     array* arr = create_array(blocks, block_size, use_static);
-    for(int i = 0; i < blocks; ++i) {
+    for(size_t i = 0; i < blocks; ++i) {
         create_block(arr, i);
         fill_random(get_block(arr, i), arr->block_size);
     }
@@ -123,7 +123,7 @@ void time_create(size_t blocks, size_t block_size, bool use_static) {
 }
 
 void time_search(array* arr, size_t target) {
-    size_t result;
+    size_t result = 0;
 
     printf("Measuring search time among %lu blocks sized %lu...\n", arr->blocks, arr->block_size);
 
@@ -142,7 +142,8 @@ void time_search(array* arr, size_t target) {
 void time_delete(const array* arr, size_t blocks) {
     assert(blocks <= arr->blocks);
 
-    printf("Measuring time of deleting %lu blocks...\n", blocks);
+    printf("Measuring time of deleting %lu %s allocated blocks...\n", blocks,
+           arr->use_static ? "statically" : "dynamically");
 
     timestamp start = get_timestamp();
     for(size_t i = 0; i < blocks; ++i) {
@@ -156,7 +157,7 @@ void time_delete(const array* arr, size_t blocks) {
 void time_add(const array* arr, size_t blocks) {
     assert(blocks <= arr->blocks);
 
-    printf("Measuring time of creating %lu blocks...\n", blocks);
+    printf("Measuring time of creating %lu %s allocated blocks...\n", blocks, arr->use_static ? "statically" : "dynamically");
 
     timestamp start = get_timestamp();
     for(size_t i = 0; i < blocks; ++i) {
@@ -167,7 +168,7 @@ void time_add(const array* arr, size_t blocks) {
     print_timing(start, end, blocks);
 }
 
-time_add_delete(const array* arr, unsigned cycles) {
+void time_add_delete(const array* arr, unsigned cycles) {
     printf("Measuring time of adding and removing %s allocated block %u times...\n",
            arr->use_static ? "statically" : "dynamically", cycles);
 
@@ -198,13 +199,13 @@ timestamp get_timestamp() {
 }
 
 
-void print_timing(timestamp start, timestamp end, unsigned long cycles) {
+void print_timing(timestamp start, timestamp end, unsigned int cycles) {
     if(cycles > 1) {
-        printf("Total timing of %d actions:\n", cycles);
+        printf("Total timing of %lu actions:\n", cycles);
         print_timediff(start.user, end.user, "User time", 1);
         print_timediff(start.system, end.system, "System time", 1);
         print_timediff(start.real, end.real, "Real time", 1);
-        printf("Timing of one action averaged over %d retries:\n", cycles);
+        printf("Timing of one action averaged over %lu retries:\n", cycles);
     }
     print_timediff(start.user, end.user, "User time", cycles);
     print_timediff(start.system, end.system, "System time", cycles);
