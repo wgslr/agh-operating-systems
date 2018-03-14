@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include "../zad1/stringlib.h"
 
+const int TIME_CYCLES = 1000;
+
 typedef struct timeval timeval;
 typedef struct timespec timespec;
 
@@ -24,7 +26,10 @@ void time_create_dynamic(size_t blocks, size_t block_size);
 
 struct timeval timespec_to_timeval(struct timespec time);
 
-timestamp get_timestamp() ;
+timestamp get_timestamp();
+
+// Creates array with every block created and filled with random contents
+array* create_filled(size_t blocks, size_t block_size, bool use_static) ;
 
 int main(int argc, char* argv[]) {
     srand(time(NULL));
@@ -60,16 +65,18 @@ int main(int argc, char* argv[]) {
     }
 
     time_create_dynamic(blocks, block_size);
+    time_search(create_filled(blocks, block_size, false), 0);
+    time_search(create_filled(blocks, block_size, true), 0);
 
     return 0;
 }
 
 // Creates array with every block created and filled with random contents
-array create_filled(size_t blocks, size_t block_size) {
-    array arr = create_array(blocks, block_size, false);
-    for(int i = 0; i< blocks; ++i){
-        create_block(&arr, i);
-        fill_random(get_block(&arr, i), arr.block_size);
+array* create_filled(size_t blocks, size_t block_size, bool use_static) {
+    array* arr = create_array(blocks, block_size, use_static);
+    for(int i = 0; i < blocks; ++i) {
+        create_block(arr, i);
+        fill_random(get_block(arr, i), arr->block_size);
     }
     return arr;
 }
@@ -77,16 +84,27 @@ array create_filled(size_t blocks, size_t block_size) {
 void time_create_dynamic(size_t blocks, size_t block_size) {
     timestamp start = get_timestamp();
 
-    unsigned cycles = (unsigned) (10000000.0 / blocks / block_size *  500); // how many times fits in 5 GiB
+    unsigned cycles = (unsigned) (10000000.0 / blocks / block_size * 500); // how many times fits in 5 GiB
 
     for(int cnt = 0; cnt < cycles; ++cnt) {
-        array arr = create_array(blocks, block_size, false);
+        array* arr = create_array(blocks, block_size, false);
         for(int i = 0; i < blocks; ++i) {
-            create_block(&arr, i);
+            create_block(arr, i);
         }
     }
 
     print_timing(start, get_timestamp(), cycles);
+}
+
+void time_search(array* arr, size_t target) {
+    timestamp start = get_timestamp();
+    size_t result;
+    for(int t = 0; t < TIME_CYCLES; ++t) {
+        result = find_nearest(arr, target);
+    }
+    timestamp end = get_timestamp();
+    printf("Block %lu has value most similar to block %lu\n", result, target);
+    print_timing(start, end, TIME_CYCLES);
 }
 
 /** Timing functions **/

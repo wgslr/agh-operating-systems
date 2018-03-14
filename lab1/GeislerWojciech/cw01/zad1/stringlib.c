@@ -10,15 +10,15 @@ const char MAX_CHAR = 'z';
 
 char static_content[MAX_BLOCKS][MAX_BLOCKS_SIZE];
 
-array create_array(size_t blocks_count, size_t block_size, bool use_static) {
-    array arr;
-    arr.use_static = use_static;
-    arr.blocks = blocks_count;
-    arr.block_size = block_size;
+array* create_array(size_t blocks_count, size_t block_size, bool use_static) {
+    array* arr = malloc(sizeof(array));
+    arr->use_static = use_static;
+    arr->blocks = blocks_count;
+    arr->block_size = block_size;
     if(!use_static) {
-        arr.content = calloc(blocks_count, sizeof(char*));
+        arr->content = calloc(blocks_count, sizeof(char*));
     } else {
-        arr.content = NULL;
+        arr->content = NULL;
     }
     return arr;
 }
@@ -88,18 +88,38 @@ void fill_random(char* block, size_t size) {
 }
 
 
-size_t find_nearest(char** array, size_t size, size_t target) {
-    int target_sum = sum_block(array[target]);
-
-    size_t best_pos = 0;
+size_t find_nearest(const array* arr, size_t target) {
+    int target_sum;
     int best_diff = INT_MAX;
+    size_t best_pos = 0;
 
-    for(size_t i = 0; i < size; ++i) {
-        if(i != target) {
-            int diff = abs(sum_block(array[i]) - target_sum);
-            if(diff < best_diff) {
-                best_diff = diff;
-                best_pos = i;
+    if(arr->use_static) {
+        target_sum = sum_block(static_content[target]);
+    } else {
+        target_sum = sum_block(arr->content[target]);
+    }
+
+    if(!arr->use_static) {
+        for(size_t i = 0; i < arr->blocks && best_diff > 0; ++i) {
+            if(i != target) {
+                int diff = abs(sum_block(arr->content[i]) - target_sum);
+
+                if(diff < best_diff) {
+                    best_diff = diff;
+                    best_pos = i;
+                }
+            }
+        }
+    } else {
+        // Duplicated code to avoid if(use_static) in every loop cycle
+        for(size_t i = 0; i < arr->blocks && best_diff > 0; ++i) {
+            if(i != target) {
+                int diff = abs(sum_block(static_content[i]) - target_sum);
+
+                if(diff < best_diff) {
+                    best_diff = diff;
+                    best_pos = i;
+                }
             }
         }
     }

@@ -17,7 +17,7 @@ typedef struct array {
     bool use_static;
 } array;
 
-array create_array(size_t blocks_count, size_t block_size, bool use_static);
+array* create_array(size_t blocks_count, size_t block_size, bool use_static);
 
 char** delete_array(array* arr, size_t size);
 
@@ -33,6 +33,6 @@ void fill_str(char* block, char* value);
 
 void fill_random(char* block, size_t size);
 
-size_t find_nearest(char** array, size_t size, size_t target);
+size_t find_nearest(const array* arr, size_t target);
 
 #endif
