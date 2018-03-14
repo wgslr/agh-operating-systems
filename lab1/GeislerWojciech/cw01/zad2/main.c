@@ -6,7 +6,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "../zad1/stringlib.h"
+#include "../zad1/chararray.h"
 
 const int TIME_CYCLES = 1000;
 
@@ -108,15 +108,19 @@ void time_create_dynamic(size_t blocks, size_t block_size) {
 }
 
 void time_search(array* arr, size_t target) {
-    timestamp start = get_timestamp();
     size_t result;
+
+    printf("Measuring search time among %lu blocks sized %lu \n", arr->blocks, arr->block_size);
+
+    timestamp start = get_timestamp();
     for(int t = 0; t < TIME_CYCLES; ++t) {
         result = find_nearest(arr, target);
     }
     timestamp end = get_timestamp();
+
     printf("Block %lu has value most similar to block %lu\n", result, target);
 
-    printf("Timings with %s allocation:\n", arr->use_static ? "static" : "dynamic");
+    printf("Timings with %s allocation - ", arr->use_static ? "static" : "dynamic");
     print_timing(start, end, TIME_CYCLES);
 }
 

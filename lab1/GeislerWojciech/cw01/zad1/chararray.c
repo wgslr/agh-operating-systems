@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include "stringlib.h"
+#include "chararray.h"
 
 const char MIN_CHAR = 'A';
 const char MAX_CHAR = 'z';
