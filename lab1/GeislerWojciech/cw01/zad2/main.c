@@ -8,6 +8,8 @@
 #include <assert.h>
 #include "../zad1/chararray.h"
 
+#define ALLOWED_MEMORY 500000000.0 // 500 MiB
+
 const int TIME_CYCLES = 1000;
 
 typedef struct timeval timeval;
@@ -23,7 +25,7 @@ void print(char** array, size_t size);
 
 void print_help();
 
-void time_create_dynamic(size_t blocks, size_t block_size);
+void time_create(size_t blocks, size_t block_size, bool use_static);
 
 timespec timeval_to_timespec(timeval time);
 
@@ -37,48 +39,50 @@ void print_timing(timestamp start, timestamp end, unsigned long cycles);
 /** Helpers **/
 void print_timediff(timespec start, timespec end, const char* description, unsigned cycles);
 
+void time_delete(const array* arr, size_t blocks);
+
+void time_search(array* arr, size_t target);
+
 int main(int argc, char* argv[]) {
     srand(time(NULL));
 
-    size_t blocks = 0;
-    size_t block_size = 0;
-    bool use_static = false;
-
-    printf("Arguments: %d\n", argc);
-
-    for(int i = 1; i < argc; ++i) {
-        if(argv[i][0] != '-') {
-            fprintf(stderr, "Incorrect arguments format in arg %d\n", i);
-            return (1);
-        }
-        switch(argv[i][1]) {
-            case 'h':
-                print_help();
-                return (0);
-            case 'n':
-                blocks = strtoul(argv[i + 1], NULL, 10);
-                ++i;
-                break;
-            case 'b':
-                block_size = strtoul(argv[i + 1], NULL, 10);
-                ++i;
-                break;
-            case 'm':
-                use_static = (bool) strtoul(argv[i + 1], NULL, 10);
-                ++i;
-                break;
-        }
+    if(argc < 4) {
+        print_help();
+        return (2);
     }
 
-    time_create_dynamic(blocks, block_size);
-    time_search(create_filled(blocks, block_size, false), 0);
-    time_search(create_filled(blocks, block_size, true), 0);
+    size_t blocks = strtoul(argv[1], NULL, 10);
+    size_t block_size = strtoul(argv[2], NULL, 10);
+    bool use_static = argv[3][0] != '0';
 
-    time_add(create_array(blocks, block_size, false), blocks );
-    time_delete(create_filled(blocks, block_size, false), blocks);
-    time_add_delete(create_array(blocks, block_size, false), TIME_CYCLES);
-    time_add_delete(create_array(blocks, block_size, true), TIME_CYCLES);
-
+    int arg = 4;
+    for(int i = 0; i < 3; ++i, ++arg) { // 3 commands are expected
+        if(arg >= argc) {
+            fprintf(stderr, "Too few arguments!\n");
+            return (2);
+        }
+        const char* command = argv[arg];
+        if(strcmp(command, "create_table") == 0) {
+            time_create(blocks, block_size, use_static);
+        } else if(strcmp(command, "search_element") == 0) {
+            size_t target = strtoul(argv[++arg], NULL, 10);
+            time_search(create_filled(blocks, block_size, use_static), target);
+        } else if(strcmp(command, "remove") == 0) {
+            size_t count = strtoul(argv[++arg], NULL, 10);
+            time_delete(create_filled(blocks, block_size, use_static), count);
+        } else if(strcmp(command, "add") == 0) {
+            size_t count = strtoul(argv[++arg], NULL, 10);
+            time_add(create_array(blocks, block_size, use_static), count);
+        } else if(strcmp(command, "remove_and_add") == 0) {
+            size_t cycles = strtoul(argv[++arg], NULL, 10);
+            time_add_delete(create_array(blocks, block_size, use_static), cycles);
+        } else {
+            fprintf(stderr, "Unexpected argument %d\n", arg);
+            return (2);
+        }
+        printf("\n");
+    }
+    
     return 0;
 }
 
@@ -92,25 +96,36 @@ array* create_filled(size_t blocks, size_t block_size, bool use_static) {
     return arr;
 }
 
-void time_create_dynamic(size_t blocks, size_t block_size) {
+void time_create(size_t blocks, size_t block_size, bool use_static) {
+    unsigned cycles = (unsigned) (ALLOWED_MEMORY / blocks / block_size); // how many times fits in 5 GiB
+
+    printf("Measuring %s creation time for table of %lu blocks sized %lu in %u cycles...\n",
+           use_static ? "static" : "dynamic", blocks, block_size, cycles);
+
+    // Store created arrays to free memory afterwards
+    array** arrays = calloc(cycles, sizeof(array*));
+
     timestamp start = get_timestamp();
-
-    unsigned cycles = (unsigned) (10000000.0 / blocks / block_size * 500); // how many times fits in 5 GiB
-
-    for(int cnt = 0; cnt < cycles; ++cnt) {
-        array* arr = create_array(blocks, block_size, false);
-        for(int i = 0; i < blocks; ++i) {
-            create_block(arr, i);
+    for(unsigned c = 0; c < cycles; ++c) {
+        arrays[c] = create_array(blocks, block_size, use_static);
+        for(size_t i = 0; i < blocks; ++i) {
+            create_block(arrays[c], i);
         }
     }
+    timestamp end = get_timestamp();
 
-    print_timing(start, get_timestamp(), cycles);
+    // clear
+    for(unsigned c = 0; c < cycles; ++c) {
+        delete_array(arrays[c]);
+    }
+
+    print_timing(start, end, cycles);
 }
 
 void time_search(array* arr, size_t target) {
     size_t result;
 
-    printf("Measuring search time among %lu blocks sized %lu \n", arr->blocks, arr->block_size);
+    printf("Measuring search time among %lu blocks sized %lu...\n", arr->blocks, arr->block_size);
 
     timestamp start = get_timestamp();
     for(int t = 0; t < TIME_CYCLES; ++t) {
@@ -118,7 +133,7 @@ void time_search(array* arr, size_t target) {
     }
     timestamp end = get_timestamp();
 
-    printf("Block %lu has value most similar to block %lu\n", result, target);
+    printf("Result: block %lu has value most similar to block %lu\n\n", result, target);
 
     printf("Timings with %s allocation - ", arr->use_static ? "static" : "dynamic");
     print_timing(start, end, TIME_CYCLES);
@@ -127,7 +142,7 @@ void time_search(array* arr, size_t target) {
 void time_delete(const array* arr, size_t blocks) {
     assert(blocks <= arr->blocks);
 
-    printf("Measuring time of deleting %lu blocks:\n", blocks);
+    printf("Measuring time of deleting %lu blocks...\n", blocks);
 
     timestamp start = get_timestamp();
     for(size_t i = 0; i < blocks; ++i) {
@@ -135,14 +150,13 @@ void time_delete(const array* arr, size_t blocks) {
     }
     timestamp end = get_timestamp();
 
-    print_timing(start, end, 1);
     print_timing(start, end, blocks);
 }
 
 void time_add(const array* arr, size_t blocks) {
     assert(blocks <= arr->blocks);
 
-    printf("Measuring time of adding %lu blocks:\n", blocks);
+    printf("Measuring time of creating %lu blocks...\n", blocks);
 
     timestamp start = get_timestamp();
     for(size_t i = 0; i < blocks; ++i) {
@@ -150,21 +164,20 @@ void time_add(const array* arr, size_t blocks) {
     }
     timestamp end = get_timestamp();
 
-    print_timing(start, end, 1);
     print_timing(start, end, blocks);
 }
 
-time_add_delete(const array* arr, unsigned cycles){
-    printf("Measuring time of adding and removing %s allocated block %u times:\n", arr->use_static ? "statically" : "dynamically", cycles);
+time_add_delete(const array* arr, unsigned cycles) {
+    printf("Measuring time of adding and removing %s allocated block %u times...\n",
+           arr->use_static ? "statically" : "dynamically", cycles);
 
     timestamp start = get_timestamp();
-    for(unsigned i = 0; i < cycles; ++i){
+    for(unsigned i = 0; i < cycles; ++i) {
         create_block(arr, 0);
         delete_block(arr, 0);
     }
     timestamp end = get_timestamp();
 
-    print_timing(start, end, 1);
     print_timing(start, end, cycles);
 }
 
@@ -186,12 +199,16 @@ timestamp get_timestamp() {
 
 
 void print_timing(timestamp start, timestamp end, unsigned long cycles) {
-    if(cycles > 1)
-        printf("Times averaged over %d cycles:\n", cycles);
+    if(cycles > 1) {
+        printf("Total timing of %d actions:\n", cycles);
+        print_timediff(start.user, end.user, "User time", 1);
+        print_timediff(start.system, end.system, "System time", 1);
+        print_timediff(start.real, end.real, "Real time", 1);
+        printf("Timing of one action averaged over %d retries:\n", cycles);
+    }
     print_timediff(start.user, end.user, "User time", cycles);
     print_timediff(start.system, end.system, "System time", cycles);
     print_timediff(start.real, end.real, "Real time", cycles);
-    printf("\n");
 }
 
 
@@ -223,8 +240,5 @@ void print_arr(const array* arr, size_t size) {
 }
 
 void print_help() {
-    printf("Options:\n"
-                   "-n blocks count\n"
-                   "-b block size\n"
-                   "-m mode (0 - dynamic; 1 - static)\n");
+    printf("Invocation: main <blocks_count> <block_size> <static_allocation> <command> <command_args...>\n");
 }

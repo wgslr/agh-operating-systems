@@ -26,14 +26,11 @@ array* create_array(size_t blocks_count, size_t block_size, bool use_static) {
     return arr;
 }
 
-void delete_array(array* arr, size_t size) {
+void delete_array(array* arr) {
+    for(size_t i = 0; i < arr->blocks; ++i) {
+        delete_block(arr, i);
+    }
     if(!arr->use_static) {
-        for(size_t i = 0; i < arr->blocks; ++i) {
-            if(arr->content[i] != 0) {
-
-            }
-            free(arr->content[i]);
-        }
         free(arr->content);
         free(arr);
     }
@@ -84,7 +81,7 @@ void fill_str(char* block, char* value) {
 // Fills given block of `size` characters with
 // random characters from a subset of ASCII.
 void fill_random(char* block, size_t size) {
-    for(int i = 0; i < size - 1; ++i) {
+    for(size_t i = 0; i < size - 1; ++i) {
         block[i] = (char) (rand() % (MAX_CHAR - MIN_CHAR + 1) + MIN_CHAR);
     }
     block[size - 1] = '\0';

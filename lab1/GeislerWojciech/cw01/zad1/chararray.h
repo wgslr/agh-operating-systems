@@ -19,7 +19,7 @@ typedef struct array {
 
 array* create_array(size_t blocks_count, size_t block_size, bool use_static);
 
-void delete_array(array* arr, size_t size);
+void delete_array(array* arr);
 
 char* create_block(const array* arr, size_t pos);
 
