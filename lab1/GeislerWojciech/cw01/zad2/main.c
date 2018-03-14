@@ -7,6 +7,15 @@
 #include <stdbool.h>
 #include "../zad1/stringlib.h"
 
+typedef struct timeval timeval;
+typedef struct timespec timespec;
+
+typedef struct timing {
+    timeval system;
+    timeval user;
+    timeval real;
+} timestamp;
+
 void print(char** array, size_t size);
 
 void print_help();
@@ -14,6 +23,8 @@ void print_help();
 void time_create_dynamic(size_t blocks, size_t block_size);
 
 struct timeval timespec_to_timeval(struct timespec time);
+
+timestamp get_timestamp() ;
 
 int main(int argc, char* argv[]) {
     srand(time(NULL));
@@ -61,39 +72,45 @@ int main(int argc, char* argv[]) {
 }
 
 void time_create_dynamic(size_t blocks, size_t block_size) {
-    struct timespec real_start;
-    struct timespec real_end;
-    struct rusage rusage_start;
-    struct rusage rusage_end;
-    clock_gettime(CLOCK_REALTIME, &real_start);
-    getrusage(RUSAGE_SELF, &rusage_start);
+    timestamp start = get_timestamp();
 
-    for(int cnt = 0; cnt < 100; ++cnt) {
+    for(int cnt = 0; cnt < 1; ++cnt) {
         array* arr = create_array(blocks, false);
         for(int i = 0; i < blocks; ++i) {
             create_block(arr, i, block_size);
         }
     }
 
-
-    clock_gettime(CLOCK_REALTIME, &real_end);
-    getrusage(RUSAGE_SELF, &rusage_end);
-    print_timing(timespec_to_timeval(real_start), timespec_to_timeval(real_end), "Real time");
-    print_timing(rusage_start.ru_utime, rusage_end.ru_utime, "User time");
-    print_timing(rusage_start.ru_stime, rusage_end.ru_stime, "System time");
+    print_timing(start, get_timestamp());
 }
+
+timestamp get_timestamp() {
+    timestamp ts;
+    struct rusage ru;
+    struct timespec real;
+
+    clock_gettime(CLOCK_REALTIME, &real);
+    ts.real = timespec_to_timeval(real);
+
+    getrusage(RUSAGE_SELF, &ru);
+    ts.system = ru.ru_stime;
+    ts.user = ru.ru_utime;
+    return ts;
+}
+
 
 
 /** Helpers **/
 
-void print_timing(struct timeval start, struct timeval end, const char* description) {
-//    long double diff_ms = (end->tv_sec - start->tv_sec) * 1000 + (end->tv_nsec - start->tv_nsec) / 1000.0;
+void print_timing(timestamp start, timestamp end) {
+    print_timediff(start.user, end.user, "User time");
+    print_timediff(start.system, end.system, "System time");
+    print_timediff(start.real, end.real, "Real time");
+}
 
-//    printf("Start: %llds %lldns, End: %llds %lldns\n", (long long int) start->tv_sec, (long long int) start->tv_nsec,
-//           (long long int) end->tv_sec, (long long int) end->tv_nsec);
+void print_timediff(struct timeval start, struct timeval end, const char* description) {
     long double diff_us = (end.tv_sec - start.tv_sec) * 1000000.0 + (end.tv_usec - start.tv_usec);
-//    long double diff_ms = diff_ns / 1000;
-    printf("%s: %.3Lf s = %.3Lf ms = %.3Lf us\n", description, diff_us / 1000000, diff_us / 1000, diff_us);
+    printf("%11s: %8.3Lf s = %10.3Lf ms = %10.3Lf us\n", description, diff_us / 1000000, diff_us / 1000, diff_us);
 }
 
 void print_arr(const array* arr, size_t size) {
@@ -115,7 +132,7 @@ void print_help() {
                    "-m mode (0 - dynamic; 1 - static)\n");
 }
 
-struct timeval timespec_to_timeval(struct timespec time) {
+timeval timespec_to_timeval(timespec time) {
     struct timeval tv;
     tv.tv_sec = time.tv_sec;
     tv.tv_usec = time.tv_nsec / 1000;
