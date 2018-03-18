@@ -2,14 +2,20 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/stat.h.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <stdlib.h>
 
-// Whether to use system calls or library functions
-bool syscalls = true;
+typedef struct File {
+    int fd;
+    FILE* handle;
+    bool syscall;
+} File;
 
-void flags_to_char(const int flags, char* char_flags) {
+// Converts from open() flags to fopen() mode
+// Returned array should be free-ed
+char* flags_to_char(const int flags) {
+    char* char_flags = calloc(3, sizeof(char));
     if(flags & O_APPEND) {
         char_flags[0] = 'a';
         char_flags[1] = '\0';
@@ -27,25 +33,31 @@ void flags_to_char(const int flags, char* char_flags) {
     } else {
         char_flags[0] = '\0';
     }
+    return char_flags;
 }
 
-// returns error code
-int file_open(const char* path, const int flags, void** file) {
-    if(syscalls) {
+// returns 0 on error
+File* file_open(const char* path, const int flags, bool syscall) {
+    File* file = calloc(1, sizeof(File));
+    file->syscall = syscall;
+    if(syscall) {
         int result = open(path, flags);
         if(result < 0) {
-            file = NULL;
-            return result;
+            free(result);
+            return NULL;
         } else {
-            *file = malloc(sizeof(int));
-            *(int*) file = result;
+            file->fd = result;
+            return file;
         }
     } else {
-        char* flags_char = calloc(3, sizeof(char));
-        flags_to_char(flags, flags_char);
-        *(FILE**) file = fopen(path, flags_char);
-        if(*file == 0) {
-            return -1; // Open error
+        char* flags_char = flags_to_char(flags);
+        file->handle = fopen(path, flags_char);
+        free(flags_char);
+        if(file->handle != 0) {
+            return file;
+        } else {
+            free(file);
+            return NULL;
         }
     }
 }
