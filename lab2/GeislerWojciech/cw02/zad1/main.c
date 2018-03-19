@@ -82,7 +82,6 @@ unsigned file_read(File* file, unsigned size, void* buf) {
         return (unsigned) (size * (fread(buf, size, 1, file->handle)));
     }
 }
-
 // Returns number of written bytes
 int file_write(File* file, unsigned size, const void* content) {
     if(file->syscall) {
@@ -92,29 +91,37 @@ int file_write(File* file, unsigned size, const void* content) {
     }
 }
 
-void generate(const char* path, const unsigned records, const unsigned record_size, bool syscalls) {
-    File* urandom = file_open("/dev/urandom", O_RDONLY, syscalls);
-    File* target = file_open(path, O_WRONLY | O_CREAT | O_TRUNC, syscalls);
+void copy(const char* path_from, const char* path_to, const unsigned records, const unsigned record_size, bool syscalls) {
+    File* source = file_open(path_from, O_RDONLY, syscalls);
+    File* target = file_open(path_to, O_WRONLY | O_CREAT | O_TRUNC, syscalls);
 
-    if(urandom == NULL || target == NULL) {
+    if(source == NULL || target == NULL) {
         fprintf(stderr, "Error opening file");
         exit(1);
     }
 
     char* buf = malloc(record_size);
-    int bytes = 0;
+    int bytes = record_size;
 
     for(int i = 0; i < records; ++i){
-        bytes = file_read(urandom, record_size, buf);
-        assert(bytes == record_size);
+        bytes = file_read(source, record_size, buf);
         file_write(target, bytes, buf);
+
+        if(bytes < record_size) {
+            fprintf(stderr, "File %s contained less than %u records", path_from, records);
+            break;
+        }
     }
 
     free(buf);
     file_close(&target);
-    file_close(&urandom);
+    file_close(&source);
+
 }
 
+void generate(const char* path, const unsigned records, const unsigned record_size, bool syscalls) {
+    copy("/dev/urandom", path, records, record_size, syscalls);
+}
 
 int main(int argc, char* argv[]) {
     if(argc < 4){
@@ -126,6 +133,7 @@ int main(int argc, char* argv[]) {
     const int record_size = atoi(argv[3]);
 
     generate(path, records, record_size, false);
+    printf("Generated\n");
 
     return 0;
 }
