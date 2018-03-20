@@ -3,10 +3,8 @@
 #include <sys/resource.h>
 #include <time.h>
 #include <stdlib.h>
-#include <time.h>
 #include <stdbool.h>
 #include <assert.h>
-#include <dlfcn.h>
 #include "../zad1/chararray.h"
 
 #define DL_NAME "libchararray.so"
