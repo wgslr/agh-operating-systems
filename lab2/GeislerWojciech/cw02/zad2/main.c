@@ -23,14 +23,14 @@ const char *PERMISSIONS = "rwxrwxrwx";
 time_t target_time = 0;
 char comparator = '\0';
 
-bool is_absolute(const char *path) {
+bool is_path_absolute(const char *path) {
     return path[0] == '/';
 }
 
-// Assummes foramt yyyy-mm-dd
+// Assummes format yyyy-mm-dd
 time_t str_to_time(char *str) {
     str[4] = '\0',
-    str[7] = '\0';
+            str[7] = '\0';
     struct tm time = {0};
 
     time.tm_year = atoi(&str[0]) - 1900;
@@ -59,10 +59,10 @@ char *mode_to_str(mode_t mode) {
 // size of buf must be at least strlen(path1) + strlen(path2) + 2;
 char *join_paths(const char *path1, const char *path2) {
     char *buf;
-    int len1 = strlen(path1);
-    int len2 = strlen(path2);
+    size_t len1 = strlen(path1);
+    size_t len2 = strlen(path2);
 
-    if(is_absolute(path2)) {
+    if(is_path_absolute(path2)) {
         // Absolute path overrides path1
         buf = malloc(len2 + 1);
         strcpy(buf, path2);
@@ -77,8 +77,8 @@ char *join_paths(const char *path1, const char *path2) {
     return buf;
 }
 
-char *absolute(const char *path) {
-    if(is_absolute(path)) {
+char *mk_path_absolute(const char *path) {
+    if(is_path_absolute(path)) {
         // copy for consistency
         char *copy = malloc(strlen(path) + 1);
         strcpy(copy, path);
@@ -98,7 +98,7 @@ char *absolute(const char *path) {
 
 
 void print_file(const char *path, const struct stat *stats) {
-    char *name = absolute(path);
+    char *name = mk_path_absolute(path);
     long size = stats->st_size;
     struct timespec mtime = stats->st_mtim;
     time_t time = mtime.tv_sec;
@@ -114,29 +114,21 @@ void print_file(const char *path, const struct stat *stats) {
 
 
 bool is_time_allowed(const struct stat *stats) {
-
-    fprintf(stderr, "file secs: %ld, target: %ld\n", stats->st_mtim.tv_sec, target_time);
     time_t file_days = stats->st_mtim.tv_sec / (3600 * 24);
     time_t target_days = target_time / (3600 * 24);
     long int diff = file_days - target_days;
 
 
-    bool result = (comparator == '<' && diff < 0)
+    return  (comparator == '<' && diff < 0)
                   || (comparator == '=' && diff == 0)
                   || (comparator == '>' && diff > 0);
-    if(!result) {
-        fprintf(stderr, "Skipping file %ld. File is %ld where looking for %c%ld\n", stats->st_size, file_days,
-                comparator, target_days);
-    }
-    return result;
 }
 
 
 void display_dir(const char *path) {
-    fprintf(stderr, "Display dir %s\n", path);
-
     DIR *dir = opendir(path);
-    dirent *entry;
+    dirent *entry = NULL;
+    char *filepath = NULL;
     struct stat *stats = calloc(1, sizeof(struct stat));
 
     if(dir == NULL) {
@@ -144,10 +136,9 @@ void display_dir(const char *path) {
         exit(1);
     }
 
-
     // print normal files
     while((entry = readdir(dir)) != NULL) {
-        char *filepath = join_paths(path, entry->d_name);
+        filepath = join_paths(path, entry->d_name);
         lstat(filepath, stats);
 
         if(S_ISREG(stats->st_mode) && is_time_allowed(stats)) {
@@ -158,11 +149,12 @@ void display_dir(const char *path) {
 
     rewinddir(dir);
 
+    // descend into subdirectories
     while((entry = readdir(dir)) != NULL) {
-        char *filepath = join_paths(path, entry->d_name);
+        filepath = join_paths(path, entry->d_name);
         lstat(filepath, stats);
         if(S_ISDIR(stats->st_mode) &&
-           strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) { // prevent recursing to the same dir
+           strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) { // prevent recursing to the same dir
             display_dir(filepath);
         }
         free(filepath);
@@ -173,7 +165,7 @@ void display_dir(const char *path) {
 }
 
 int nftw_callback(const char *path, const struct stat *stats, int typeflag, struct FTW *ftwbuf) {
-    (void) ftwbuf; // silence unsued variable warning
+    (void) ftwbuf; // silence unused variable warning
     if(typeflag == FTW_F && is_time_allowed(stats)) {
         print_file(path, stats);
     }
@@ -181,9 +173,7 @@ int nftw_callback(const char *path, const struct stat *stats, int typeflag, stru
 }
 
 void display_dir_nftw(const char *path) {
-    fprintf(stderr, "NFTW Display dir %s\n", path);
     nftw(path, &nftw_callback, 512, 0);
-
 }
 
 int main(int argc, char *argv[]) {
@@ -195,15 +185,11 @@ int main(int argc, char *argv[]) {
     comparator = argv[2][0];
 
     if(comparator != '>' && comparator != '<' && comparator != '=') {
-        fprintf(stderr, "Comparator mus be < = or >\n");
+        fprintf(stderr, "Comparison operator must be < = or >\n");
         exit(1);
     }
 
-//    const char *date = argv[3];
-    target_time = 0;
-    printf("target_time: %ld\n", target_time);
     target_time = str_to_time(argv[3]);
-    printf("target_time2: %ld\n", target_time);
 
     printf("Using opendir:\n");
     display_dir(path);
