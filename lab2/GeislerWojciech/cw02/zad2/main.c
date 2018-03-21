@@ -107,7 +107,7 @@ void print_file(const char *path, const struct stat *stats) {
 }
 
 
-bool is_time_allowed(struct stat *stats) {
+bool is_time_allowed(const struct stat *stats) {
     time_t file_days = stats->st_mtim.tv_sec / (3600 * 24);
     time_t target_days = target_time / (3600 * 24);
     long diff = file_days - target_days;
