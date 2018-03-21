@@ -2,8 +2,8 @@
 
 COMMAND=$1
 OUT=${2:-times.txt}
-BLOCKS=1000
-BLOCKS2=3300 # insertions sort is O(n^2), increase by log2(10)
+BLOCKS=5000
+BLOCKS2=10000 # insertions sort is O(n^2), increase by log2(10)
 
 cat /dev/null > $OUT
 
