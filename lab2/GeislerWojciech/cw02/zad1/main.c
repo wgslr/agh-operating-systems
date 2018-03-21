@@ -204,7 +204,6 @@ void sort(const char *path, const int records, const int record_size, bool sysca
             if(current[0] < buffer[0]) {
                 fprintf(stderr, "%d is smaller than %d\n", i, pos - 1);
                 // move record one position right
-                fprintf(stderr, "Writing at %u\n", ftell(file->handle));
                 int written = file_write(file, record_size, buffer);
                 assert(written == record_size);
                 ++pos;
@@ -221,7 +220,8 @@ void sort(const char *path, const int records, const int record_size, bool sysca
         fprintf(stderr, "Written %d to %d\n", written, pos);
         ++pos;
         // move to next record
-        file_seek(file, (i - pos + 1) * record_size, syscalls);
+        file_seek(file, (i - pos + 1) * record_size, SEEK_CUR);
+        fprintf(stderr, "jumping %d records forward\n", i - pos + 1);
         pos += i - pos + 1;
     }
 
