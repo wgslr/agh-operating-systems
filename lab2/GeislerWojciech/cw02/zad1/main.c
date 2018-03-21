@@ -171,6 +171,7 @@ void generate(const char *path, const unsigned records, const unsigned record_si
 void sort(const char *path, const int records, const int record_size, bool syscalls) {
     unsigned char *buffer = malloc(record_size);
     unsigned char *current = malloc(record_size);
+    int pos; // tracks position in file in record_size units
     File *file = file_open(path, O_RDWR, syscalls);
 
     if(file == NULL) {
@@ -178,51 +179,39 @@ void sort(const char *path, const int records, const int record_size, bool sysca
         exit(1);
     }
 
-    // begin from second record
     file_seek(file, record_size, SEEK_SET);
-    int pos; // tracks position in file in record_size units
     for(int i = pos = 1; i < records; ++i) {
-        if(!file_read(file, record_size, current)) {
+        if(file_read(file, (unsigned int) record_size, current) != record_size) {
             break;
         }
-        ++pos;
 
-//        // move to beginning of current record
-        file_seek(file, -(int) record_size, SEEK_CUR);
-        --pos;
+        file_seek(file, -record_size, SEEK_CUR);
 
-        while(pos > 0) { // @fixme
-            file_seek(file, -(int) record_size, SEEK_CUR);
-            --pos;
+        while(pos > 0) {
+            file_seek(file, -record_size, SEEK_CUR);
             int bytes_read = file_read(file, record_size, buffer);
-            ++pos;
 
-            if(bytes_read < record_size) {
-                fprintf(stderr, "Error reading: %s\n", strerror(errno));
-            }
+            assert(bytes_read == record_size);
 
             if(current[0] < buffer[0]) {
                 fprintf(stderr, "%d is smaller than %d\n", i, pos - 1);
+
                 // move record one position right
                 int written = file_write(file, record_size, buffer);
                 assert(written == record_size);
-                ++pos;
+
                 // move to next record left
                 file_seek(file, -2 * (int) record_size, SEEK_CUR);
-                --pos;
                 --pos;
             } else {
                 break;
             }
         }
-//        fprintf(stderr, "Move %d to %d\n", i, pos);
-        int written = file_write(file, record_size, current);
-        fprintf(stderr, "Written %d to %d\n", written, pos);
-        ++pos;
-        // move to next record
-        file_seek(file, (i - pos + 1) * record_size, SEEK_CUR);
-        fprintf(stderr, "jumping %d records forward\n", i - pos + 1);
-        pos += i - pos + 1;
+        file_write(file, record_size, current);
+
+        // move forward to read next record
+        file_seek(file, (i - pos) * record_size, SEEK_CUR);
+        pos += i - pos;
     }
 
     file_close(&file);
