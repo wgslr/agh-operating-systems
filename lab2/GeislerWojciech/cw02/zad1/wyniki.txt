@@ -1,3 +1,10 @@
+Poniższe pomiary pokazują, że:
+przy kopiowaniu za pomocą małych rekordów funkcje biblioteczne są szybsze od
+systemowych, co zmienia się przy rekordach powyżej 4kB.
+
+Z kolei przy sortowaniu dla dowolnego rozmiaru rekordu
+szybsze były funkcje systemowe.
+
 copy;	 5000;	    4;	 sys; user	 (ms):    1.00000
 copy;	 5000;	    4;	 sys; system	 (ms):   21.00000
 copy;	 5000;	    4;	 sys; real	 (ms):   22.00000
