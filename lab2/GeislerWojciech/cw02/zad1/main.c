@@ -171,8 +171,8 @@ void generate(const char *path, const int records, const int record_size, bool s
 void sort(const char *path, const int records, const int record_size, bool syscalls) {
     unsigned char *buffer = malloc((size_t) record_size);
     unsigned char *current = malloc((size_t) record_size);
-    int pos; // tracks position in file in record_size units
     File *file = file_open(path, O_RDWR, syscalls);
+    int pos = 0; // tracks position in file in record_size units
 
     if(file == NULL) {
         fprintf(stderr, "Error opening file %s\n", path);
@@ -180,9 +180,9 @@ void sort(const char *path, const int records, const int record_size, bool sysca
     }
 
     file_seek(file, record_size, SEEK_SET);
-    for(int i = pos = 1; i < records; ++i) {
+    ++pos;
+    for(int i = 1; i < records; ++i) {
         int read = file_read(file, record_size, current);
-        ++pos;
         if(read != record_size) {
             fprintf(stderr, "Read %d bytes of %d record\n", read, i);
 //            fprintf(stderr, "Unexpected and of file %s reading %dth record\n", path, i);
@@ -190,25 +190,20 @@ void sort(const char *path, const int records, const int record_size, bool sysca
         }
         // compensate the read
         file_seek(file, -record_size, SEEK_CUR);
-        --pos;
 
 
         while(pos > 0) {
             file_seek(file, -record_size, SEEK_CUR);
-            --pos;
             int bytes_read = file_read(file, record_size, buffer);
-            ++pos;
             assert(bytes_read == record_size);
 
             if(current[0] < buffer[0]) {
                 // move record one position right
                 int written = file_write(file, record_size, buffer);
-                ++pos;
                 assert(written == record_size);
 
                 // move to next record left
                 file_seek(file, -2 * record_size, SEEK_CUR);
-                --pos;
                 --pos;
             } else {
                 break;
@@ -267,7 +262,7 @@ int main(int argc, char *argv[]) {
         copy(from, to, records, record_size, syscalls);
         timestamp end = get_timestamp();
 
-        sprintf(description, "copy; %d; %d; %d;", records, record_size, syscalls);
+        sprintf(description, "copy;\t%5d;\t%5d;\t%4s;", records, record_size, syscalls ? "sys" : "lib");
         print_timing(start, end, description);
 
     } else if(strcmp(argv[1], "sort") == 0) {
@@ -278,7 +273,7 @@ int main(int argc, char *argv[]) {
         sort(path, records, record_size, syscalls);
         timestamp end = get_timestamp();
 
-        sprintf(description, "sort; %d; %d; %d;", records, record_size, syscalls);
+        sprintf(description, "sort;\t%5d;\t%5d;\t%4s;", records, record_size, syscalls ? "sys" : "lib");
         print_timing(start, end, description);
     } else {
         fprintf(stderr, "Unidentified argument \'%s\"\n", argv[1]);
@@ -306,11 +301,11 @@ timestamp get_timestamp() {
 
 void print_timing(const timestamp start, const timestamp end, const char *description) {
     char *buf = calloc(10 + strlen(description), sizeof(char));
-    sprintf(buf, "%s user", description);
+    sprintf(buf, "%s user\t", description);
     print_timediff(start.user, end.user, buf);
-    sprintf(buf, "%s system", description);
+    sprintf(buf, "%s system\t", description);
     print_timediff(start.system, end.system, buf);
-    sprintf(buf, "%s real", description);
+    sprintf(buf, "%s real\t", description);
     print_timediff(start.real, end.real, buf);
     free(buf);
 }
