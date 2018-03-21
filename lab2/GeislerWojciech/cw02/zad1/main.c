@@ -136,6 +136,7 @@ void copy(const char *path_from, const char *path_to,
 
     File *source = file_open(path_from, O_RDONLY, syscalls);
     File *target = file_open(path_to, O_WRONLY | O_CREAT | O_TRUNC, syscalls);
+    long int copied_bytes = 0;
 
     if(source == NULL || target == NULL) {
         fprintf(stderr, "Error opening file");
@@ -147,9 +148,10 @@ void copy(const char *path_from, const char *path_to,
     for(int i = 0; i < records; ++i) {
         int bytes = file_read(source, record_size, buf);
         file_write(target, bytes, buf);
+        copied_bytes += bytes;
 
         if(bytes < record_size) {
-            fprintf(stderr, "File %s contained less than %u records. Copied %d", path_from, records, i);
+            fprintf(stderr, "File %s contained less than %u records. Copied %ld bytes in %d records", path_from, records, copied_bytes, i);
             break;
         }
     }
@@ -165,6 +167,7 @@ void generate(const char *path, const int records, const int record_size, bool s
     copy("/dev/urandom", path, records, record_size, syscalls);
 }
 
+
 void sort(const char *path, const int records, const int record_size, bool syscalls) {
     unsigned char *buffer = malloc((size_t) record_size);
     unsigned char *current = malloc((size_t) record_size);
@@ -172,43 +175,51 @@ void sort(const char *path, const int records, const int record_size, bool sysca
     File *file = file_open(path, O_RDWR, syscalls);
 
     if(file == NULL) {
-        fprintf(stderr, "Error opening file %s", path);
+        fprintf(stderr, "Error opening file %s\n", path);
         exit(1);
     }
 
     file_seek(file, record_size, SEEK_SET);
     for(int i = pos = 1; i < records; ++i) {
-        if(file_read(file, record_size, current) != record_size) {
-            break;
+        int read = file_read(file, record_size, current);
+        ++pos;
+        if(read != record_size) {
+            fprintf(stderr, "Read %d bytes of %d record\n", read, i);
+//            fprintf(stderr, "Unexpected and of file %s reading %dth record\n", path, i);
+            exit(1);
         }
-
+        // compensate the read
         file_seek(file, -record_size, SEEK_CUR);
+        --pos;
+
 
         while(pos > 0) {
             file_seek(file, -record_size, SEEK_CUR);
+            --pos;
             int bytes_read = file_read(file, record_size, buffer);
-
+            ++pos;
             assert(bytes_read == record_size);
 
             if(current[0] < buffer[0]) {
-                fprintf(stderr, "%d is smaller than %d\n", i, pos - 1);
-
                 // move record one position right
                 int written = file_write(file, record_size, buffer);
+                ++pos;
                 assert(written == record_size);
 
                 // move to next record left
                 file_seek(file, -2 * record_size, SEEK_CUR);
+                --pos;
                 --pos;
             } else {
                 break;
             }
         }
         file_write(file, record_size, current);
+        ++pos;
 
         // move forward to read next record
-        file_seek(file, (i - pos) * record_size, SEEK_CUR);
-        pos += i - pos;
+        file_seek(file, (i - pos + 1) * record_size, SEEK_CUR);
+        pos += i - pos + 1;
     }
 
     file_close(&file);
