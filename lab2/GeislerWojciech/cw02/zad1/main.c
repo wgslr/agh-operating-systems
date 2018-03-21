@@ -6,11 +6,9 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
 #include <sys/resource.h>
 #include <time.h>
 #include <assert.h>
-#include <errno.h>
 
 
 typedef struct File {
@@ -36,14 +34,14 @@ timestamp get_timestamp();
 
 timeval timespec_to_timeval(timespec time);
 
-void print_timing(const timestamp start, const timestamp end, const char *description);
+void print_timing(timestamp start, timestamp end, const char *description);
 
 // Converts a subset of open() flags to fopen() mode
 // Returned array should be free-ed
 char *flags_to_char(const int flags) {
     char *char_flags = calloc(3, sizeof(char));
     if((flags & O_RDWR) == O_RDWR) {
-        if((flags & O_TRUNC) == O_TRUNC && (flags & O_CREAT) == O_TRUNC){
+        if((flags & O_TRUNC) == O_TRUNC && (flags & O_CREAT) == O_CREAT) {
             char_flags[0] = 'w';
         } else if((flags & O_APPEND) == O_APPEND) {
             char_flags[0] = 'a';
@@ -104,21 +102,21 @@ void file_close(File **file_ptr) {
 
 // Returns number of read bytes
 // file is either (int*) or (FILE*)
-unsigned file_read(const File *file, unsigned size, void *buf) {
+int file_read(const File *file, int size, void *buf) {
     if(file->syscall) {
-        return (unsigned) read(file->fd, buf, size);
+        return (int) read(file->fd, buf, (size_t) size);
     } else {
         // multiply by size since fread returns number of *blocks* read
-        return (unsigned) (size * (fread(buf, size, 1, file->handle)));
+        return size * (int) fread(buf, (size_t) size, 1, file->handle);
     }
 }
 
 // Returns number of written bytes
-int file_write(File *file, unsigned size, const void *content) {
+int file_write(File *file, int size, const void *content) {
     if(file->syscall) {
-        return (int) write(file->fd, content, size);
+        return (int) write(file->fd, content, (size_t) size);
     } else {
-        return (int) (size * fwrite(content, size, 1, file->handle));
+        return (int) (size * fwrite(content, (size_t) size, 1, file->handle));
     }
 }
 
@@ -133,7 +131,7 @@ void file_seek(const File *file, const off_t offset, const int whence) {
 
 
 void copy(const char *path_from, const char *path_to,
-          const unsigned records, const unsigned record_size, bool syscalls) {
+          const int records, const int record_size, bool syscalls) {
     fprintf(stderr, "Copying %ux%u bytes from \"%s\" to \"%s\"\n", records, record_size, path_from, path_to);
 
     File *source = file_open(path_from, O_RDONLY, syscalls);
@@ -145,10 +143,9 @@ void copy(const char *path_from, const char *path_to,
     }
 
     char *buf = malloc(record_size);
-    int bytes = record_size;
 
     for(int i = 0; i < records; ++i) {
-        bytes = file_read(source, record_size, buf);
+        int bytes = file_read(source, record_size, buf);
         file_write(target, bytes, buf);
 
         if(bytes < record_size) {
@@ -164,24 +161,24 @@ void copy(const char *path_from, const char *path_to,
 }
 
 
-void generate(const char *path, const unsigned records, const unsigned record_size, bool syscalls) {
+void generate(const char *path, const int records, const int record_size, bool syscalls) {
     copy("/dev/urandom", path, records, record_size, syscalls);
 }
 
 void sort(const char *path, const int records, const int record_size, bool syscalls) {
-    unsigned char *buffer = malloc(record_size);
-    unsigned char *current = malloc(record_size);
+    unsigned char *buffer = malloc((size_t) record_size);
+    unsigned char *current = malloc((size_t) record_size);
     int pos; // tracks position in file in record_size units
     File *file = file_open(path, O_RDWR, syscalls);
 
     if(file == NULL) {
-        fprintf("Error opening file %s", path);
+        fprintf(stderr, "Error opening file %s", path);
         exit(1);
     }
 
     file_seek(file, record_size, SEEK_SET);
     for(int i = pos = 1; i < records; ++i) {
-        if(file_read(file, (unsigned int) record_size, current) != record_size) {
+        if(file_read(file, record_size, current) != record_size) {
             break;
         }
 
@@ -201,7 +198,7 @@ void sort(const char *path, const int records, const int record_size, bool sysca
                 assert(written == record_size);
 
                 // move to next record left
-                file_seek(file, -2 * (int) record_size, SEEK_CUR);
+                file_seek(file, -2 * record_size, SEEK_CUR);
                 --pos;
             } else {
                 break;
@@ -219,9 +216,6 @@ void sort(const char *path, const int records, const int record_size, bool sysca
     free(current);
 }
 
-//void write_at(const File *file, const unsigned record_size, const unsigned pos) {
-//
-//}
 
 // offset - number of arguments before size parameters
 void parse_params(int offset, char *argv[], int *records, int *record_size, bool *syscalls) {
@@ -236,6 +230,7 @@ void parse_params(int offset, char *argv[], int *records, int *record_size, bool
         exit(1);
     }
 }
+
 
 int main(int argc, char *argv[]) {
     if(argc < 5) {
