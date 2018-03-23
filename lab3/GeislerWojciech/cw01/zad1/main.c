@@ -107,7 +107,7 @@ void print_file(const char *path, const struct stat *stats) {
     char *time_str = ctime(&time);
 
     // specify time length to strip newline character
-    printf("%6d: %s\t%10ld\t%.*s\t%s\n", getpid(), mode, size, (int) strlen(time_str) - 1, time_str, path);
+    printf("pid %6d: %s\t%10ld\t%.*s\t%s\n", getpid(), mode, size, (int) strlen(time_str) - 1, time_str, path);
 
     free(mode);
     free(name);
@@ -127,11 +127,8 @@ bool is_time_allowed(const struct stat *stats) {
 
 
 void display_dir(const char *path) {
-    printf("%6d: display_dir(%s) in pid %d %dsson\n", getpid(), path, getpid(), getppid());
-    int pid = fork();
-    if(pid == 0) {
-        printf("%6d: scanning dir %s in pid %d %dsson\n", getpid(), path, getpid(), getppid());
-
+    fflush(stdout); // required to prevent cached content duplication after fork
+    if(fork() == 0) {
         DIR *dir = opendir(path);
         dirent *entry = NULL;
         char *filepath = NULL;
@@ -166,34 +163,14 @@ void display_dir(const char *path) {
             }
             free(filepath);
         }
-        printf("%6d: scanned dir %s in pid %d %dsson\n", getpid(), path, getpid(), getppid());
 
         free(stats);
         closedir(dir);
         exit(0);
-    } else {
-        printf("%6d: wait() in pid %d %dsson\n", getpid(), getpid(), getppid());
-        int status;
-        int waited_pid = wait(&status);
-        printf("%6d: child %d finished with status %d\n", getpid(), waited_pid, WEXITSTATUS(status));
-        WEXITSTATUS(status);
     }
-}
-
-int nftw_callback(const char *path, const struct stat *stats, int typeflag, struct FTW *ftwbuf) {
-    (void) ftwbuf; // silence unused variable warning
-    if(typeflag == FTW_F && is_time_allowed(stats)) {
-        print_file(path, stats);
-    }
-    return 0;
-}
-
-void display_dir_nftw(const char *path) {
-    nftw(path, &nftw_callback, 512, 0);
 }
 
 int main(int argc, char *argv[]) {
-    printf("%6d: main() \n", getpid());
     if(argc < 3) {
         fprintf(stderr, "Not enough arguments\n");
         exit(1);
@@ -208,11 +185,7 @@ int main(int argc, char *argv[]) {
 
     target_time = str_to_time(argv[3]);
 
-    printf("%6d: pre-display_dir(%s) in main in %d %dsson\n", getpid(), path, getpid(), getppid());
     display_dir(path);
-
-//    printf("Using nftw:\n");
-//    display_dir_nftw(path);
 
     return 0;
 }
