@@ -72,6 +72,7 @@ void execute_batch(char *file) {
 int main(int argc, char *argv[]) {
     if(argc < 1) {
         fprintf(stderr, "Batch file is required as the first argument\n");
+        exit(1);
     }
 
     execute_batch(argv[1]);
