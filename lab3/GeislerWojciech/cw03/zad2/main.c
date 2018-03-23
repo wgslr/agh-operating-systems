@@ -75,4 +75,5 @@ int main(int argc, char *argv[]) {
     }
 
     execute_batch(argv[1]);
+    return 0;
 }
