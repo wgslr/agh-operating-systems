@@ -6,6 +6,9 @@
 # executable
 main
 
+# sample data
+example
+
 # CLion
 */.idea
 
