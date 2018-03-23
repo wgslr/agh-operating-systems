@@ -1,0 +1,6 @@
+ls -l
+echo a b c
+/bin/true
+ echo 1 2 3  
+../zad1/main . < 2019-01-01
+false
