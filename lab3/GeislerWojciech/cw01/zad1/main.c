@@ -158,8 +158,8 @@ void display_dir(const char *path) {
             lstat(filepath, stats);
             if(S_ISDIR(stats->st_mode) &&
                strcmp(entry->d_name, ".") != 0 &&
-               strcmp(entry->d_name, "..") != 0) { // prevent recursing to the same dir
-               display_dir(filepath); // wraca tu i kontynuuje!
+               strcmp(entry->d_name, "..") != 0) {
+               display_dir(filepath);
             }
             free(filepath);
         }
