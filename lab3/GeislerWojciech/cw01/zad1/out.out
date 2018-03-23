@@ -1,0 +1,73 @@
+  7108: main() 
+  7108: pre-display_dir(example) in main in 7108 7083sson
+  7108: display_dir(example) in pid 7108 7083sson
+  7108: wait() in pid 7108 7083sson
+  7109: scanning dir example in pid 7109 7108sson
+  7109: rw-r--r--         10485760      Fri Mar 23 00:35:18 2018        example/big.bin
+  7109: rwxr-xr-x            10240      Fri Mar 23 00:35:18 2018        example/medium.bin
+  7109: r--------              400      Fri Mar 23 00:35:18 2018        example/small.bin
+  7109: rw-------            18092      Fri Mar 23 00:35:18 2018        example/other
+  7109: display_dir(example/subdir) in pid 7109 7108sson
+  7109: wait() in pid 7109 7108sson
+  7110: scanning dir example/subdir in pid 7110 7109sson
+  7110: rw-r--r--         20971520      Fri Mar 23 00:35:18 2018        example/subdir/zeros.bin
+  7110: display_dir(example/subdir/subsubdir) in pid 7110 7109sson
+  7110: wait() in pid 7110 7109sson
+  7111: scanning dir example/subdir/subsubdir in pid 7111 7110sson
+  7111: rw-r--r--                0      Fri Mar 23 00:35:18 2018        example/subdir/subsubdir/empty
+  7111: scanned dir example/subdir/subsubdir in pid 7111 7110sson
+  7111: display_dir(example/subdir/second) in pid 7111 7110sson
+  7111: wait() in pid 7111 7110sson
+  7112: scanning dir example/subdir/second in pid 7112 7111sson
+  7112: rw-r--r--          6691463      Fri Mar 23 00:35:18 2018        example/subdir/second/graphite.tgz
+  7112: scanned dir example/subdir/second in pid 7112 7111sson
+  7112: scanned dir example/subdir in pid 7112 7111sson
+  7112: display_dir(example/single) in pid 7112 7111sson
+  7112: wait() in pid 7112 7111sson
+  7113: scanning dir example/single in pid 7113 7112sson
+  7113: scanned dir example/single in pid 7113 7112sson
+  7113: scanned dir example in pid 7113 7112sson
+  7112: child 7113 finished with status 0
+  7112: scanned dir example in pid 7112 7111sson
+  7111: child 7112 finished with status 0
+  7111: scanned dir example/subdir in pid 7111 7110sson
+  7111: display_dir(example/single) in pid 7111 7110sson
+  7111: wait() in pid 7111 7110sson
+  7114: scanning dir example/single in pid 7114 7111sson
+  7114: scanned dir example/single in pid 7114 7111sson
+  7114: scanned dir example in pid 7114 7111sson
+  7111: child 7114 finished with status 0
+  7111: scanned dir example in pid 7111 7110sson
+  7110: child 7111 finished with status 0
+  7110: display_dir(example/subdir/second) in pid 7110 7109sson
+  7110: wait() in pid 7110 7109sson
+  7115: scanning dir example/subdir/second in pid 7115 7110sson
+  7115: rw-r--r--          6691463      Fri Mar 23 00:35:18 2018        example/subdir/second/graphite.tgz
+  7115: scanned dir example/subdir/second in pid 7115 7110sson
+  7115: scanned dir example/subdir in pid 7115 7110sson
+  7115: display_dir(example/single) in pid 7115 7110sson
+  7115: wait() in pid 7115 7110sson
+  7116: scanning dir example/single in pid 7116 7115sson
+  7116: scanned dir example/single in pid 7116 7115sson
+  7116: scanned dir example in pid 7116 7115sson
+  7115: child 7116 finished with status 0
+  7115: scanned dir example in pid 7115 7110sson
+  7110: child 7115 finished with status 0
+  7110: scanned dir example/subdir in pid 7110 7109sson
+  7110: display_dir(example/single) in pid 7110 7109sson
+  7110: wait() in pid 7110 7109sson
+  7117: scanning dir example/single in pid 7117 7110sson
+  7117: scanned dir example/single in pid 7117 7110sson
+  7117: scanned dir example in pid 7117 7110sson
+  7110: child 7117 finished with status 0
+  7110: scanned dir example in pid 7110 7109sson
+  7109: child 7110 finished with status 0
+  7109: display_dir(example/single) in pid 7109 7108sson
+  7109: wait() in pid 7109 7108sson
+  7118: scanning dir example/single in pid 7118 7109sson
+  7118: scanned dir example/single in pid 7118 7109sson
+  7118: scanned dir example in pid 7118 7109sson
+  7109: child 7118 finished with status 0
+  7109: scanned dir example in pid 7109 7108sson
+  7108: child 7109 finished with status 0
+

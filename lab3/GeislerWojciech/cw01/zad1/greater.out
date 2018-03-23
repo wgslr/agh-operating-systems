@@ -1,0 +1,219 @@
+  5069: main() 
+  5069: pre-display_dir(example) in main in 5069 5068sson
+  5069: display_dir(example) in pid 5069 5068sson
+  5071: scanning dir example in pid 5071 5069sson
+  5071: rw-r--r--	  10485760	Fri Mar 23 00:35:18 2018	example/big.bin
+  5071: rwxr-xr-x	     10240	Fri Mar 23 00:35:18 2018	example/medium.bin
+  5071: r--------	       400	Fri Mar 23 00:35:18 2018	example/small.bin
+  5071: rw-------	     18092	Fri Mar 23 00:35:18 2018	example/other
+  5071: display_dir(example/subdir) in pid 5071 5069sson
+  5072: scanning dir example/subdir in pid 5072 5071sson
+  5072: rw-r--r--	  20971520	Fri Mar 23 00:35:18 2018	example/subdir/zeros.bin
+  5072: display_dir(example/subdir/subsubdir) in pid 5072 5071sson
+  5073: scanning dir example/subdir/subsubdir in pid 5073 5072sson
+  5073: rw-r--r--	         0	Fri Mar 23 00:35:18 2018	example/subdir/subsubdir/empty
+  5073: scanned dir example/subdir/subsubdir in pid 5073 5072sson
+  5073: display_dir(example/subdir/second) in pid 5073 5072sson
+  5074: scanning dir example/subdir/second in pid 5074 5073sson
+  5074: rw-r--r--	   6691463	Fri Mar 23 00:35:18 2018	example/subdir/second/graphite.tgz
+  5074: scanned dir example/subdir/second in pid 5074 5073sson
+  5074: scanned dir example/subdir in pid 5074 5073sson
+  5074: display_dir(example/single) in pid 5074 5073sson
+  5075: scanning dir example/single in pid 5075 5074sson
+  5075: scanned dir example/single in pid 5075 5074sson
+  5075: scanned dir example in pid 5075 5074sson
+  5069: main() 
+  5069: pre-display_dir(example) in main in 5069 5068sson
+  5069: display_dir(example) in pid 5069 5068sson
+  5071: scanning dir example in pid 5071 5069sson
+  5071: rw-r--r--	  10485760	Fri Mar 23 00:35:18 2018	example/big.bin
+  5071: rwxr-xr-x	     10240	Fri Mar 23 00:35:18 2018	example/medium.bin
+  5071: r--------	       400	Fri Mar 23 00:35:18 2018	example/small.bin
+  5071: rw-------	     18092	Fri Mar 23 00:35:18 2018	example/other
+  5071: display_dir(example/subdir) in pid 5071 5069sson
+  5072: scanning dir example/subdir in pid 5072 5071sson
+  5072: rw-r--r--	  20971520	Fri Mar 23 00:35:18 2018	example/subdir/zeros.bin
+  5072: display_dir(example/subdir/subsubdir) in pid 5072 5071sson
+  5073: scanning dir example/subdir/subsubdir in pid 5073 5072sson
+  5073: rw-r--r--	         0	Fri Mar 23 00:35:18 2018	example/subdir/subsubdir/empty
+  5073: scanned dir example/subdir/subsubdir in pid 5073 5072sson
+  5073: display_dir(example/subdir/second) in pid 5073 5072sson
+  5074: scanning dir example/subdir/second in pid 5074 5073sson
+  5074: rw-r--r--	   6691463	Fri Mar 23 00:35:18 2018	example/subdir/second/graphite.tgz
+  5074: scanned dir example/subdir/second in pid 5074 5073sson
+  5074: scanned dir example/subdir in pid 5074 5073sson
+  5074: display_dir(example/single) in pid 5074 5073sson
+  5074: wait() in pid 5074 5073sson
+  5074: child 5075 finished with status 0
+  5074: scanned dir example in pid 5074 5073sson
+  5069: main() 
+  5069: pre-display_dir(example) in main in 5069 5068sson
+  5069: display_dir(example) in pid 5069 5068sson
+  5071: scanning dir example in pid 5071 5069sson
+  5071: rw-r--r--	  10485760	Fri Mar 23 00:35:18 2018	example/big.bin
+  5071: rwxr-xr-x	     10240	Fri Mar 23 00:35:18 2018	example/medium.bin
+  5071: r--------	       400	Fri Mar 23 00:35:18 2018	example/small.bin
+  5071: rw-------	     18092	Fri Mar 23 00:35:18 2018	example/other
+  5071: display_dir(example/subdir) in pid 5071 5069sson
+  5072: scanning dir example/subdir in pid 5072 5071sson
+  5072: rw-r--r--	  20971520	Fri Mar 23 00:35:18 2018	example/subdir/zeros.bin
+  5072: display_dir(example/subdir/subsubdir) in pid 5072 5071sson
+  5073: scanning dir example/subdir/subsubdir in pid 5073 5072sson
+  5073: rw-r--r--	         0	Fri Mar 23 00:35:18 2018	example/subdir/subsubdir/empty
+  5073: scanned dir example/subdir/subsubdir in pid 5073 5072sson
+  5073: display_dir(example/subdir/second) in pid 5073 5072sson
+  5073: wait() in pid 5073 5072sson
+  5073: child 5074 finished with status 0
+  5073: scanned dir example/subdir in pid 5073 5072sson
+  5073: display_dir(example/single) in pid 5073 5072sson
+  5076: scanning dir example/single in pid 5076 5073sson
+  5076: scanned dir example/single in pid 5076 5073sson
+  5076: scanned dir example in pid 5076 5073sson
+  5069: main() 
+  5069: pre-display_dir(example) in main in 5069 5068sson
+  5069: display_dir(example) in pid 5069 5068sson
+  5071: scanning dir example in pid 5071 5069sson
+  5071: rw-r--r--	  10485760	Fri Mar 23 00:35:18 2018	example/big.bin
+  5071: rwxr-xr-x	     10240	Fri Mar 23 00:35:18 2018	example/medium.bin
+  5071: r--------	       400	Fri Mar 23 00:35:18 2018	example/small.bin
+  5071: rw-------	     18092	Fri Mar 23 00:35:18 2018	example/other
+  5071: display_dir(example/subdir) in pid 5071 5069sson
+  5072: scanning dir example/subdir in pid 5072 5071sson
+  5072: rw-r--r--	  20971520	Fri Mar 23 00:35:18 2018	example/subdir/zeros.bin
+  5072: display_dir(example/subdir/subsubdir) in pid 5072 5071sson
+  5073: scanning dir example/subdir/subsubdir in pid 5073 5072sson
+  5073: rw-r--r--	         0	Fri Mar 23 00:35:18 2018	example/subdir/subsubdir/empty
+  5073: scanned dir example/subdir/subsubdir in pid 5073 5072sson
+  5073: display_dir(example/subdir/second) in pid 5073 5072sson
+  5073: wait() in pid 5073 5072sson
+  5073: child 5074 finished with status 0
+  5073: scanned dir example/subdir in pid 5073 5072sson
+  5073: display_dir(example/single) in pid 5073 5072sson
+  5073: wait() in pid 5073 5072sson
+  5073: child 5076 finished with status 0
+  5073: scanned dir example in pid 5073 5072sson
+  5069: main() 
+  5069: pre-display_dir(example) in main in 5069 5068sson
+  5069: display_dir(example) in pid 5069 5068sson
+  5071: scanning dir example in pid 5071 5069sson
+  5071: rw-r--r--	  10485760	Fri Mar 23 00:35:18 2018	example/big.bin
+  5071: rwxr-xr-x	     10240	Fri Mar 23 00:35:18 2018	example/medium.bin
+  5071: r--------	       400	Fri Mar 23 00:35:18 2018	example/small.bin
+  5071: rw-------	     18092	Fri Mar 23 00:35:18 2018	example/other
+  5071: display_dir(example/subdir) in pid 5071 5069sson
+  5072: scanning dir example/subdir in pid 5072 5071sson
+  5072: rw-r--r--	  20971520	Fri Mar 23 00:35:18 2018	example/subdir/zeros.bin
+  5072: display_dir(example/subdir/subsubdir) in pid 5072 5071sson
+  5072: wait() in pid 5072 5071sson
+  5072: child 5073 finished with status 0
+  5072: display_dir(example/subdir/second) in pid 5072 5071sson
+  5077: scanning dir example/subdir/second in pid 5077 5072sson
+  5077: rw-r--r--	   6691463	Fri Mar 23 00:35:18 2018	example/subdir/second/graphite.tgz
+  5077: scanned dir example/subdir/second in pid 5077 5072sson
+  5077: scanned dir example/subdir in pid 5077 5072sson
+  5077: display_dir(example/single) in pid 5077 5072sson
+  5078: scanning dir example/single in pid 5078 5077sson
+  5078: scanned dir example/single in pid 5078 5077sson
+  5078: scanned dir example in pid 5078 5077sson
+  5069: main() 
+  5069: pre-display_dir(example) in main in 5069 5068sson
+  5069: display_dir(example) in pid 5069 5068sson
+  5071: scanning dir example in pid 5071 5069sson
+  5071: rw-r--r--	  10485760	Fri Mar 23 00:35:18 2018	example/big.bin
+  5071: rwxr-xr-x	     10240	Fri Mar 23 00:35:18 2018	example/medium.bin
+  5071: r--------	       400	Fri Mar 23 00:35:18 2018	example/small.bin
+  5071: rw-------	     18092	Fri Mar 23 00:35:18 2018	example/other
+  5071: display_dir(example/subdir) in pid 5071 5069sson
+  5072: scanning dir example/subdir in pid 5072 5071sson
+  5072: rw-r--r--	  20971520	Fri Mar 23 00:35:18 2018	example/subdir/zeros.bin
+  5072: display_dir(example/subdir/subsubdir) in pid 5072 5071sson
+  5072: wait() in pid 5072 5071sson
+  5072: child 5073 finished with status 0
+  5072: display_dir(example/subdir/second) in pid 5072 5071sson
+  5077: scanning dir example/subdir/second in pid 5077 5072sson
+  5077: rw-r--r--	   6691463	Fri Mar 23 00:35:18 2018	example/subdir/second/graphite.tgz
+  5077: scanned dir example/subdir/second in pid 5077 5072sson
+  5077: scanned dir example/subdir in pid 5077 5072sson
+  5077: display_dir(example/single) in pid 5077 5072sson
+  5077: wait() in pid 5077 5072sson
+  5077: child 5078 finished with status 0
+  5077: scanned dir example in pid 5077 5072sson
+  5069: main() 
+  5069: pre-display_dir(example) in main in 5069 5068sson
+  5069: display_dir(example) in pid 5069 5068sson
+  5071: scanning dir example in pid 5071 5069sson
+  5071: rw-r--r--	  10485760	Fri Mar 23 00:35:18 2018	example/big.bin
+  5071: rwxr-xr-x	     10240	Fri Mar 23 00:35:18 2018	example/medium.bin
+  5071: r--------	       400	Fri Mar 23 00:35:18 2018	example/small.bin
+  5071: rw-------	     18092	Fri Mar 23 00:35:18 2018	example/other
+  5071: display_dir(example/subdir) in pid 5071 5069sson
+  5072: scanning dir example/subdir in pid 5072 5071sson
+  5072: rw-r--r--	  20971520	Fri Mar 23 00:35:18 2018	example/subdir/zeros.bin
+  5072: display_dir(example/subdir/subsubdir) in pid 5072 5071sson
+  5072: wait() in pid 5072 5071sson
+  5072: child 5073 finished with status 0
+  5072: display_dir(example/subdir/second) in pid 5072 5071sson
+  5072: wait() in pid 5072 5071sson
+  5072: child 5077 finished with status 0
+  5072: scanned dir example/subdir in pid 5072 5071sson
+  5072: display_dir(example/single) in pid 5072 5071sson
+  5079: scanning dir example/single in pid 5079 5072sson
+  5079: scanned dir example/single in pid 5079 5072sson
+  5079: scanned dir example in pid 5079 5072sson
+  5069: main() 
+  5069: pre-display_dir(example) in main in 5069 5068sson
+  5069: display_dir(example) in pid 5069 5068sson
+  5071: scanning dir example in pid 5071 5069sson
+  5071: rw-r--r--	  10485760	Fri Mar 23 00:35:18 2018	example/big.bin
+  5071: rwxr-xr-x	     10240	Fri Mar 23 00:35:18 2018	example/medium.bin
+  5071: r--------	       400	Fri Mar 23 00:35:18 2018	example/small.bin
+  5071: rw-------	     18092	Fri Mar 23 00:35:18 2018	example/other
+  5071: display_dir(example/subdir) in pid 5071 5069sson
+  5072: scanning dir example/subdir in pid 5072 5071sson
+  5072: rw-r--r--	  20971520	Fri Mar 23 00:35:18 2018	example/subdir/zeros.bin
+  5072: display_dir(example/subdir/subsubdir) in pid 5072 5071sson
+  5072: wait() in pid 5072 5071sson
+  5072: child 5073 finished with status 0
+  5072: display_dir(example/subdir/second) in pid 5072 5071sson
+  5072: wait() in pid 5072 5071sson
+  5072: child 5077 finished with status 0
+  5072: scanned dir example/subdir in pid 5072 5071sson
+  5072: display_dir(example/single) in pid 5072 5071sson
+  5072: wait() in pid 5072 5071sson
+  5072: child 5079 finished with status 0
+  5072: scanned dir example in pid 5072 5071sson
+  5069: main() 
+  5069: pre-display_dir(example) in main in 5069 5068sson
+  5069: display_dir(example) in pid 5069 5068sson
+  5071: scanning dir example in pid 5071 5069sson
+  5071: rw-r--r--	  10485760	Fri Mar 23 00:35:18 2018	example/big.bin
+  5071: rwxr-xr-x	     10240	Fri Mar 23 00:35:18 2018	example/medium.bin
+  5071: r--------	       400	Fri Mar 23 00:35:18 2018	example/small.bin
+  5071: rw-------	     18092	Fri Mar 23 00:35:18 2018	example/other
+  5071: display_dir(example/subdir) in pid 5071 5069sson
+  5071: wait() in pid 5071 5069sson
+  5071: child 5072 finished with status 0
+  5071: display_dir(example/single) in pid 5071 5069sson
+  5080: scanning dir example/single in pid 5080 5071sson
+  5080: scanned dir example/single in pid 5080 5071sson
+  5080: scanned dir example in pid 5080 5071sson
+  5069: main() 
+  5069: pre-display_dir(example) in main in 5069 5068sson
+  5069: display_dir(example) in pid 5069 5068sson
+  5071: scanning dir example in pid 5071 5069sson
+  5071: rw-r--r--	  10485760	Fri Mar 23 00:35:18 2018	example/big.bin
+  5071: rwxr-xr-x	     10240	Fri Mar 23 00:35:18 2018	example/medium.bin
+  5071: r--------	       400	Fri Mar 23 00:35:18 2018	example/small.bin
+  5071: rw-------	     18092	Fri Mar 23 00:35:18 2018	example/other
+  5071: display_dir(example/subdir) in pid 5071 5069sson
+  5071: wait() in pid 5071 5069sson
+  5071: child 5072 finished with status 0
+  5071: display_dir(example/single) in pid 5071 5069sson
+  5071: wait() in pid 5071 5069sson
+  5071: child 5080 finished with status 0
+  5071: scanned dir example in pid 5071 5069sson
+  5069: main() 
+  5069: pre-display_dir(example) in main in 5069 5068sson
+  5069: display_dir(example) in pid 5069 5068sson
+  5069: wait() in pid 5069 5068sson
+  5069: child 5071 finished with status 0

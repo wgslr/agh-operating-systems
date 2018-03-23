@@ -1,0 +1,163 @@
+  5041: main() 
+  5041: pre-display_dir(example) in main in 5041 5040sson
+  5041: display_dir(example) in pid 5041 5040sson
+  5043: scanning dir example in pid 5043 5041sson
+  5043: display_dir(example/subdir) in pid 5043 5041sson
+  5044: scanning dir example/subdir in pid 5044 5043sson
+  5044: display_dir(example/subdir/subsubdir) in pid 5044 5043sson
+  5045: scanning dir example/subdir/subsubdir in pid 5045 5044sson
+  5045: scanned dir example/subdir/subsubdir in pid 5045 5044sson
+  5045: display_dir(example/subdir/second) in pid 5045 5044sson
+  5046: scanning dir example/subdir/second in pid 5046 5045sson
+  5046: scanned dir example/subdir/second in pid 5046 5045sson
+  5046: scanned dir example/subdir in pid 5046 5045sson
+  5046: display_dir(example/single) in pid 5046 5045sson
+  5047: scanning dir example/single in pid 5047 5046sson
+  5047: scanned dir example/single in pid 5047 5046sson
+  5047: scanned dir example in pid 5047 5046sson
+  5041: main() 
+  5041: pre-display_dir(example) in main in 5041 5040sson
+  5041: display_dir(example) in pid 5041 5040sson
+  5043: scanning dir example in pid 5043 5041sson
+  5043: display_dir(example/subdir) in pid 5043 5041sson
+  5044: scanning dir example/subdir in pid 5044 5043sson
+  5044: display_dir(example/subdir/subsubdir) in pid 5044 5043sson
+  5045: scanning dir example/subdir/subsubdir in pid 5045 5044sson
+  5045: scanned dir example/subdir/subsubdir in pid 5045 5044sson
+  5045: display_dir(example/subdir/second) in pid 5045 5044sson
+  5046: scanning dir example/subdir/second in pid 5046 5045sson
+  5046: scanned dir example/subdir/second in pid 5046 5045sson
+  5046: scanned dir example/subdir in pid 5046 5045sson
+  5046: display_dir(example/single) in pid 5046 5045sson
+  5046: wait() in pid 5046 5045sson
+  5046: child 5047 finished with status 0
+  5046: scanned dir example in pid 5046 5045sson
+  5041: main() 
+  5041: pre-display_dir(example) in main in 5041 5040sson
+  5041: display_dir(example) in pid 5041 5040sson
+  5043: scanning dir example in pid 5043 5041sson
+  5043: display_dir(example/subdir) in pid 5043 5041sson
+  5044: scanning dir example/subdir in pid 5044 5043sson
+  5044: display_dir(example/subdir/subsubdir) in pid 5044 5043sson
+  5045: scanning dir example/subdir/subsubdir in pid 5045 5044sson
+  5045: scanned dir example/subdir/subsubdir in pid 5045 5044sson
+  5045: display_dir(example/subdir/second) in pid 5045 5044sson
+  5045: wait() in pid 5045 5044sson
+  5045: child 5046 finished with status 0
+  5045: scanned dir example/subdir in pid 5045 5044sson
+  5045: display_dir(example/single) in pid 5045 5044sson
+  5048: scanning dir example/single in pid 5048 5045sson
+  5048: scanned dir example/single in pid 5048 5045sson
+  5048: scanned dir example in pid 5048 5045sson
+  5041: main() 
+  5041: pre-display_dir(example) in main in 5041 5040sson
+  5041: display_dir(example) in pid 5041 5040sson
+  5043: scanning dir example in pid 5043 5041sson
+  5043: display_dir(example/subdir) in pid 5043 5041sson
+  5044: scanning dir example/subdir in pid 5044 5043sson
+  5044: display_dir(example/subdir/subsubdir) in pid 5044 5043sson
+  5045: scanning dir example/subdir/subsubdir in pid 5045 5044sson
+  5045: scanned dir example/subdir/subsubdir in pid 5045 5044sson
+  5045: display_dir(example/subdir/second) in pid 5045 5044sson
+  5045: wait() in pid 5045 5044sson
+  5045: child 5046 finished with status 0
+  5045: scanned dir example/subdir in pid 5045 5044sson
+  5045: display_dir(example/single) in pid 5045 5044sson
+  5045: wait() in pid 5045 5044sson
+  5045: child 5048 finished with status 0
+  5045: scanned dir example in pid 5045 5044sson
+  5041: main() 
+  5041: pre-display_dir(example) in main in 5041 5040sson
+  5041: display_dir(example) in pid 5041 5040sson
+  5043: scanning dir example in pid 5043 5041sson
+  5043: display_dir(example/subdir) in pid 5043 5041sson
+  5044: scanning dir example/subdir in pid 5044 5043sson
+  5044: display_dir(example/subdir/subsubdir) in pid 5044 5043sson
+  5044: wait() in pid 5044 5043sson
+  5044: child 5045 finished with status 0
+  5044: display_dir(example/subdir/second) in pid 5044 5043sson
+  5049: scanning dir example/subdir/second in pid 5049 5044sson
+  5049: scanned dir example/subdir/second in pid 5049 5044sson
+  5049: scanned dir example/subdir in pid 5049 5044sson
+  5049: display_dir(example/single) in pid 5049 5044sson
+  5050: scanning dir example/single in pid 5050 5049sson
+  5050: scanned dir example/single in pid 5050 5049sson
+  5050: scanned dir example in pid 5050 5049sson
+  5041: main() 
+  5041: pre-display_dir(example) in main in 5041 5040sson
+  5041: display_dir(example) in pid 5041 5040sson
+  5043: scanning dir example in pid 5043 5041sson
+  5043: display_dir(example/subdir) in pid 5043 5041sson
+  5044: scanning dir example/subdir in pid 5044 5043sson
+  5044: display_dir(example/subdir/subsubdir) in pid 5044 5043sson
+  5044: wait() in pid 5044 5043sson
+  5044: child 5045 finished with status 0
+  5044: display_dir(example/subdir/second) in pid 5044 5043sson
+  5049: scanning dir example/subdir/second in pid 5049 5044sson
+  5049: scanned dir example/subdir/second in pid 5049 5044sson
+  5049: scanned dir example/subdir in pid 5049 5044sson
+  5049: display_dir(example/single) in pid 5049 5044sson
+  5049: wait() in pid 5049 5044sson
+  5049: child 5050 finished with status 0
+  5049: scanned dir example in pid 5049 5044sson
+  5041: main() 
+  5041: pre-display_dir(example) in main in 5041 5040sson
+  5041: display_dir(example) in pid 5041 5040sson
+  5043: scanning dir example in pid 5043 5041sson
+  5043: display_dir(example/subdir) in pid 5043 5041sson
+  5044: scanning dir example/subdir in pid 5044 5043sson
+  5044: display_dir(example/subdir/subsubdir) in pid 5044 5043sson
+  5044: wait() in pid 5044 5043sson
+  5044: child 5045 finished with status 0
+  5044: display_dir(example/subdir/second) in pid 5044 5043sson
+  5044: wait() in pid 5044 5043sson
+  5044: child 5049 finished with status 0
+  5044: scanned dir example/subdir in pid 5044 5043sson
+  5044: display_dir(example/single) in pid 5044 5043sson
+  5051: scanning dir example/single in pid 5051 5044sson
+  5051: scanned dir example/single in pid 5051 5044sson
+  5051: scanned dir example in pid 5051 5044sson
+  5041: main() 
+  5041: pre-display_dir(example) in main in 5041 5040sson
+  5041: display_dir(example) in pid 5041 5040sson
+  5043: scanning dir example in pid 5043 5041sson
+  5043: display_dir(example/subdir) in pid 5043 5041sson
+  5044: scanning dir example/subdir in pid 5044 5043sson
+  5044: display_dir(example/subdir/subsubdir) in pid 5044 5043sson
+  5044: wait() in pid 5044 5043sson
+  5044: child 5045 finished with status 0
+  5044: display_dir(example/subdir/second) in pid 5044 5043sson
+  5044: wait() in pid 5044 5043sson
+  5044: child 5049 finished with status 0
+  5044: scanned dir example/subdir in pid 5044 5043sson
+  5044: display_dir(example/single) in pid 5044 5043sson
+  5044: wait() in pid 5044 5043sson
+  5044: child 5051 finished with status 0
+  5044: scanned dir example in pid 5044 5043sson
+  5041: main() 
+  5041: pre-display_dir(example) in main in 5041 5040sson
+  5041: display_dir(example) in pid 5041 5040sson
+  5043: scanning dir example in pid 5043 5041sson
+  5043: display_dir(example/subdir) in pid 5043 5041sson
+  5043: wait() in pid 5043 5041sson
+  5043: child 5044 finished with status 0
+  5043: display_dir(example/single) in pid 5043 5041sson
+  5052: scanning dir example/single in pid 5052 5043sson
+  5052: scanned dir example/single in pid 5052 5043sson
+  5052: scanned dir example in pid 5052 5043sson
+  5041: main() 
+  5041: pre-display_dir(example) in main in 5041 5040sson
+  5041: display_dir(example) in pid 5041 5040sson
+  5043: scanning dir example in pid 5043 5041sson
+  5043: display_dir(example/subdir) in pid 5043 5041sson
+  5043: wait() in pid 5043 5041sson
+  5043: child 5044 finished with status 0
+  5043: display_dir(example/single) in pid 5043 5041sson
+  5043: wait() in pid 5043 5041sson
+  5043: child 5052 finished with status 0
+  5043: scanned dir example in pid 5043 5041sson
+  5041: main() 
+  5041: pre-display_dir(example) in main in 5041 5040sson
+  5041: display_dir(example) in pid 5041 5040sson
+  5041: wait() in pid 5041 5040sson
+  5041: child 5043 finished with status 0
