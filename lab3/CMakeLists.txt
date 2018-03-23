@@ -10,3 +10,5 @@ set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${FLAGS}" )
 add_executable(zad1 GeislerWojciech/cw03/zad1/main.c)
 
 add_executable(zad2  GeislerWojciech/cw03/zad2/main.c)
+
+add_executable(zad3  GeislerWojciech/cw03/zad3/main.c)

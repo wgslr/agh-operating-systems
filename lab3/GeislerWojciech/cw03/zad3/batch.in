@@ -1,0 +1,5 @@
+ls -la -r
+echo a b c
+xz /dev/urandom -c
+false
+echo should not execute
