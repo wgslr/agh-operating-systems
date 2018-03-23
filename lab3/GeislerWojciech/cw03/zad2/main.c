@@ -60,7 +60,6 @@ void execute_batch(char *file) {
     while(getline(&line, &length, handle) != -1) {
         // remove \n
         line[strlen(line) - 1] = '\0';
-        fprintf(stderr, "Read line '%s'\n", line);
         if(run(tokenize(line)) != 0){
             printf("Error executing line '%s'\n", line);
             break;
