@@ -3,6 +3,9 @@
 *.so
 *.a
 
+# executable
+main
+
 # CLion
 */.idea
 
