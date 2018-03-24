@@ -1,6 +1,8 @@
 CC=gcc
 RESULTS=times.txt
 O=-O0
+MLIM=300
+TLIM=10
 CFLAGS=-lm -Wall -Wextra -Wall \
 	-Wno-missing-braces -Wextra -Wno-missing-field-initializers -Wformat=2 \
 	-Wswitch-default -Wswitch-enum -Wcast-align -Wpointer-arith \
@@ -17,10 +19,13 @@ main: main.c
 	$(CC) $< -o $@ $(CFLAGS)
 
 long: long.c
-	$(CC) $< -o $@ $(CFLAGS)
+	$(CC) $< -o $@ $(CFLAGS) -lm
 
-test: main long batch.in
-	./main batch.in 10 300
+big: big.c
+	$(CC) $< -o $@ $(CFLAGS) -lm
+
+test: main long big batch.in
+	./main batch.in $(TLIM) $(MLIM)
 
 clean:
 	-rm *.o *.so *.a main *.bin *.out

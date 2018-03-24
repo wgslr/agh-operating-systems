@@ -45,8 +45,9 @@ char **tokenize(char *string) {
 void set_limits(limits l){
     struct rlimit r;
     r.rlim_cur = r.rlim_max =  ((rlim_t)l.size * 1024 * 1024);
+    printf("Set limit as %zu\n", (rlim_t)l.size * 1024 * 1024);
     setrlimit(RLIMIT_AS, &r);
-    r.rlim_cur = r.rlim_max =  l.time;
+    r.rlim_cur = r.rlim_max = (rlim_t) l.time;
     setrlimit(RLIMIT_CPU, &r);
 }
 
@@ -60,6 +61,12 @@ int run(char** tokens, limits limit){
     } else {
         int status;
         waitpid(pid, &status, 0);
+
+        if(WIFSIGNALED(status)){
+            printf("Process ended because of signal %d\n", WTERMSIG(status));
+            return -1;
+        }
+
         return WEXITSTATUS(status);
     }
 }

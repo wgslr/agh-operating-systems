@@ -1,6 +1,6 @@
 ls -la -r
 echo a b c
-google-chrome
-firefox
+./long 100000
+./big 10 5
 false
 echo should not execute
