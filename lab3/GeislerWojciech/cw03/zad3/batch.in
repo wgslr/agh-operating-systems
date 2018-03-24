@@ -1,5 +1,6 @@
 ls -la -r
 echo a b c
-xz /dev/urandom -c
+google-chrome
+firefox
 false
 echo should not execute

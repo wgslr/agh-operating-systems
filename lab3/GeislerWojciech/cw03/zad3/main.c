@@ -11,6 +11,8 @@ typedef struct limits{
     int size;
 } limits;
 
+void display_usage(char* name, struct rusage *before, struct rusage *after);
+
 // Replaces each space in a string with '\0'
 // and returns it as a 2-dimensional array
 char **tokenize(char *string) {
@@ -71,13 +73,21 @@ void execute_batch(char *file, limits limit) {
 
     char* line = calloc(255, sizeof(char));
     size_t length = 0;
+    struct rusage usage_before;
+    struct rusage usage_after;
 
     while(getline(&line, &length, handle) != -1) {
         // remove \n
         line[strlen(line) - 1] = '\0';
+
+        getrusage(RUSAGE_CHILDREN, &usage_before);
+
         if(run(tokenize(line), limit) != 0){
             printf("Error executing line '%s'\n", line);
             break;
+        } else {
+            getrusage(RUSAGE_CHILDREN, &usage_after);
+            display_usage(line, &usage_before, &usage_after);
         }
     }
 
@@ -99,3 +109,10 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+void display_usage(char* name, struct rusage *before, struct rusage *after){
+    time_t user = (after->ru_utime.tv_sec - before->ru_utime.tv_sec) * 1000000 + after->ru_utime.tv_usec - before->ru_utime.tv_usec;
+    time_t system = (after->ru_stime.tv_sec - before->ru_stime.tv_sec) * 1000000 + after->ru_stime.tv_usec - before->ru_stime.tv_usec;
+    printf("Finished execution of '%s':\n", name),
+    printf("Elapsed user time: %ld us\n", user);
+    printf("Elapsed system time: %ld us\n\n", system);
+}
