@@ -1,0 +1,23 @@
+./main batch.in
+total 56
+drwxr-xr-x 1 wojciech wojciech    72 Mar 26 23:28 .
+drwxr-xr-x 1 wojciech wojciech    36 Mar 26 22:51 ..
+-rw-r--r-- 1 wojciech wojciech    80 Mar 26 22:49 batch.in
+-rwxr-xr-x 1 wojciech wojciech 36960 Mar 26 23:28 main
+-rw-r--r-- 1 wojciech wojciech  2247 Mar 26 23:24 main.c
+-rw-r--r-- 1 wojciech wojciech   758 Mar 26 22:48 Makefile
+-rw-r--r-- 1 wojciech wojciech    16 Mar 26 23:28 wyniki.txt
+a 123 c
+ls -la .
+echo a 123 c
+/bin/true
+Running 'ls -la .':
+
+Running 'echo a 123 c':
+
+Running '/bin/true':
+
+Running '/bin/head -n 3 batch.in':
+
+Running 'false':
+Job 'false' encountered error

@@ -11,7 +11,7 @@ CFLAGS=-Wall -Wextra -Wall \
 	-Werror \
 	-fno-omit-frame-pointer -ffloat-store -fno-common -fstrict-aliasing \
 	$(O)
-SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak \
+#SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak \
     -lasan -lubsan
 .PHONY: test clean
 
