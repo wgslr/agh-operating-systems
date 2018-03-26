@@ -8,13 +8,15 @@ CFLAGS=-Wall -Wextra -Wall \
 	-Wundef -Wnested-externs -Wcast-qual -Wshadow -Wunreachable-code \
 	-Wlogical-op -Wfloat-equal -Wstrict-aliasing=2 -Wredundant-decls \
 	-Wold-style-definition \
-	#-Werror \
+	-Werror \
 	-fno-omit-frame-pointer -ffloat-store -fno-common -fstrict-aliasing \
 	$(O)
+SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak \
+    -lasan -lubsan
 .PHONY: test clean
 
 main: main.c
-	$(CC) $< -o $@ $(CFLAGS)
+	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
 
 clean:
 	-rm *.o *.so *.a main *.bin *.out

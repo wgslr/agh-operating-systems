@@ -12,3 +12,6 @@ add_executable(zad1 GeislerWojciech/cw03/zad1/main.c)
 add_executable(zad2  GeislerWojciech/cw03/zad2/main.c)
 
 add_executable(zad3  GeislerWojciech/cw03/zad3/main.c)
+
+add_executable(big  GeislerWojciech/cw03/zad3/big.c)
+add_executable(long  GeislerWojciech/cw03/zad3/long.c)

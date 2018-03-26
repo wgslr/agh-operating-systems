@@ -5,10 +5,10 @@
 int main(int argc, char *argv[]) {
     double x = 253;
     double y = -223;
-    printf("%s\n",argv[1]);
+
     unsigned long operations = strtoul(argv[1], NULL, 10);
-    for(int i = 0; i < operations; ++i){
-        for(int j = 0; j < 1000; ++j){
+    for(int i = 0; i < operations; ++i) {
+        for(int j = 0; j < 1000; ++j) {
             x = sin(y);
             y = sin(x);
         }

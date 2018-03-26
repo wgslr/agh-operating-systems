@@ -9,12 +9,14 @@
 // and returns it as a 2-dimensional array
 char **tokenize(char *string) {
     char **result;
-    int first = 0;
-    // special case for first token
-    while(string[first] == ' ') ++first;
+
+    // find beginning of string
+    while(string[0] == ' ')
+        string = &string[1];
+
     int count = 1;
     int i, j, length;
-    for(i = first + 1; string[i] != '\0'; ++i) {
+    for(i = 1; string[i] != '\0'; ++i) {
         if(string[i] == ' ') {
             string[i] = '\0';
         } else if (string[i - 1] == '\0'){
@@ -23,7 +25,7 @@ char **tokenize(char *string) {
     }
     length = i;
     result = calloc((size_t) count + 1, sizeof(char *));
-    result[0] = &string[first];
+    result[0] = &string[0];
     j = 1;
     for(i = 1; i < length; ++i) {
         if(string[i] != '\0' && string[i - 1] == '\0') { // do not create tokens from consecutive spaces
@@ -39,10 +41,16 @@ int run(char** tokens){
     int pid = fork();
     if(pid == 0) {
         execvp(tokens[0], tokens);
-        exit(1);
+        exit(126);
     } else {
         int status;
         waitpid(pid, &status, 0);
+
+        if(WIFSIGNALED(status)){
+            printf("Process ended because of signal %d\n", WTERMSIG(status));
+            return -1;
+        }
+
         return WEXITSTATUS(status);
     }
 }
@@ -54,18 +62,26 @@ void execute_batch(char *file) {
         exit(1);
     }
 
-    char* line = calloc(255, sizeof(char));
+    char* line;
     size_t length = 0;
 
     while(getline(&line, &length, handle) != -1) {
         // remove \n
         line[strlen(line) - 1] = '\0';
-        if(run(tokenize(line)) != 0){
-            printf("Error executing line '%s'\n", line);
+
+        printf("Running '%s':\n", line);
+        char** args = tokenize(line);
+        int result = run(args);
+        free(args);
+        if(result != 0){
+            printf("Error executing job '%s'\n", line);
             break;
+        } else {
+            printf("\n");
         }
     }
 
+    free(line);
     fclose(handle);
 }
 

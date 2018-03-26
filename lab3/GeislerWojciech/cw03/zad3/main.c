@@ -17,12 +17,15 @@ void display_usage(char* name, struct rusage *before, struct rusage *after);
 // and returns it as a 2-dimensional array
 char **tokenize(char *string) {
     char **result;
-    int first = 0;
+
+    // find beginning of string
+    while(string[0] == ' ')
+        string = &string[1];
+
     // special case for first token
-    while(string[first] == ' ') ++first;
     int count = 1;
     int i, j, length;
-    for(i = first + 1; string[i] != '\0'; ++i) {
+    for(i = 1; string[i] != '\0'; ++i) {
         if(string[i] == ' ') {
             string[i] = '\0';
         } else if (string[i - 1] == '\0'){
@@ -31,7 +34,7 @@ char **tokenize(char *string) {
     }
     length = i;
     result = calloc((size_t) count + 1, sizeof(char *));
-    result[0] = &string[first];
+    result[0] = &string[0];
     j = 1;
     for(i = 1; i < length; ++i) {
         if(string[i] != '\0' && string[i - 1] == '\0') { // do not create tokens from consecutive spaces
@@ -57,7 +60,7 @@ int run(char** tokens, limits limit){
     if(pid == 0) {
         set_limits(limit);
         execvp(tokens[0], tokens);
-        exit(1);
+        exit(126);
     } else {
         int status;
         waitpid(pid, &status, 0);
@@ -99,6 +102,7 @@ void execute_batch(char *file, limits limit) {
     }
 
     fclose(handle);
+    free(line);
 }
 
 int main(int argc, char *argv[]) {
