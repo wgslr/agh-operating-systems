@@ -1,7 +1,7 @@
 CC=gcc
 RESULTS=times.txt
 O=-O0
-MLIM=300
+MLIM=800
 TLIM=10
 CFLAGS=-lm -Wall -Wextra -Wall \
 	-Wno-missing-braces -Wextra -Wno-missing-field-initializers -Wformat=2 \
@@ -10,22 +10,21 @@ CFLAGS=-lm -Wall -Wextra -Wall \
 	-Wundef -Wnested-externs -Wcast-qual -Wshadow -Wunreachable-code \
 	-Wlogical-op -Wfloat-equal -Wstrict-aliasing=2 -Wredundant-decls \
 	-Wold-style-definition \
-	#-Werror \
+	-Werror \
 	-fno-omit-frame-pointer -ffloat-store -fno-common -fstrict-aliasing \
 	$(O)
-.PHONY: test clean
+SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak \
+    -lasan -lubsan
+.PHONY: test clean debug
 
 main: main.c
-	$(CC) $< -o $@ $(CFLAGS)
+	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
 
-long: ../zad3b/long.c
-	$(CC) $< -o $@ $(CFLAGS) -lm
-
-big: ../zad3b/big.c
-	$(CC) $< -o $@ $(CFLAGS) -lm
-
-test: main long big batch.in
+test: main batch.in
 	./main batch.in $(TLIM) $(MLIM)
+
+test-chrome: main chrome.batch
+	./$< chrome.batch $(TLIM) $(MLIM) 2>/dev/null
 
 clean:
 	-rm *.o *.so *.a main *.bin *.out

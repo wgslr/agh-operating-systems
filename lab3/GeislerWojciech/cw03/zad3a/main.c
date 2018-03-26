@@ -22,7 +22,6 @@ char **tokenize(char *string) {
     while(string[0] == ' ')
         string = &string[1];
 
-    // special case for first token
     int count = 1;
     int i, j, length;
     for(i = 1; string[i] != '\0'; ++i) {
@@ -48,7 +47,7 @@ char **tokenize(char *string) {
 void set_limits(limits l){
     struct rlimit r;
     r.rlim_cur = r.rlim_max =  ((rlim_t)l.size * 1024 * 1024);
-    printf("Set limit as %zu\n", (rlim_t)l.size * 1024 * 1024);
+    printf("Set limit as %zu MiB\n", (rlim_t)l.size);
     setrlimit(RLIMIT_AS, &r);
     r.rlim_cur = r.rlim_max = (rlim_t) l.time;
     setrlimit(RLIMIT_CPU, &r);
@@ -81,7 +80,7 @@ void execute_batch(char *file, limits limit) {
         exit(1);
     }
 
-    char* line = calloc(255, sizeof(char));
+    char* line = NULL;
     size_t length = 0;
     struct rusage usage_before;
     struct rusage usage_after;
@@ -89,20 +88,26 @@ void execute_batch(char *file, limits limit) {
     while(getline(&line, &length, handle) != -1) {
         // remove \n
         line[strlen(line) - 1] = '\0';
+        char** args = tokenize(line);
+
+        printf("Running '%s':\n", line);
 
         getrusage(RUSAGE_CHILDREN, &usage_before);
+        int result = run(args, limit);
+        getrusage(RUSAGE_CHILDREN, &usage_after);
 
-        if(run(tokenize(line), limit) != 0){
-            printf("Error executing line '%s'\n", line);
+        free(args);
+
+        if(result != 0){
+            printf("Job '%s' encountered error\n", line);
             break;
         } else {
-            getrusage(RUSAGE_CHILDREN, &usage_after);
             display_usage(line, &usage_before, &usage_after);
         }
     }
 
-    fclose(handle);
     free(line);
+    fclose(handle);
 }
 
 int main(int argc, char *argv[]) {
