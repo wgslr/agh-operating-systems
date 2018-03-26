@@ -1,7 +1,6 @@
-ls -la -r
-echo a b c
+ls -la .
+echo a 123 c
 /bin/true
- echo 1 2 3  
-../zad1/main . < 2019-01-01
+/bin/head -n 3 batch.in
 false
-echo should not execute
+echo not executed

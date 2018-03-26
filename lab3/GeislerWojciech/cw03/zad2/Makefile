@@ -18,6 +18,9 @@ SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak \
 main: main.c
 	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
 
+test: main batch.in
+	./$< batch.in
+
 clean:
 	-rm *.o *.so *.a main *.bin *.out
 

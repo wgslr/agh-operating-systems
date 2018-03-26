@@ -1,8 +1,9 @@
+// Wojciech Geisler 2018
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <wait.h>
-#include <stdbool.h>
 #include <string.h>
 
 // Replaces each space in a string with '\0'
@@ -62,7 +63,7 @@ void execute_batch(char *file) {
         exit(1);
     }
 
-    char* line;
+    char* line = NULL;
     size_t length = 0;
 
     while(getline(&line, &length, handle) != -1) {
@@ -74,11 +75,12 @@ void execute_batch(char *file) {
         int result = run(args);
         free(args);
         if(result != 0){
-            printf("Error executing job '%s'\n", line);
+            printf("Job '%s' encountered error\n", line);
             break;
         } else {
             printf("\n");
         }
+
     }
 
     free(line);
