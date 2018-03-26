@@ -17,11 +17,11 @@ main: main.c
 	$(CC) $< -o $@ $(CFLAGS)
 
 test: main
-	./main example '<' 2018-03-18 > smaller.out
+	./main example '<' 2018-03-18 | tee smaller.out
 	echo
-	./main example '=' 2018-03-18 > equal.out
+	./main example '=' 2018-03-18 | tee equal.out
 	echo
-	./main example '>' 2018-03-18 > bigger.out
+	./main example '>' 2018-03-18 | tee bigger.out
 
 clean:
 	-rm *.o *.so *.a main *.bin *.out
