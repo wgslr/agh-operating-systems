@@ -1,0 +1,41 @@
+./main batch.in 10 800
+total 36
+drwxr-xr-x 1 wojciech wojciech    96 Mar 26 23:25 .
+drwxr-xr-x 1 wojciech wojciech    36 Mar 26 22:51 ..
+lrwxrwxrwx 1 wojciech wojciech    16 Mar 26 22:58 batch.in -> ../zad2/batch.in
+-rw-r--r-- 1 wojciech wojciech    21 Mar 26 22:59 chrome.batch
+-rwxr-xr-x 1 wojciech wojciech 13480 Mar 26 23:25 main
+-rw-r--r-- 1 wojciech wojciech  3608 Mar 26 23:23 main.c
+-rw-r--r-- 1 wojciech wojciech   883 Mar 26 23:19 Makefile
+-rw-r--r-- 1 wojciech wojciech    23 Mar 26 23:25 wyniki.txt
+a 123 c
+ls -la .
+echo a 123 c
+/bin/true
+Running 'ls -la .':
+Finished execution of 'ls':
+Elapsed user time: 1446 us
+Elapsed system time: 711 us
+
+Running 'echo a 123 c':
+Finished execution of 'echo':
+Elapsed user time: 480 us
+Elapsed system time: 0 us
+
+Running '/bin/true':
+Finished execution of '/bin/true':
+Elapsed user time: 385 us
+Elapsed system time: 0 us
+
+Running '/bin/head -n 3 batch.in':
+Finished execution of '/bin/head':
+Elapsed user time: 0 us
+Elapsed system time: 506 us
+
+Running 'false':
+Job 'false' encountered error
+
+./main chrome.batch 10 800 2>/dev/null
+Running 'google-chrome-stable':
+Process ended because of signal 6
+Job 'google-chrome-stable' encountered error

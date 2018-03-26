@@ -1,3 +1,5 @@
+// Wojciech Geisler 2018
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -47,7 +49,7 @@ char **tokenize(char *string) {
 void set_limits(limits l){
     struct rlimit r;
     r.rlim_cur = r.rlim_max =  ((rlim_t)l.size * 1024 * 1024);
-    printf("Set limit as %zu MiB\n", (rlim_t)l.size);
+    printf("Set limit as %zu s, %zu MiB\n", (rlim_t) l.time, (rlim_t)l.size);
     setrlimit(RLIMIT_AS, &r);
     r.rlim_cur = r.rlim_max = (rlim_t) l.time;
     setrlimit(RLIMIT_CPU, &r);
@@ -88,9 +90,9 @@ void execute_batch(char *file, limits limit) {
     while(getline(&line, &length, handle) != -1) {
         // remove \n
         line[strlen(line) - 1] = '\0';
-        char** args = tokenize(line);
-
         printf("Running '%s':\n", line);
+
+        char** args = tokenize(line);
 
         getrusage(RUSAGE_CHILDREN, &usage_before);
         int result = run(args, limit);

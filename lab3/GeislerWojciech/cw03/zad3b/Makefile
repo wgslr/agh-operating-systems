@@ -1,8 +1,8 @@
 CC=gcc
 RESULTS=times.txt
 O=-O0
-MLIM=300
-TLIM=10
+MLIM=200
+TLIM=5
 CFLAGS=-lm -Wall -Wextra -Wall \
 	-Wno-missing-braces -Wextra -Wno-missing-field-initializers -Wformat=2 \
 	-Wswitch-default -Wswitch-enum -Wcast-align -Wpointer-arith \
@@ -10,23 +10,29 @@ CFLAGS=-lm -Wall -Wextra -Wall \
 	-Wundef -Wnested-externs -Wcast-qual -Wshadow -Wunreachable-code \
 	-Wlogical-op -Wfloat-equal -Wstrict-aliasing=2 -Wredundant-decls \
 	-Wold-style-definition \
-	#-Werror \
+	-Werror \
 	-fno-omit-frame-pointer -ffloat-store -fno-common -fstrict-aliasing \
 	$(O)
-.PHONY: test clean
+SANITIZER=
+.PHONY: test clean debug
 
 main: main.c
-	$(CC) $< -o $@ $(CFLAGS)
+	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
 
-long: ../zad3b/long.c
-	$(CC) $< -o $@ $(CFLAGS) -lm
+long: long.c
+	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
 
-big: ../zad3b/big.c
-	$(CC) $< -o $@ $(CFLAGS) -lm
+big: big.c
+	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
 
-test: main long big batch.in
-	./main batch.in $(TLIM) $(MLIM)
+test: test-big test-long
+
+test-big: main big
+	./$< big.batch $(TLIM) $(MLIM)
+
+test-long: main long
+	./$< long.batch $(TLIM) $(MLIM)
 
 clean:
-	-rm *.o *.so *.a main *.bin *.out
+	-rm *.o *.so *.a *.bin *.out main big long
 

@@ -1,0 +1,35 @@
+./main big.batch 5 200
+Allocating 10 MiB for a total of 10 MiB
+Allocating 10 MiB for a total of 20 MiB
+Allocating 10 MiB for a total of 30 MiB
+Allocating 10 MiB for a total of 40 MiB
+Allocating 10 MiB for a total of 50 MiB
+Allocating 10 MiB for a total of 60 MiB
+Allocating 10 MiB for a total of 70 MiB
+Allocating 10 MiB for a total of 80 MiB
+Allocating 10 MiB for a total of 90 MiB
+Allocating 10 MiB for a total of 100 MiB
+Running './big 10 10':
+Finished execution of './big':
+Elapsed user time: 9880 us
+Elapsed system time: 29659 us
+
+Running './big 100 10':
+Process ended because of signal 11
+Job './big' encountered error
+./main long.batch 5 200
+After 10000 thousand operations result is -0.000387
+After 100000 thousand operations result is -0.000122
+Running './long 10000':
+Finished execution of './long':
+Elapsed user time: 356662 us
+Elapsed system time: 0 us
+
+Running './long 100000':
+Finished execution of './long':
+Elapsed user time: 3593180 us
+Elapsed system time: 0 us
+
+Running './long 1000000':
+Process ended because of signal 9
+Job './long' encountered error

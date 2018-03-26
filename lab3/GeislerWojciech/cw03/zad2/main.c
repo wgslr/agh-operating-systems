@@ -69,13 +69,13 @@ void execute_batch(char *file) {
     while(getline(&line, &length, handle) != -1) {
         // remove \n
         line[strlen(line) - 1] = '\0';
-        char** args = tokenize(line);
-
         printf("Running '%s':\n", line);
+
+        char** args = tokenize(line);
 
         int result = run(args);
         free(args);
-        
+
         if(result != 0){
             printf("Job '%s' encountered error\n", line);
             break;
