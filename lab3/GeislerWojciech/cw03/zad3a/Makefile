@@ -18,10 +18,10 @@ CFLAGS=-lm -Wall -Wextra -Wall \
 main: main.c
 	$(CC) $< -o $@ $(CFLAGS)
 
-long: long.c
+long: ../zad3b/long.c
 	$(CC) $< -o $@ $(CFLAGS) -lm
 
-big: big.c
+big: ../zad3b/big.c
 	$(CC) $< -o $@ $(CFLAGS) -lm
 
 test: main long big batch.in
