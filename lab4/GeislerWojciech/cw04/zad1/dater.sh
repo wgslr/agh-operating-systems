@@ -2,5 +2,5 @@
 
 while true; do
     date
-    sleep 0.1
+    sleep 1
 done

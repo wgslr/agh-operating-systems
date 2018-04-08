@@ -2,53 +2,36 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <signal.h>
+#include <stdbool.h>
 
 pid_t dater_pid = 0;
 
 pid_t spawn_dater(void);
-void child(void);
 
-void child_handler(int signal){
-    if(signal == SIGSTOP){
+void handler(int signal){
+    if(signal == SIGTSTP){
         if(dater_pid == 0) {
             dater_pid = spawn_dater();
         } else {
             kill(SIGKILL, dater_pid);
             dater_pid = 0;
+            printf("Oczekuję na CTRL+Z - kontynuacja albo CTR+C - zakonczenie programu\n");
         }
     } else if(signal == SIGINT) {
         printf("Odebrano sygnał SIGINT");
+        kill(SIGKILL, dater_pid);
         exit(0);
     } else {
-        fprintf(stderr, "pid %d received unexpected signal %d\n", getpid(), signal);
+        fprintf(stderr, "Signal handler in pid %d received unexpected signal %d\n", getpid(), signal);
     }
-}
-
-void child(void) {
-    dater_pid = spawn_dater();
-    signal(SIGSTOP, &child_handler);
-
-    // TODO use sigaction
-    signal(SIGINT, &child_handler);
 }
 
 pid_t spawn_dater(void) {
     int pid = fork();
     if(pid == 0) {
-        printf("Spawning dater\n");
         int result = execl("dater.sh", "dater.sh", NULL);
-        printf("%d\n", result);
+        fprintf(stderr, "Could not spawn date-printing script: %d\n", result);
         exit(1);
-    } else {
-        return pid;
-    }
-}
-
-pid_t spawn_child(void) {
-    int pid = fork();
-    if(pid == 0) {
-        child();
-        exit(0);
     } else {
         return pid;
     }
@@ -59,20 +42,16 @@ int main(int argc, char* argv[]) {
     (void) argc;
     (void) argv;
 
-    pid_t child = spawn_child();
-    sleep(5);
-    printf("Sending SIGSTOP to child\n");
-    kill(SIGSTOP, child);
-    sleep(5);
-    printf("Sending SIGSTOP to child\n");
-    kill(SIGSTOP, child);
-    sleep(5);
-    printf("Sending SIGSTOP to child\n");
-    kill(SIGSTOP, child);
-    sleep(5);
-    printf("Sending SIGINT to child\n");
-    kill(SIGINT, child);
+    dater_pid = spawn_dater();
 
-    return 0;
+    printf("dater pid is %d\n", dater_pid);
+
+    signal(SIGTSTP, &handler);
+
+    // TODO use sigaction
+    signal(SIGINT, &handler);
+    signal(SIGCHLD, &handler);
+
+    while(true) {}
 }
 

@@ -19,3 +19,5 @@ main: main.c
 clean:
 	-rm *.o *.so *.a *.bin *.out main big long
 
+kill:
+	pkill dater
