@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <signal.h>
 #include <stdbool.h>
+
+#define _XOPEN_SOURCE
+#include <signal.h>
 
 pid_t dater_pid = 0;
 
@@ -13,6 +15,7 @@ void handler(int signal){
         if(dater_pid == 0) {
             dater_pid = spawn_dater();
         } else {
+            printf("send kill to %d\n", dater_pid);
             kill(SIGKILL, dater_pid);
             dater_pid = 0;
             printf("Oczekuję na CTRL+Z - kontynuacja albo CTR+C - zakonczenie programu\n");
@@ -38,18 +41,15 @@ pid_t spawn_dater(void) {
 }
 
 
-int main(int argc, char* argv[]) {
-    (void) argc;
-    (void) argv;
+int main(void) {
+
+    signal(SIGINT, &handler);
+
+    struct sigaction *sg = calloc(1, sizeof(struct sigaction));
+    sg->sa_handler = &handler;
+    sigaction(SIGTSTP, sg, NULL);
 
     dater_pid = spawn_dater();
-
-    printf("dater pid is %d\n", dater_pid);
-
-    signal(SIGTSTP, &handler);
-
-    // TODO use sigaction
-    signal(SIGINT, &handler);
 
     while(true) {}
 }
