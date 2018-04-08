@@ -50,7 +50,6 @@ int main(int argc, char* argv[]) {
 
     // TODO use sigaction
     signal(SIGINT, &handler);
-    signal(SIGCHLD, &handler);
 
     while(true) {}
 }
