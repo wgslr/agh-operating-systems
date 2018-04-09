@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define _XOPEN_SOURCE
 #include <signal.h>
@@ -15,24 +17,26 @@ void handler(int signal){
         if(dater_pid == 0) {
             dater_pid = spawn_dater();
         } else {
-            printf("send kill to %d\n", dater_pid);
-            kill(SIGKILL, dater_pid);
+            kill(dater_pid, SIGKILL);
+            // clear zombie
+            waitpid(dater_pid, NULL, 0);
             dater_pid = 0;
             printf("Oczekuję na CTRL+Z - kontynuacja albo CTR+C - zakonczenie programu\n");
         }
     } else if(signal == SIGINT) {
         printf("Odebrano sygnał SIGINT");
-        kill(SIGKILL, dater_pid);
+        kill(dater_pid, SIGKILL);
         exit(0);
     } else {
         fprintf(stderr, "Signal handler in pid %d received unexpected signal %d\n", getpid(), signal);
     }
 }
 
+
 pid_t spawn_dater(void) {
     int pid = fork();
     if(pid == 0) {
-        int result = execl("dater.sh", "dater.sh", NULL);
+        int result = execlp("./dater.sh", "dater.sh", NULL);
         fprintf(stderr, "Could not spawn date-printing script: %d\n", result);
         exit(1);
     } else {
