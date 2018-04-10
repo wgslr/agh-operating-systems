@@ -10,6 +10,7 @@
 int delay;
 
 void handler(int signal) {
+    (void) signal; // unused
     int sigrt = SIGRTMIN + (rand() % (SIGRTMAX - SIGRTMIN + 1));
     kill(getppid(), sigrt);
 

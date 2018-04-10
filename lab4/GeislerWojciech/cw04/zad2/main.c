@@ -39,7 +39,8 @@ void sigchld_handler(int signal, siginfo_t *info, void *ucontext);
 
 void rt_handler(int signal, siginfo_t *info, void *ucontext);
 
-void sigint_handler(int signal, siginfo_t *info, void *ucontext) ;
+//void sigint_handler(int signal, siginfo_t *info, void *ucontext) ;
+void sigint_handler(void) ;
 
 int get_child_id(pid_t pid) {
     int id = 0;
@@ -69,7 +70,7 @@ int main(int argc, char *argv[]) {
     sg->sa_sigaction = &sigchld_handler;
     sigaction(SIGCHLD, sg, NULL);
 
-    sg->sa_sigaction = &sigint_handler;
+    sg->sa_sigaction = (void (*)(int, siginfo_t *, void *)) &sigint_handler;
     sigaction(SIGINT, sg, NULL);
 
     sg->sa_sigaction = &rt_handler;
@@ -112,6 +113,19 @@ pid_t spawn_child(void) {
     }
 }
 
+void allow_all(void) {
+    for(int i = 0; i < N; ++i) {
+        if(allowed[i]) {
+            send_allow(children[i]);
+        }
+    }
+}
+
+void send_allow(pid_t child) {
+    if(PRINT_ALLOWS) printf("%d (%3d): Sending permission\n", child, get_child_id(child));
+    kill(child, SIGALRM);
+}
+
 void request_handler(int signal, siginfo_t *info, void *ucontext) {
     assert(signal == SIGUSR1);
     (void) ucontext; // unused
@@ -135,18 +149,6 @@ void request_handler(int signal, siginfo_t *info, void *ucontext) {
     }
 }
 
-void allow_all(void) {
-    for(int i = 0; i < N; ++i) {
-        if(allowed[i]) {
-            send_allow(children[i]);
-        }
-    }
-}
-
-void send_allow(pid_t child) {
-    if(PRINT_ALLOWS) printf("%d (%3d): Sending permission\n", child, get_child_id(child));
-    kill(child, SIGALRM);
-}
 
 void sigchld_handler(int signal, siginfo_t *info, void *ucontext) {
     assert(signal == SIGCHLD);
@@ -168,11 +170,12 @@ void sigchld_handler(int signal, siginfo_t *info, void *ucontext) {
 }
 
 void rt_handler(int signal, siginfo_t *info, void *ucontext) {
+    (void) ucontext; // unused
     assert(signal >= SIGRTMIN && signal <= SIGRTMAX);
     if(PRINT_SIGRT) printf("%d (%3d): Received SIGRT%d\n", info->si_pid, get_child_id(info->si_pid), signal - SIGRTMIN);
 }
 
-void sigint_handler(int signal, siginfo_t *info, void *ucontext) {
+void sigint_handler(void) {
     for(int i = 0; i < N; ++i){
         if(children[i] != 0){
             kill(children[i], SIGKILL);
