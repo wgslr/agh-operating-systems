@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     sg->sa_flags = SA_SIGINFO;
     sg->sa_sigaction = &request_handler;
     sg->sa_mask = to_mask;
-    sigaction(SIGTSTP, sg, NULL);
+    sigaction(SIGUSR1, sg, NULL);
 
     N = atoi(argv[1]);
     K = atoi(argv[1]);

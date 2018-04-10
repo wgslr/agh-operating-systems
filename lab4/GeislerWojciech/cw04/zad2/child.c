@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <stdio.h>
 
 #define MAX_DELAY 10
 int delay;
@@ -19,9 +20,12 @@ int main(void) {
     srand(time(NULL));
     delay = rand() % (MAX_DELAY + 1);
 
-    signal(SIGUSR2, &handler);
+    signal(SIGALRM, &handler);
 
     sleep(delay);
     kill(getppid(), SIGUSR1);
+
+    // wait for permission
+    pause();
 }
 
