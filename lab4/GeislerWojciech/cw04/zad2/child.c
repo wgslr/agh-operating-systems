@@ -17,12 +17,16 @@ void handler(int signal) {
 }
 
 int main(void) {
-    srand(time(NULL));
+    srand(time(NULL) * getpid());
     delay = rand() % (MAX_DELAY + 1);
 
     signal(SIGALRM, &handler);
 
+    printf("%d: sleep for %ds\n", getpid(), delay);
+
     sleep(delay);
+    printf("%d: slept\n", getpid(), delay);
+
     kill(getppid(), SIGUSR1);
 
     // wait for permission

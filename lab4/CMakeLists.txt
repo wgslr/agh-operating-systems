@@ -5,3 +5,5 @@ set(CMAKE_C_STANDARD 99)
 
 add_executable(zad1a GeislerWojciech/cw04/zad1a/main.c)
 add_executable(zad1b GeislerWojciech/cw04/zad1b/main.c)
+add_executable(zad2 GeislerWojciech/cw04/zad2/main.c)
+add_executable(zad2child GeislerWojciech/cw04/zad2/child.c)
