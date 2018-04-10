@@ -22,11 +22,7 @@ int main(void) {
 
     signal(SIGALRM, &handler);
 
-    printf("%d: sleep for %ds\n", getpid(), delay);
-
     sleep(delay);
-    printf("%d: slept\n", getpid(), delay);
-
     kill(getppid(), SIGUSR1);
 
     // wait for permission

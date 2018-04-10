@@ -41,11 +41,14 @@ void rt_handler(int signal, siginfo_t *info, void *ucontext);
 
 void sigint_handler(int signal, siginfo_t *info, void *ucontext) ;
 
-void print_allowed(void) {
-    for(int i = 0; i < N; ++i) {
-        printf("%d", allowed[i]);
+int get_child_id(pid_t pid) {
+    int id = 0;
+    while(id < N && children[id] != pid) ++id;
+    if(id < N){
+        return id;
+    } else {
+        return -1;
     }
-    printf("\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -73,17 +76,19 @@ int main(int argc, char *argv[]) {
     for(int sig = SIGRTMIN; sig <= SIGRTMAX; ++sig) {
         sigaction(sig, sg, NULL);
     }
+    free(sg);
 
     N = atoi(argv[1]);
     K = atoi(argv[2]);
     children = calloc(N, sizeof(pid_t));
     allowed = calloc(N, sizeof(bool));
 
-    print_allowed();
-
     spawn_children(N);
 
     while(alive > 0) { }
+
+    free(children);
+    free(allowed);
 
     return 0;
 }
@@ -92,7 +97,7 @@ int main(int argc, char *argv[]) {
 void spawn_children(int count) {
     for(int i = 0; i < count; ++i) {
         children[i] = spawn_child();
-        if(PRINT_SPAWN) printf("Spawned %d\n", children[i]);
+        if(PRINT_SPAWN) printf("%d (%3d): Spawned\n", children[i], i);
     }
 }
 
@@ -113,11 +118,10 @@ void request_handler(int signal, siginfo_t *info, void *ucontext) {
 
 
     pid_t caller = info->si_pid;
+    int childnum = get_child_id(caller);
 
-    if(PRINT_REQUEST) printf("Received request from %d\n", caller);
+    if(PRINT_REQUEST) printf("%d (%3d): Requested permission\n", caller, childnum);
 
-    int childnum = 0;
-    while(childnum < N && children[childnum] != caller) ++childnum;
 
     if(!allowed[childnum]) {
         ++request_count;
@@ -140,7 +144,7 @@ void allow_all(void) {
 }
 
 void send_allow(pid_t child) {
-    if(PRINT_ALLOWS) printf("Sending allowance to %d\n", child);
+    if(PRINT_ALLOWS) printf("%d (%3d): Sending permission\n", child, get_child_id(child));
     kill(child, SIGALRM);
 }
 
@@ -151,12 +155,13 @@ void sigchld_handler(int signal, siginfo_t *info, void *ucontext) {
     int left = --alive;
     int status = info->si_status;
     pid_t child = info->si_pid;
-    int i = 0;
-    while(children[i] != child && i < N) ++i;
+    int i = get_child_id(child);
+
     children[i] = 0;
 
     assert(status <= 10); // maximum selected time
-    if(PRINT_CHLD) printf("Child %d exited with %d, %d children left\n", info->si_pid, status, left);
+    if(PRINT_CHLD) printf("%d (%3d): Exited with %d, %d children left\n",
+                          info->si_pid, i, status, left);
 
     // collect zombie
     waitpid(info->si_pid, NULL, 0);
@@ -164,13 +169,14 @@ void sigchld_handler(int signal, siginfo_t *info, void *ucontext) {
 
 void rt_handler(int signal, siginfo_t *info, void *ucontext) {
     assert(signal >= SIGRTMIN && signal <= SIGRTMAX);
-    if(PRINT_SIGRT) printf("Received SIGRT%d from %d\n", signal - SIGRTMIN, info->si_pid);
+    if(PRINT_SIGRT) printf("%d (%3d): Received SIGRT%d\n", info->si_pid, get_child_id(info->si_pid), signal - SIGRTMIN);
 }
 
 void sigint_handler(int signal, siginfo_t *info, void *ucontext) {
     for(int i = 0; i < N; ++i){
         if(children[i] != 0){
             kill(children[i], SIGKILL);
+            if(PRINT_CHLD) printf("%d (%3d): Killed upon parent exit\n", children[i], i);
         }
     }
     exit(1);

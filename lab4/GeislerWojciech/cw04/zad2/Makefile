@@ -9,7 +9,8 @@ CFLAGS=-lm -Wall -Wextra -Wall \
 	-Wold-style-definition \
 	-fno-omit-frame-pointer -ffloat-store -fno-common -fstrict-aliasing \
 	$(O)
-SANITIZER=
+SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak \
+    -lasan -lubsan
 .PHONY: all test clean debug
 
 all: main child
