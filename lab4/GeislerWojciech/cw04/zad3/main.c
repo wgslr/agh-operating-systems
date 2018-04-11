@@ -53,14 +53,17 @@ int main(int argc, char *argv[]) {
 
         if(Type == 2){
             while(!confirmed) {}
-        } else {
-//            sleep(1);
         }
     }
     printf("Sent all signals\n");
+
+    sleep(1);
     kill(child, sig2);
     waitpid(child, NULL, WNOHANG);
+
+    printf("Parent summary:\n%4d signals sent\n%4d signals received\n", sent, received);
 }
+
 
 void set_handlers(void) {
     struct sigaction *sg = calloc(1, sizeof(struct sigaction));
@@ -89,7 +92,8 @@ pid_t spawn_child(void) {
 
 void handler(int signal) {
     confirmed = true;
-    printf("Parent received %dnth signal %d\n", ++received, signal);
+    ++received;
+    printf("Parent received %dnth signal %d\n", received, signal);
 }
 
 void int_handler(int signal) {
