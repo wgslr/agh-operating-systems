@@ -17,7 +17,7 @@ main: main.c
 	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
 
 clean:
-	-rm *.o *.so *.a *.bin *.out main big long
+	-rm *.o *.so *.a *.bin *.out main 
 
 kill:
 	pkill dater
