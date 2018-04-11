@@ -58,6 +58,9 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    N = atoi(argv[1]);
+    K = atoi(argv[2]);
+
     sigset_t to_mask;
     sigfillset(&to_mask);
 
@@ -79,8 +82,6 @@ int main(int argc, char *argv[]) {
     }
     free(sg);
 
-    N = atoi(argv[1]);
-    K = atoi(argv[2]);
     children = calloc(N, sizeof(pid_t));
     allowed = calloc(N, sizeof(bool));
 
