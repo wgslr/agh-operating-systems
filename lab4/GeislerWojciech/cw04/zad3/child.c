@@ -1,25 +1,26 @@
 // Wojciech Geisler
-
 #include <time.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdbool.h>
+
+
+#include <signal.h>
 
 int received = 0;
 
 void respond_handler(int signal) {
     (void) signal; // unused
     ++received;
-//    printf("Child received %dnth signal %d\n", received, signal);
+    printf("Child received %dnth signal %d\n", received, signal);
     kill(getppid(), signal);
 }
 
 void exit_handler(int signal) {
     (void) signal; // unused
     printf("Child received exit signal %d\n", signal);
-    printf("Total of %d signals was handled by child", received);
+    printf("Total of %d signals was handled by child\n", received);
     exit(0);
 }
 

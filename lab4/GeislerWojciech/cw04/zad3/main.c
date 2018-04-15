@@ -1,13 +1,12 @@
 // Wojciech Geisler
 
+#define _XOPEN_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
 #include <stdbool.h>
-
-#define _XOPEN_SOURCE
-
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/types.h>
