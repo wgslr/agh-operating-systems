@@ -1,6 +1,6 @@
 CC=gcc
 O=-O0
-CFLAGS=-lm -Wall -Wextra -Wall \
+override CFLAGS+=-lm -Wall -Wextra -Wall \
 	-Wno-missing-braces -Wextra -Wno-missing-field-initializers -Wformat=2 \
 	-Wswitch-default -Wswitch-enum -Wcast-align -Wpointer-arith \
 	-Wbad-function-cast -Wstrict-overflow=5 -Wstrict-prototypes -Winline \
@@ -8,7 +8,8 @@ CFLAGS=-lm -Wall -Wextra -Wall \
 	-Wlogical-op -Wfloat-equal -Wstrict-aliasing=2 -Wredundant-decls \
 	-Wold-style-definition \
 	-fno-omit-frame-pointer -ffloat-store -fno-common -fstrict-aliasing \
-	$(O)
+	#-fdiagnostics-color=always \
+	$(O) \
 #SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak -lasan -lubsan
 .PHONY: all test clean debug
 
