@@ -30,14 +30,14 @@ char *get_date(void) {
 }
 
 int main(int argc, char *argv[]) {
-    if(argc < 2) {
-        fprintf(stderr, "Pipe file is required as the first argument\n");
+    if(argc < 3) {
+        fprintf(stderr, "Pipe file is required as the first argument and print count as second\n");
         exit(1);
     }
 
     srand((unsigned int) time(NULL) * getpid());
 
-    FILE *handle = fopen(argv[1], "w");
+    FILE *handle = fopen(argv[1], "r+");
     const int repeats = atoi(argv[2]);
     char *date;
 
