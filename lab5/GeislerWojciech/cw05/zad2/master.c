@@ -19,44 +19,24 @@
 #include <unistd.h>
 
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     if(argc < 1) {
         fprintf(stderr, "Pipe file is required as the first argument\n");
         exit(1);
     }
 
-    if(mkfifo(argv[1], 0644) != 0){
-        printf("Error creating pipe: %s\n", strerror(errno));
+    if(mkfifo(argv[1], 0644) != 0) {
+        fprintf(stderr, "Error creating pipe: %s\n", strerror(errno));
         exit(1);
     }
 
-    int fd = open(argv[1], O_RDONLY);
-    char buff[2];
+    FILE *handle = fopen(argv[1], "r");
+    char *line = NULL;
+    size_t length = 0;
 
-    while(true){
-        fprintf(stderr, "Reading byte\n");
-        int b = read(fd, buff, 1);
-
-        fprintf(stderr, "Read %d bytes\n", b);
-        buff[2] = '\0';
-        write(STDOUT_FILENO, buff, 1);
-            usleep(200000);
+    while(true) {
+        if(getline(&line, &length, handle) != -1) {
+            printf("%s", line);
+        }
     }
-
-//
-////    int handle = open(argv[1], O_RDONLY);
-//    FILE * handle = fopen(argv[1], "r");
-//    char *line = NULL;
-//
-//    size_t length = 0;
-//
-//    while(true){
-//        fprintf(stderr, "Getline\n");
-//        if(getline(&line, &length, handle) != -1) {
-//            puts(line);
-//        } else {
-//            usleep(2000000);
-//        }
-//    }
-
 }
