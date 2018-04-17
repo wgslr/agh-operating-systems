@@ -32,8 +32,7 @@ tokens *tokenize(char *string) {
     size_t wordlen;
 
     // find beginning of string
-    while(isspace(string[0]))
-        string += 1;
+    string += strspn(string, WHITESPACE);
 
     while(string != NULL && *string != '\0') {
         wordlen = strcspn(string, WHITESPACE);
@@ -42,7 +41,7 @@ tokens *tokenize(char *string) {
         ++result->size;
 
         string += wordlen;
-        string += strspn(string, WHITESPACE); // skip whresult->sizeespace
+        string += strspn(string, WHITESPACE); // skip whitespace
     }
     return result;
 }

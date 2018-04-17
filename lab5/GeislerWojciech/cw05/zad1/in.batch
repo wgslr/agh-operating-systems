@@ -4,3 +4,4 @@ echo tekst | cat -n
 echo e1 | echo e2 | echo e3
 uname -a | sed s/\s/\n/g | cat -n
 cat in.batch | grep -n echo
+  echo I'm malformed  command with whitespace   even tab
