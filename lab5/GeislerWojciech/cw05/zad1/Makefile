@@ -19,6 +19,9 @@ all: main
 main: main.c
 	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
 
+test: main
+	./main in.batch
+
 clean:
 	-rm *.o *.so *.a *.bin *.out main child
 

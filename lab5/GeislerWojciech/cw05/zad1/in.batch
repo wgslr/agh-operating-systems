@@ -2,5 +2,5 @@ echo hello
 cat -n in.batch
 echo tekst | cat -n
 echo e1 | echo e2 | echo e3
-uname -a | sed s/\s/\n/g | cat -n 
+uname -a | sed s/\s/\n/g | cat -n
 cat in.batch | grep -n echo

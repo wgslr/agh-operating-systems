@@ -47,27 +47,22 @@ tokens *tokenize(char *string) {
     return result;
 }
 
+// Destructively splits command on pipe '|' tokens
+// by changing them to null
 commands *split_commands(tokens *ts) {
     commands *result = calloc(1, sizeof(commands));
-    int it = 0;
-
-    while(it < ts->size) {
-        result->commands[result->size] = ts->toks + it;
-        ++result->size;
-        while(ts->toks[it] != NULL && *ts->toks[it] != '|') {
-            ++it;
+    int i;
+    for(i = 0; i < ts->size; ++i) {
+        if(ts->toks[i][0] == '|') {
+            ts->toks[i] = NULL; // separate commands
         }
-        if(ts->toks[it] == NULL)
-            break;
-        if(ts->toks[it][0] == '|') {
-            ts->toks[it] = NULL; // separate commands
+        if(i == 0 || ts->toks[i - 1] == NULL) {
+            result->commands[result->size++] = &ts->toks[i];
         }
-        ++it;
     }
     return result;
 }
 
-// returns exit status of the called process
 void run(char **args, int in[2], int out[2]) {
     int pid = fork();
     if(pid == 0) {
