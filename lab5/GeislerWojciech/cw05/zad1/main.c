@@ -1,5 +1,7 @@
 // Wojciech Geisler 2018
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -24,9 +26,7 @@ typedef struct {
 
 // Splits string on whitespace
 tokens tokenize(char *string) {
-    tokens result = { .toks = {0}, .size = 0};
-//    memset(&result.toks, '\0', MAX_TOKENS * sizeof(char*));
-//    result.size = 0;
+    tokens result = {.toks = {0}, .size = 0};
     size_t wordlen;
 
     // find beginning of string
@@ -47,24 +47,39 @@ tokens tokenize(char *string) {
 
 commands split_commands(tokens ts) {
     commands result = {.size = 0, .commands = {0}};
-    int pos = 0;
+    int it = 0;
+
+    while(it < ts.size) {
+        result.commands[result.size] = ts.toks + it;
+        ++result.size;
+        while(ts.toks[it] != NULL && *ts.toks[it] != '|') {
+            ++it;
+        }
+        if(ts.toks[it] == NULL)
+            break;
+        if(*ts.toks[it] == '|') {
+            ts.toks[it] = NULL; // separate commands
+        }
+        ++it;
+    }
+    return result;
 }
 
 // returns exit status of the called process
-void run(tokens ts, int in, int out, int close1, int close2) {
+void run(char** args, int in, int out, int close1, int close2) {
     int pid = fork();
     if(pid == 0) {
         dup2(in, STDIN_FILENO);
         dup2(out, STDOUT_FILENO);
 
-        if(close1 >= 0){
+        if(close1 >= 0) {
             close(close1);
         }
-        if(close2 >= 0){
+        if(close2 >= 0) {
             close(close2);
         }
 
-        execvp(ts.toks[0], ts.toks);
+        execvp(args[0], args);
         exit(126);
     } else {
         printf("Spawned %d\n", pid);
@@ -79,24 +94,41 @@ void run(tokens ts, int in, int out, int close1, int close2) {
 //        return WEXITSTATUS(status);
     }
 }
-//
-//void execute_batch(char *file) {
-//    FILE *handle = fopen(file, "r");
-//    if(handle == NULL) {
-//        fprintf(stderr, "Error opening batch file\n");
-//        exit(1);
-//    }
-//
-//    char *line = NULL;
-//    size_t length = 0;
-//
-//    while(getline(&line, &length, handle) != -1) {
-//        // remove \n
-//        line[strlen(line) - 1] = '\0';
-//        printf("Running '%s':\n", line);
 
-//        char** args = tokenize(line);
-//
+void execute_batch(char *file) {
+    FILE *handle = fopen(file, "r");
+    if(handle == NULL) {
+        fprintf(stderr, "Error opening batch file\n");
+        exit(1);
+    }
+
+    char *line = NULL;
+    size_t length = 0;
+
+    int prev[2];
+    int curr[2];
+    prev[0] = STDIN_FILENO;
+    prev[1] = STDOUT_FILENO;
+    pipe(curr);
+
+    while(getline(&line, &length, handle) != -1) {
+        commands c = split_commands(tokenize(line));
+
+        for(int i = 0; i < c.size; ++i) {
+            printf("Running %s\n", c.commands[i][0]);
+
+            if(i == c.size - 1) {
+                curr[1] = STDOUT_FILENO;
+                prev[1] = -1;
+            } else {
+                pipe(curr);
+            }
+
+            run(c.commands[i], prev[0], curr[1], prev[1], curr[0]);
+            close(curr[1]);
+            prev[0] = curr[0];
+        }
+
 //        int result = run(args);
 //        free(args);
 //
@@ -106,12 +138,11 @@ void run(tokens ts, int in, int out, int close1, int close2) {
 //        } else {
 //            printf("\n");
 //        }
-//    }
-//    }
-//
-//    free(line);
-//    fclose(handle);
-//}
+    }
+
+    free(line);
+    fclose(handle);
+}
 
 int main(int argc, char *argv[]) {
     if(argc < 1) {
@@ -119,58 +150,63 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    char *uname, *sed, *cat;
-    uname = malloc(255);
-    sed = malloc(255);
-    cat = malloc(255);
-    strcpy(uname, "uname -snm");
-    strcpy(sed, "sed s/\\s/\\n/g");
-    strcpy(cat, "cat -n");
+    execute_batch(argv[1]);
+    sleep(1);
 
-    tokens t1 = tokenize(uname);
-    tokens t2 = tokenize(sed);
-    tokens t3 = tokenize(cat);
+//    char *str, *sed, *cat;
+//    str = malloc(255);
+//    sed = malloc(255);
+//    cat = malloc(255);
 
-    int fd[2];
-    int fd2[2];
-    pipe(fd);
-    pipe(fd2);
-    run(t1, fd[0], fd[1], fd[0], -1);
+
+//    strcpy(str, "cat file | grep -n test | cat -n");
+//    strcpy(sed, "sed s/\\s/\\n/g");
+//    strcpy(cat, "cat -n");
+//
+//    tokens t1 = tokenize(str);
+//    tokens t2 = tokenize(sed);
+//    tokens t3 = tokenize(cat);
+//
+//    int fd[2];
+//    int fd2[2];
+//    pipe(fd);
+//    pipe(fd2);
+//    run(t1, fd[0], fd[1], fd[0], -1);
+////    close(fd[0]);
+//    close(fd[1]);
+////    run(t2, fd[0], STDOUT_FILENO, fd[1], fd2[0]);
+//    run(t2, fd[0], fd2[1], fd[1], -1);
 //    close(fd[0]);
-    close(fd[1]);
-//    run(t2, fd[0], STDOUT_FILENO, fd[1], fd2[0]);
-    run(t2, fd[0], fd2[1], fd[1], -1);
-    close(fd[0]);
-    run(t3, fd2[0], fd2[1], -1, -1);
-    close(fd2[1]);
-
-
-//    dup2(STDOUT_FILENO, fd[0]);
-//    dup2(fd[0], STDOUT_FILENO);
-//    sleep(1);
-    char* buff = calloc(100, sizeof(char));
-    read(fd2[0], buff, 99);
-    printf("Read from pipe2: '%s'\n", buff);
-
-
-    close(fd[0]);
-    close(fd[1]);
-    close(fd2[0]);
-    close(fd2[1]);
-
-//    run(t2, fd[1], STDOUT_FILENO);
+//    run(t3, fd2[0], fd2[1], -1, -1);
+//    close(fd2[1]);
+//
+//
+////    dup2(STDOUT_FILENO, fd[0]);
+////    dup2(fd[0], STDOUT_FILENO);
+////    sleep(1);
+//    char *buff = calloc(100, sizeof(char));
+//    read(fd2[0], buff, 99);
+//    printf("Read from pipe2: '%s'\n", buff);
+//
+//
 //    close(fd[0]);
-
-    printf("Wait1\n");
-    pid_t trup = wait(NULL);
-    printf("Waited %d\n", trup);
-    printf("Wait2\n");
-    trup = wait(NULL);
-    printf("Waited %d\n", trup);
-    printf("Wait3\n");
-    trup = wait(NULL);
-    printf("Waited %d\n", trup);
-
+//    close(fd[1]);
+//    close(fd2[0]);
+//    close(fd2[1]);
+//
+////    run(t2, fd[1], STDOUT_FILENO);
+////    close(fd[0]);
+//
+//    printf("Wait1\n");
+//    pid_t trup = wait(NULL);
+//    printf("Waited %d\n", trup);
+//    printf("Wait2\n");
+//    trup = wait(NULL);
+//    printf("Waited %d\n", trup);
+//    printf("Wait3\n");
+//    trup = wait(NULL);
+//    printf("Waited %d\n", trup);
+//
 
 //    execute_batch(argv[1]);
     return 0;
