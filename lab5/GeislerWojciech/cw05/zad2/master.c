@@ -1,7 +1,6 @@
 // Wojciech Geisler 2018
 
 #define _POSIX_C_SOURCE 200809L
-#define _BSD_SOURCE
 #define _XOPENS_OURCE 500
 
 #include <stdio.h>

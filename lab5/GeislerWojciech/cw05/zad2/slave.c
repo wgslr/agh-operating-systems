@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    srand((unsigned int) time(NULL));
+    srand((unsigned int) time(NULL) * getpid());
 
     FILE *handle = fopen(argv[1], "w");
     const int repeats = atoi(argv[2]);
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     printf("Slave %d is born\n", getpid());
     for(int i = 0; i < repeats; ++i) {
         date = get_date();
-        fprintf(handle, "%d: %s\n", getpid(), date);
+        fprintf(handle, "%d: %s", getpid(), date);
         fflush(handle);
 
         free(date);

@@ -16,11 +16,19 @@ override CFLAGS+=-lm -Wall -Wextra -Wall -std=c11 \
 
 all: master slave
 
-main: main.c
+master: master.c
 	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
 
 slave: slave.c
 	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
+
+test: clean master slave 
+	./master mypipe &
+	./slave mypipe 3 &
+	./slave mypipe 13 &
+	./slave mypipe 13 &
+	./slave mypipe 14
+
 
 clean:
 	-rm *.o *.so *.a *.bin *.out master slave 
