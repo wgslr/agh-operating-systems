@@ -90,12 +90,16 @@ void execute_batch(char *file) {
     int out[2];
 
     while(getline(&line, &length, handle) != -1) {
-        printf("Executing '%.*s':\n", (int) (strlen(line) - 1), line);
         tokens *ts = tokenize(line);
         commands *c = split_commands(ts);
 
+        if(ts->size == 0)
+            continue;
+
         in[0] = STDIN_FILENO;
         in[1] = -1;
+
+        printf("Executing '%.*s':\n", (int) (strlen(line) - 1), line);
 
         for(int i = 0; i < c->size; ++i) {
             if(i == c->size - 1) {
@@ -126,7 +130,7 @@ void execute_batch(char *file) {
 }
 
 int main(int argc, char *argv[]) {
-    if(argc < 1) {
+    if(argc < 2) {
         fprintf(stderr, "Batch file is required as the first argument\n");
         exit(1);
     }
