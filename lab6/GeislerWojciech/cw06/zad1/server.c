@@ -36,7 +36,7 @@ void onexit(void) {
 }
 
 void register_client(int queue) {
-    fprintf(stderr, "Registering client qeueu %d\n", queue);
+    fprintf(stderr, "Registering client qeueue %d\n", queue);
     int id = client_idx++;
 
     // send message with queue identifier
@@ -45,7 +45,7 @@ void register_client(int queue) {
     msg.mtype = REGISTER_ACK;
     msg.sender_msqid = server_queue;
     *(int*) msg.content = id;
-    OK(msgsnd(queue, &msg, sizeof(int), 0),
+    OK(msgsnd(queue, &msg, MSG_SZ, 0),
        "Sending client ID failed");
 }
 
