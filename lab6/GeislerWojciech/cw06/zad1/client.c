@@ -57,4 +57,31 @@ int main(void) {
 
     printf("Mirrored: %s\n", buff->content);
 
+    arith_req calc_arg = {.op = MUL, .arg1 = 3, .arg2 = 4};
+    to_send->mtype = CALC;
+    memcpy(to_send->content, &calc_arg, sizeof(calc_arg));
+
+    OK(msgsnd(server_queue, to_send, MSG_SZ, 0), "Error sending calc message");
+
+    read = msgrcv(client_queue, buff, MSG_SZ, 0, 0);
+    assert(read > 0);
+    assert(buff->sender_id == SERVER_ID);
+    assert(buff->mtype == CALC_RESP);
+
+    printf("Calced: %d\n", *(int *) buff->content);
+
+    to_send->mtype = TIME;
+
+    OK(msgsnd(server_queue, to_send, MSG_SZ, 0), "Error sending calc message");
+
+    read = msgrcv(client_queue, buff, MSG_SZ, 0, 0);
+    assert(read > 0);
+    assert(buff->sender_id == SERVER_ID);
+    assert(buff->mtype == TIME_RESP);
+
+    printf("Time is: %s\n", buff->content);
+
+    to_send->mtype = END;
+
+    OK(msgsnd(server_queue, to_send, MSG_SZ, 0), "Error sending calc message");
 }
