@@ -158,6 +158,7 @@ void receive_loop(void) {
                 break;
             case STOP:
                 fprintf(stderr, "Handling STOP\n");
+                msgctl(client_queues[buff->sender_id], IPC_RMID, NULL);
                 client_queues[buff->sender_id] = -1;
                 break;
             default:
