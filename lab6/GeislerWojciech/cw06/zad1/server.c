@@ -49,6 +49,11 @@ void onexit(void) {
     msgctl(server_queue, IPC_RMID, NULL);
 }
 
+void sigint_handler(int signal) {
+    assert(signal == SIGINT);
+    exit(0);
+}
+
 void send_to(int client_id, msgbuf *msg) {
     int qid = client_queues[client_id];
     if(msgsnd(qid, msg, MSG_SZ, 0) < 0) {
@@ -178,11 +183,6 @@ int main(void) {
     receive_loop();
 
     return 0;
-}
-
-void sigint_handler(int signal) {
-    assert(signal == SIGINT);
-    exit(0);
 }
 
 char *get_date(void) {

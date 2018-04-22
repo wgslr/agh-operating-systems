@@ -22,12 +22,8 @@ server: server.c common.h
 client: client.c common.h
 	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
 
-test: clean server client 
-	./server mypipe &
-	./client mypipe 3 &
-	./client mypipe 1 &
-	./client mypipe 2 &
-
+test: server client
+	./client < test.in
 
 clean:
 	-rm *.o *.so *.a *.bin *.out server client 
