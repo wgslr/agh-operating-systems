@@ -58,10 +58,22 @@ void handle_register(msgbuf *msg) {
 
     // send message with client_msqid identifier
     msgbuf response = {0};
-    response.mtype = REGISTER_ACK;
+    response.mtype = REGISTER_RESP;
     response.sender_id = SERVER_ID;
     *(int*) response.content = id;
     send_to(id, &response);
+}
+
+void handle_mirror(msgbuf *msg) {
+    int size = (int) strlen(msg->content);
+
+    msgbuf response = {0};
+    response.mtype = MIRROR_RESP;
+    response.sender_id = SERVER_ID;
+    for(int i = 0; i < size; ++i) {
+        response.content[i] = msg->content[size - i - 1];
+    }
+    send_to(msg->sender_id, &response);
 }
 
 void receive_loop(void) {
@@ -75,10 +87,14 @@ void receive_loop(void) {
         assert(read <= (ssize_t) MSG_SZ);
 
         long mtype = buff->mtype;
-        int sender_id = buff->sender_id;
         switch(mtype) {
             case REGISTER:
+                fprintf(stderr, "Handling REGISTER\n");
                 handle_register(buff);
+                break;
+            case MIRROR:
+                fprintf(stderr, "Handling MIRROR\n");
+                handle_mirror(buff);
                 break;
             default:
                 fprintf(stderr, "Server received unexpected message of type %ld", mtype);
