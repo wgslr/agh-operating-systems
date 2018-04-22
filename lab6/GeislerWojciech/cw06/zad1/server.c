@@ -69,7 +69,7 @@ void handle_register(msgbuf *msg) {
     // send message with client_msqid identifier
     msgbuf response = {0};
     response.sender_pid = getpid();
-    response.mtype = REGISTER_RESP;
+    response.mtype = msg->sender_pid;
     response.sender_id = SERVER_ID;
     *(int *) response.content = id;
     send_to(id, &response);
@@ -80,7 +80,7 @@ void handle_mirror(msgbuf *msg) {
 
     msgbuf response = {0};
     response.sender_pid = getpid();
-    response.mtype = MIRROR_RESP;
+    response.mtype = msg->sender_pid;
     response.sender_id = SERVER_ID;
     for(int i = 0; i < size; ++i) {
         response.content[i] = msg->content[size - i - 1];
@@ -110,7 +110,7 @@ void handle_calc(msgbuf *msg) {
     }
     msgbuf response = {0};
     response.sender_pid = getpid();
-    response.mtype = CALC_RESP;
+    response.mtype = msg->sender_pid;
     response.sender_id = SERVER_ID;
     *(int *) response.content = result;
     send_to(msg->sender_id, &response);
@@ -121,7 +121,7 @@ void handle_time(msgbuf *msg) {
 
     msgbuf response = {0};
     response.sender_pid = getpid();
-    response.mtype = TIME_RESP;
+    response.mtype = msg->sender_pid;
     response.sender_id = SERVER_ID;
     strcpy(response.content, date);
     send_to(msg->sender_id, &response);
