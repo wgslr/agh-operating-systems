@@ -138,8 +138,7 @@ void receive_loop(void) {
         assert(read > 0);
         assert(read <= (ssize_t) MSG_SZ);
 
-        long mtype = buff->mtype;
-        switch(mtype) {
+        switch(buff->mtype) {
             case REGISTER:
                 fprintf(stderr, "Handling REGISTER from %d\n", buff->sender_pid);
                 handle_register(buff);
@@ -166,7 +165,7 @@ void receive_loop(void) {
                 client_queues[buff->sender_id] = -1;
                 break;
             default:
-                fprintf(stderr, "Server received unexpected message of type %ld", mtype);
+                fprintf(stderr, "Server received unexpected message of type %ld", buff->mtype);
         }
     }
 }
