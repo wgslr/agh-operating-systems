@@ -22,8 +22,8 @@ int main(void) {
 
     msgbuf *to_send = calloc(1, sizeof(msgbuf));
     to_send->mtype = REGISTER;
-    to_send->sender_msqid = client_queue;
-    memset(to_send->content, 0, CONTENT_SZ);
+    to_send->sender_id = -1;
+    *(int*)to_send->content = client_queue;
 
     fprintf(stderr, "Registering %d with server queue %d (size: %u)\n", client_queue, server_queue, MSG_SZ);
     OK(msgsnd(server_queue, to_send, MSG_SZ, 0), "Error sending registration message");
@@ -36,7 +36,7 @@ int main(void) {
     fprintf(stderr, "Waiting for message\n");
     read = msgrcv(client_queue, buff, MSG_SZ, 0, 0);
     assert(read > 0);
-    assert(buff->sender_msqid == server_queue);
+    assert(buff->sender_id == server_queue);
     assert(buff->mtype == REGISTER_ACK);
 
     printf("Client id is %d\n", *(int*)buff->content);

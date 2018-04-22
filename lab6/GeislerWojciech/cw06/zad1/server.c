@@ -43,7 +43,7 @@ void register_client(int queue) {
     client_queues[id] = queue;
     msgbuf msg = {0};
     msg.mtype = REGISTER_ACK;
-    msg.sender_msqid = server_queue;
+    msg.sender_id = server_queue;
     *(int*) msg.content = id;
     OK(msgsnd(queue, &msg, MSG_SZ, 0),
        "Sending client ID failed");
@@ -60,10 +60,11 @@ void handle_loop() {
         assert(read <= MSG_SZ);
 
         long mtype = buff->mtype;
-        int client_msqid = buff->sender_msqid;
+        int sender_id = buff->sender_id;
         switch(mtype) {
             case REGISTER:
-                register_client(client_msqid);
+                assert(sender_id == -1);
+                register_client(*(int*)buff->content);
                 break;
             default:
                 fprintf(stderr, "Server received unexpected message of type %ld", mtype);
