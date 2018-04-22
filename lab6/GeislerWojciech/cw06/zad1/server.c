@@ -16,6 +16,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <signal.h>
+#include <unistd.h>
 
 int client_queues[MAX_CLIENTS];
 int client_idx = 0;
@@ -67,6 +68,7 @@ void handle_register(msgbuf *msg) {
 
     // send message with client_msqid identifier
     msgbuf response = {0};
+    response.sender_pid = getpid();
     response.mtype = REGISTER_RESP;
     response.sender_id = SERVER_ID;
     *(int *) response.content = id;
@@ -77,6 +79,7 @@ void handle_mirror(msgbuf *msg) {
     int size = (int) strlen(msg->content);
 
     msgbuf response = {0};
+    response.sender_pid = getpid();
     response.mtype = MIRROR_RESP;
     response.sender_id = SERVER_ID;
     for(int i = 0; i < size; ++i) {
@@ -102,10 +105,11 @@ void handle_calc(msgbuf *msg) {
             result = req.arg1 / req.arg2;
             break;
         default:
-            fprintf(stderr, "Unknown arithmetic operation reqeusted by %d\n", msg->sender_id);
+            fprintf(stderr, "Unknown arithmetic operation requested by %d\n", msg->sender_id);
             result = 0;
     }
     msgbuf response = {0};
+    response.sender_pid = getpid();
     response.mtype = CALC_RESP;
     response.sender_id = SERVER_ID;
     *(int *) response.content = result;
@@ -116,6 +120,7 @@ void handle_time(msgbuf *msg) {
     char *date = get_date();
 
     msgbuf response = {0};
+    response.sender_pid = getpid();
     response.mtype = TIME_RESP;
     response.sender_id = SERVER_ID;
     strcpy(response.content, date);
@@ -124,7 +129,6 @@ void handle_time(msgbuf *msg) {
 }
 
 void receive_loop(void) {
-//    struct msgbuf *buff = calloc(1, sizeof(long) + sizeof(clientmsg));
     msgbuf *buff = calloc(1, sizeof(msgbuf));
     ssize_t read;
     bool should_end = false;
@@ -137,27 +141,27 @@ void receive_loop(void) {
         long mtype = buff->mtype;
         switch(mtype) {
             case REGISTER:
-                fprintf(stderr, "Handling REGISTER\n");
+                fprintf(stderr, "Handling REGISTER from %d\n", buff->sender_pid);
                 handle_register(buff);
                 break;
             case MIRROR:
-                fprintf(stderr, "Handling MIRROR\n");
+                fprintf(stderr, "Handling MIRROR from %d\n", buff->sender_pid);
                 handle_mirror(buff);
                 break;
             case CALC:
-                fprintf(stderr, "Handling CALC\n");
+                fprintf(stderr, "Handling CALC from %d\n", buff->sender_pid);
                 handle_calc(buff);
                 break;
             case TIME:
-                fprintf(stderr, "Handling TIME\n");
+                fprintf(stderr, "Handling TIME from %d\n", buff->sender_pid);
                 handle_time(buff);
                 break;
             case END:
-                fprintf(stderr, "Handling END\n");
+                fprintf(stderr, "Handling END from %d\n", buff->sender_pid);
                 should_end = true;
                 break;
             case STOP:
-                fprintf(stderr, "Handling STOP\n");
+                fprintf(stderr, "Handling STOP from %d\n", buff->sender_pid);
                 msgctl(client_queues[buff->sender_id], IPC_RMID, NULL);
                 client_queues[buff->sender_id] = -1;
                 break;

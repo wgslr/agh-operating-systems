@@ -12,6 +12,7 @@
 #include <memory.h>
 #include <errno.h>
 #include <assert.h>
+#include <unistd.h>
 
 int client_id = -1;
 
@@ -25,6 +26,7 @@ int main(void) {
     msgbuf *to_send = calloc(1, sizeof(msgbuf));
     to_send->mtype = REGISTER;
     to_send->sender_id = -1;
+    to_send->sender_pid = getpid();
     *(int *) to_send->content = client_queue;
 
     fprintf(stderr, "Registering %d with server queue %d (size: %tu)\n", client_queue, server_queue, MSG_SZ);
@@ -83,5 +85,5 @@ int main(void) {
 
     to_send->mtype = END;
 
-    OK(msgsnd(server_queue, to_send, MSG_SZ, 0), "Error sending calc message");
+//    OK(msgsnd(server_queue, to_send, MSG_SZ, 0), "Error sending calc message");
 }
