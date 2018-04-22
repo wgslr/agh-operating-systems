@@ -16,10 +16,10 @@ override CFLAGS+=-lm -Wall -Wextra -Wall -std=c11 \
 
 all: server client
 
-server: server.c
+server: server.c common.h
 	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
 
-client: client.c
+client: client.c common.h
 	$(CC) $< -o $@ $(CFLAGS) $(SANITIZER)
 
 test: clean server client 
