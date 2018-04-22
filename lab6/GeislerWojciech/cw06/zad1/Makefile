@@ -6,9 +6,9 @@ override CFLAGS+=-lm -Wall -Wextra -Wall -std=c11 \
 	-Wswitch-default -Wswitch-enum -Wcast-align -Wpointer-arith \
 	-Wbad-function-cast -Wstrict-overflow=5 -Wstrict-prototypes -Winline \
 	-Wundef -Wnested-externs -Wcast-qual -Wshadow  \
-	-Wlogical-op -Wfloat-equal -Wstrict-aliasing=2 -Wredundant-decls \
+	-Wlogical-op -Wfloat-equal -Wredundant-decls \
 	-Wold-style-definition -Wuninitialized -Winit-self \
-	-ffloat-store -fno-common -fstrict-aliasing \
+	-ffloat-store -fno-common \
 	-fdiagnostics-color=always \
 	$(O) \
 #SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak -lasan -lubsan

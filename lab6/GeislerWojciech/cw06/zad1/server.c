@@ -18,7 +18,12 @@ int client_idx = 0;
 
 int server_queue = -1;
 
+void onexit(void) ;
+
 void create_queue(void) {
+    // REMVOVE
+    onexit();
+
     const char *home = getenv("HOME");
     int result = msgget(ftok(home, FTOK_PROJ_ID), IPC_CREAT |  0644u);
     if(result < 0) {
@@ -35,21 +40,31 @@ void onexit(void) {
     msgctl(server_queue, IPC_RMID, NULL);
 }
 
-void register_client(int queue) {
-    fprintf(stderr, "Registering client qeueue %d\n", queue);
-    int id = client_idx++;
-
-    // send message with queue identifier
-    client_queues[id] = queue;
-    msgbuf msg = {0};
-    msg.mtype = REGISTER_ACK;
-    msg.sender_id = server_queue;
-    *(int*) msg.content = id;
-    OK(msgsnd(queue, &msg, MSG_SZ, 0),
-       "Sending client ID failed");
+void send_to(int client_id, msgbuf *msg) {
+    int qid = client_queues[client_id];
+    if(msgsnd(qid, msg, MSG_SZ, 0) < 0) {
+        fprintf(stderr, "Sending message (type %ld) to %d (qid %d) failed: %d %s\n", msg->mtype, client_id, qid, errno, strerror(errno));
+        exit(1);
+    }
 }
 
-void handle_loop() {
+void handle_register(msgbuf *msg) {
+    assert(msg->sender_id == -1);
+    int client_msqid = *(int*) msg->content;
+
+    fprintf(stderr, "Registering client qeueue %d\n", client_msqid);
+    int id = client_idx++;
+    client_queues[id] = client_msqid;
+
+    // send message with client_msqid identifier
+    msgbuf response = {0};
+    response.mtype = REGISTER_ACK;
+    response.sender_id = SERVER_ID;
+    *(int*) response.content = id;
+    send_to(id, &response);
+}
+
+void receive_loop(void) {
 //    struct msgbuf *buff = calloc(1, sizeof(long) + sizeof(clientmsg));
     msgbuf *buff = calloc(1, sizeof(msgbuf));
     ssize_t read;
@@ -57,14 +72,13 @@ void handle_loop() {
     fprintf(stderr, "Waiting for message\n");
     while((read = msgrcv(server_queue, buff, MSG_SZ, 0, 0)) >= 0) {
         assert(read > 0);
-        assert(read <= MSG_SZ);
+        assert(read <= (ssize_t) MSG_SZ);
 
         long mtype = buff->mtype;
         int sender_id = buff->sender_id;
         switch(mtype) {
             case REGISTER:
-                assert(sender_id == -1);
-                register_client(*(int*)buff->content);
+                handle_register(buff);
                 break;
             default:
                 fprintf(stderr, "Server received unexpected message of type %ld", mtype);
@@ -77,7 +91,7 @@ int main(int argc, char *argv[], char *env[]) {
     create_queue();
     atexit(&onexit);
 
-    handle_loop();
+    receive_loop();
 
     //TODO handle SIGINT
 

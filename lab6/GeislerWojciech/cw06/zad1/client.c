@@ -18,14 +18,14 @@ int main(void) {
     int server_queue = msgget(ftok(home, FTOK_PROJ_ID), 0644u);
     OK(server_queue, "Opening server client_queue failed");
 
-    int client_queue = msgget(IPC_PRIVATE, IPC_CREAT | 0644u);
+    int client_queue = msgget(IPC_PRIVATE, IPC_CREAT | IPC_EXCL | 0644u);
 
     msgbuf *to_send = calloc(1, sizeof(msgbuf));
     to_send->mtype = REGISTER;
     to_send->sender_id = -1;
     *(int*)to_send->content = client_queue;
 
-    fprintf(stderr, "Registering %d with server queue %d (size: %u)\n", client_queue, server_queue, MSG_SZ);
+    fprintf(stderr, "Registering %d with server queue %d (size: %tu)\n", client_queue, server_queue, MSG_SZ);
     OK(msgsnd(server_queue, to_send, MSG_SZ, 0), "Error sending registration message");
 
     fprintf(stderr, "Sent registration message\n");
@@ -36,7 +36,7 @@ int main(void) {
     fprintf(stderr, "Waiting for message\n");
     read = msgrcv(client_queue, buff, MSG_SZ, 0, 0);
     assert(read > 0);
-    assert(buff->sender_id == server_queue);
+    assert(buff->sender_id == SERVER_ID);
     assert(buff->mtype == REGISTER_ACK);
 
     printf("Client id is %d\n", *(int*)buff->content);
