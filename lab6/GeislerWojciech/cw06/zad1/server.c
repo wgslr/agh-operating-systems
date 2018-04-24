@@ -30,9 +30,6 @@ char *get_date(void) ;
 void sigint_handler(int signal) ;
 
 void create_queue(void) {
-    // REMVOVE
-    onexit();
-
     const char *home = getenv("HOME");
     int result = msgget(ftok(home, FTOK_PROJ_ID), IPC_CREAT | 0644u);
     if(result < 0) {
