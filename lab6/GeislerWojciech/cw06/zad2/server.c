@@ -18,7 +18,7 @@
 #include <mqueue.h>
 #include <fcntl.h>
 
-mqd_t client_queues[MAX_CLIENTS];
+mqd_t client_queues[MAX_CLIENTS] = {0};
 int client_idx = 0;
 
 mqd_t server_queue = -1;
@@ -44,6 +44,12 @@ void create_queue(void) {
 void onexit(void) {
     fprintf(stderr, "Removing queue %d\n", server_queue);
     mq_unlink(SERVER_QUEUE);
+    for(int i = 0; i < MAX_CLIENTS; ++i) {
+        if(client_queues[i] > 0) {
+            fprintf(stderr, "Closing queue with descriptor %d\n", client_queues[i]);
+            mq_close(client_queues[i]);
+        }
+    }
 }
 
 void sigint_handler(int signal) {
