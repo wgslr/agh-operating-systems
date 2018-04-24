@@ -6,9 +6,6 @@
 
 #include <stdio.h>
 #include "common.h"
-#include <sys/msg.h>
-#include <sys/ipc.h>
-#include <sys/types.h>
 #include <stdlib.h>
 #include <memory.h>
 #include <errno.h>
@@ -39,16 +36,6 @@ tokens *tokenize(char *string);
 arith_op char_to_op(char c);
 
 
-void onexit(void) {
-    fprintf(stderr, "Removing queue %d\n", client_queue);
-    mq_unlink(queue_name);
-}
-
-void sigint_handler(int signal) {
-    (void) signal;
-    exit(0);
-}
-
 void send(const uint8_t mtype, const void *content, size_t content_len) {
     msgbuf req = {
             .sender_id = client_id, .sender_pid = getpid(),
@@ -60,6 +47,19 @@ void send(const uint8_t mtype, const void *content, size_t content_len) {
     OK(mq_send(server_queue, (char*)&req, MSG_SZ, PRIORITY), "Error sending message");
 }
 
+void onexit(void) {
+    send(STOP, queue_name, 0);
+
+    fprintf(stderr, "Removing queue %d\n", client_queue);
+    mq_close(client_queue);
+    mq_unlink(queue_name);
+}
+
+void sigint_handler(int signal) {
+    (void) signal;
+    exit(0);
+}
+
 msgbuf *receive(void) {
     msgbuf *buff = calloc(1, sizeof(msgbuf));
     unsigned priority;
@@ -69,7 +69,8 @@ msgbuf *receive(void) {
 }
 
 void register_client(void) {
-    send(REGISTER, &client_queue, sizeof(client_queue));
+    fprintf(stderr, "Registering with queue %s\n", queue_name);
+    send(REGISTER, queue_name, 1 + strlen(queue_name));
 
     msgbuf *resp = receive();
     client_id = *(int *) resp->content;
@@ -145,7 +146,8 @@ void create_queue(void) {
 }
 
 int main(int argc, char *argv[]) {
-    srand(time(NULL));
+    srand((unsigned int) (time(NULL) * getpid()));
+    signal(SIGINT, &sigint_handler);
 
     FILE *input;
     if(argc <= 1 || strcmp("-", argv[1]) == 0) {
@@ -158,12 +160,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    signal(SIGINT, &sigint_handler);
-
     server_queue = mq_open(SERVER_QUEUE, O_WRONLY);
     OK(server_queue, "Opening server queue failed");
 
     create_queue();
+    atexit(&onexit);
     register_client();
 
     char *line = NULL;

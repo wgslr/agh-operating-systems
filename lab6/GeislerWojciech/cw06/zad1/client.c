@@ -139,6 +139,8 @@ int main(int argc, char *argv[]) {
     client_queue = msgget(IPC_PRIVATE, IPC_CREAT | IPC_EXCL | 0644u);
     OK(client_queue, "Creating client queue failed");
 
+    atexit(&onexit);
+
     register_client();
 
     char *line = NULL;

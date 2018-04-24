@@ -6,9 +6,6 @@
 
 #include <stdio.h>
 #include "common.h"
-#include <sys/msg.h>
-#include <sys/ipc.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -64,11 +61,13 @@ void send_to(int client_id, msgbuf *msg) {
 
 void handle_register(msgbuf *msg) {
     assert(msg->sender_id == -1);
-    int client_msqid = *(int *) msg->content;
+    char* client_queue = msg->content;
 
-    fprintf(stderr, "Registering client qeueue %d\n", client_msqid);
-    int id = client_idx++;
-    client_queues[id] = client_msqid;
+    fprintf(stderr, "Registering client qeueue %s\n", client_queue);
+
+    int id = client_idx;
+    client_queues[id] = mq_open(client_queue, O_WRONLY);
+    ++client_idx;
 
     // send message with client_msqid identifier
     msgbuf response = {0};
@@ -173,7 +172,7 @@ void receive_loop(void) {
                 break;
             case STOP:
                 fprintf(stderr, "Handling STOP from %d\n", buff->sender_pid);
-                msgctl(client_queues[buff->sender_id], IPC_RMID, NULL);
+                mq_close(client_queues[buff->sender_id]);
                 client_queues[buff->sender_id] = -1;
                 break;
             default:

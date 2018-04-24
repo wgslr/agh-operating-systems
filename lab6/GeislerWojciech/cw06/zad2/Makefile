@@ -24,6 +24,7 @@ client: client.c common.h
 
 test: server client
 	./client < test.in
+	./client test.in
 
 clean:
 	-rm *.o *.so *.a *.bin *.out server client 
