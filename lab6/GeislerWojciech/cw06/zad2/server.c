@@ -180,6 +180,7 @@ void receive_loop(void) {
                 fprintf(stderr, "Server received unexpected message of type %d", buff->mtype);
         }
     }
+    fprintf(stderr, "mq_receive returned %td: %d %s\n", read, errno, strerror(errno));
 }
 
 int main(void) {

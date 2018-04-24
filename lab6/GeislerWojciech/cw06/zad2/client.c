@@ -16,6 +16,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <signal.h>
+#include <mqueue.h>
+#include <fcntl.h>
+#include <time.h>
 
 #define MAX_TOKENS 5
 const char *const WHITESPACE = " \r\n\t";
@@ -26,8 +29,9 @@ typedef struct {
 } tokens;
 
 int client_id = -1;
-int client_queue;
-int server_queue;
+mqd_t client_queue;
+mqd_t server_queue;
+char *queue_name = NULL;
 
 // Splits string on whitespace
 tokens *tokenize(char *string);
@@ -37,7 +41,7 @@ arith_op char_to_op(char c);
 
 void onexit(void) {
     fprintf(stderr, "Removing queue %d\n", client_queue);
-    msgctl(client_queue, IPC_RMID, NULL);
+    mq_unlink(queue_name);
 }
 
 void sigint_handler(int signal) {
@@ -45,7 +49,7 @@ void sigint_handler(int signal) {
     exit(0);
 }
 
-void send(const int mtype, const void *content, size_t content_len) {
+void send(const uint8_t mtype, const void *content, size_t content_len) {
     msgbuf req = {
             .sender_id = client_id, .sender_pid = getpid(),
             .mtype = mtype,
@@ -53,12 +57,14 @@ void send(const int mtype, const void *content, size_t content_len) {
     };
     memcpy(req.content, content, content_len);
 
-    OK(msgsnd(server_queue, &req, MSG_SZ, 0), "Error sending message");
+    OK(mq_send(server_queue, (char*)&req, MSG_SZ, PRIORITY), "Error sending message");
 }
 
 msgbuf *receive(void) {
     msgbuf *buff = calloc(1, sizeof(msgbuf));
-    msgrcv(client_queue, buff, MSG_SZ, 0, 0);
+    unsigned priority;
+    mq_receive(client_queue, (char*)buff, MSG_SZ, &priority);
+    assert(PRIORITY == priority);
     return buff;
 }
 
@@ -119,7 +125,28 @@ arith_op char_to_op(char c) {
     }
 }
 
+char* generate_queue_name(void) {
+    const int LEN = 6;
+    char *name = calloc(LEN + 2, sizeof(char));
+    name[0] = '/';
+    for(int i = 1; i < LEN + 1; ++i){
+        name[i] = (char) (rand() % ('z' - 'a' + 1) + 'a');
+    }
+    return name;
+}
+
+void create_queue(void) {
+    queue_name = generate_queue_name();
+    struct mq_attr attr = {
+            .mq_flags = 0, .mq_maxmsg = 10, .mq_curmsgs = 0, .mq_msgsize = MSG_SZ
+    };
+    client_queue = mq_open(queue_name, O_RDONLY | O_CREAT | O_EXCL, 0644, &attr);
+    OK(client_queue, "Creating client queue failed");
+}
+
 int main(int argc, char *argv[]) {
+    srand(time(NULL));
+
     FILE *input;
     if(argc <= 1 || strcmp("-", argv[1]) == 0) {
         fprintf(stderr, "Reading input from stdin\n");
@@ -133,12 +160,10 @@ int main(int argc, char *argv[]) {
 
     signal(SIGINT, &sigint_handler);
 
-    const char *home = getenv("HOME");
-    server_queue = msgget(ftok(home, FTOK_PROJ_ID), 0644u);
+    server_queue = mq_open(SERVER_QUEUE, O_WRONLY);
     OK(server_queue, "Opening server queue failed");
-    client_queue = msgget(IPC_PRIVATE, IPC_CREAT | IPC_EXCL | 0644u);
-    OK(client_queue, "Creating client queue failed");
 
+    create_queue();
     register_client();
 
     char *line = NULL;
