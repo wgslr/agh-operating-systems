@@ -33,7 +33,10 @@ char *get_date(void) ;
 void sigint_handler(int signal) ;
 
 void create_queue(void) {
-    server_queue = mq_open(SERVER_QUEUE, O_RDONLY | O_CREAT | O_EXCL, 0644, NULL);
+    struct mq_attr attr = {
+            .mq_flags = 0, .mq_maxmsg = 10, .mq_curmsgs = 0, .mq_msgsize = MSG_SZ
+    };
+    server_queue = mq_open(SERVER_QUEUE, O_RDONLY | O_CREAT | O_EXCL, 0644, &attr);
 
     if(server_queue < 0) {
         fprintf(stderr, "Error creating server queue: %s\n", strerror(errno));
