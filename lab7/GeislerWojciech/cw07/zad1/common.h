@@ -17,8 +17,18 @@
 #include <unistd.h>
 
 #define FTOK_PROJ_ID 123
-#define OK(_EXPR, _ERR_MSG) if((_EXPR) < 0) { fprintf(stderr, "%s: %d %s\n", _ERR_MSG, errno, strerror(errno)); exit(1); }
+#define MAX_QUEUE 512
 
+#define SEMS 3
+#define EMPTY_SEATS_SEM 0
+#define IS_SLEEPING_SEM 1
+#define SEAT_TAKEN_SEM 2
+
+
+// Check success and exit with log on error
+#define OK(_EXPR, _ERR_MSG) if((_EXPR) < -1) { fprintf(stderr, "%s: %d %s\n", _ERR_MSG, errno, strerror(errno)); exit(1); }
+
+// Print timestamped message with pid
 #define LOG(args...) { \
     struct timespec time; \
     clock_gettime(CLOCK_MONOTONIC, &time); \
@@ -28,14 +38,12 @@
 }
 
 
-#define SEMS 3
-#define EMPTY_SEATS_SEM 0
-#define IS_SLEEPING_SEM 1
-
-typedef struct msgbuf {
-    long mtype;
-    int client;
-} msgbuf;
+typedef struct state {
+    int current_client;
+    pid_t queue[MAX_QUEUE];
+    int queue_size;
+    int seats_taken;
+} state;
 
 void logmsg(const char *msg);
 key_t get_ipc_key(void);
