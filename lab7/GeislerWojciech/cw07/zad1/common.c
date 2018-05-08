@@ -8,6 +8,7 @@
 #include <time.h>
 #include <sys/ipc.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "common.h"
 
 #define SEMS 3
@@ -15,7 +16,7 @@
 void logmsg(const char *msg) {
     struct timespec time;
     clock_gettime(CLOCK_MONOTONIC, &time);
-    printf("%ld.%06ld: %s\n", time.tv_nsec, time.tv_nsec / 1000, msg);
+    printf("%d@%ld.%06ld: %s\n", getpid(), time.tv_nsec, time.tv_nsec / 1000, msg);
 }
 
 key_t get_ipc_key(void) {
