@@ -4,9 +4,9 @@
 
 #include "common.h"
 
-int semset_id;
+int semset;
 int shm_id;
-state *shared_state;
+state *shm;
 int repeats;
 
 void push_client(void);
@@ -23,12 +23,12 @@ void be_client(void) {
                 .sem_num =  SEAT_TAKEN_SEM,
                 .sem_op = 1
         };
-        semop(semset_id, &sop, 1);
+        semop(semset, &sop, 1);
     }
 }
 
 void push_client(void) {
-    shared_state->queue[shared_state->seats_taken++] = getpid();
+    shm->queue[shm->seats_taken++] = getpid();
 }
 
 void spawn(void) {
@@ -51,10 +51,10 @@ int main(int argc, char *argv[]) {
     repeats = atoi(argv[2]);
 
     key_t key = get_ipc_key();
-    OK(semset_id = semget(key, SEMS, IPC_CREAT | 0600u), "Creating semaphore set failed");
+    OK(semset = semget(key, SEMS, IPC_CREAT | 0600u), "Creating semaphore set failed");
     OK(shm_id = shmget(key, sizeof(state), IPC_CREAT | 0600u), "Failed creating shared memory");
-    shared_state = shmat(shm_id, NULL, 0);
-    if(shared_state == (void *) -1) {
+    shm = shmat(shm_id, NULL, 0);
+    if(shm == (void *) -1) {
         fprintf(stderr, "Failed attaching shared memory");
         exit(1);
     }

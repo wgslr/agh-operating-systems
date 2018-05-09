@@ -23,11 +23,12 @@
 #define FTOK_PROJ_ID 123
 #define MAX_QUEUE 512
 
-#define SEMS 3
+#define SEMS 5
 #define STATE_RLOCK 0
 #define STATE_RWLOCK 1
-#define WORK_TO_DO 2
-#define SEAT_TAKEN_SEM 2
+#define CURRENT_SEATED 2
+#define INVITATION 3
+#define FINISHED 4
 
 
 // Check success and exit with log on error
@@ -46,8 +47,8 @@
 typedef struct state {
     int current_client;
     pid_t queue[MAX_QUEUE];
-    int queue_size;
     int seats_taken;
+    int chairs;
 } state;
 
 key_t get_ipc_key(void);

@@ -5,25 +5,44 @@
 
 #include "common.h"
 
-int semset_id;
+int semset;
 int shm_id;
-state *shared_state;
+state *shm;
 
 pid_t pop_client(void);
 
 void be_barber(void) {
     while(true) {
+        wait(semset, STATE_RWLOCK);
+        if(shm->seats_taken != 0) {
+            pid_t client = pop_client();
+
+            LOG("Inviting client %d", client);
+            signal(semset, INVITATION);
+            signal(semset, STATE_RWLOCK);
+
+            wait(semset, CURRENT_SEATED);
+            LOG("Cutting hair of %d", client);
+
+            // busy work
+
+            LOG("Cut hair of %d", client);
+            signal(semset, FINISHED);
+        }
+
+
+
         struct sembuf sop = {
                 .sem_num = SEAT_TAKEN_SEM,
                 .sem_op = -1,
                 .sem_flg = 0
         };
         LOG("Waiting for client...");
-        int result = semop(semset_id, &sop, 1);
+        int result = semop(semset, &sop, 1);
         if(result == ENOMSG) {
             LOG("Going to sleep");
-            sop.sem_num = WORK_TO_DO;
-            semop(semset_id, &sop, 1);
+            sop.sem_num = CURRENT_SEATED;
+            semop(semset, &sop, 1);
             LOG("Waking up");
         } else if(result < 0) {
             fprintf(stderr, "Error waiting for semaphor: %d %s\n", result, strerror(result));
@@ -35,25 +54,20 @@ void be_barber(void) {
 }
 
 pid_t pop_client(void) {
-    struct sembuf sop = {.sem_num = STATE_LOCK, .sem_op = 1, .sem_flg = 0};
-
     // TODO lock on queue
 
-    wait(STATE_RWLOCK);
-    signal(STATE_RWLOCK);
+    pid_t client = shm->queue[0];
 
-    pid_t client = shared_state->queue[0];
-
-    for(int i = 0; i < shared_state->seats_taken - 1; ++i) {
-        shared_state->queue[i] = shared_state->queue[i + 1];
+    for(int i = 0; i < shm->seats_taken - 1; ++i) {
+        shm->queue[i] = shm->queue[i + 1];
     }
-    shared_state->seats_taken--;
+    shm->seats_taken--;
     return client;
 }
 
 void cleanup(void) {
     OK(semctl(semget(get_ipc_key(), 0, 0600u), 0, IPC_RMID), "Deleting semaphore set failed");
-    OK(shmdt(shared_state), "Failed deattaching shm");
+    OK(shmdt(shm), "Failed deattaching shm");
     OK(shmctl(shm_id, IPC_RMID, NULL), "Failed deleting shm");
 }
 
@@ -67,24 +81,24 @@ int main(int argc, char *argv[]) {
     int chairs = atoi(argv[1]);
 
     key_t key = get_ipc_key();
-    OK(semset_id = semget(key, SEMS, IPC_CREAT | 0600u), "Creating semaphore set failed");
+    OK(semset = semget(key, SEMS, IPC_CREAT | 0600u), "Creating semaphore set failed");
 
     OK(shm_id = shmget(key, sizeof(state), IPC_CREAT | 0600u), "Failed creating shared memory");
-    shared_state = shmat(shm_id, NULL, 0);
-    if(shared_state == (void *) -1) {
+    shm = shmat(shm_id, NULL, 0);
+    if(shm == (void *) -1) {
         fprintf(stderr, "Failed attaching shared memory");
         exit(1);
     }
 
-    shared_state->seats_taken = 0;
-    shared_state->queue_size = chairs;
-    shared_state->current_client = -1;
+    shm->seats_taken = 0;
+    shm->chairs = chairs;
+    shm->current_client = -1;
     for(int i = 0; i < MAX_QUEUE; ++i) {
-        shared_state->queue[i] = -1;
+        shm->queue[i] = -1;
     }
 
 
-    OK(semctl(semset_id, EMPTY_SEATS_SEM, SETVAL, chairs), "Setting semaphore value failed");
+    OK(semctl(semset, EMPTY_SEATS_SEM, SETVAL, chairs), "Setting semaphore value failed");
 
     be_barber();
 
