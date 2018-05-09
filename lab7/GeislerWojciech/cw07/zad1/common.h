@@ -54,6 +54,7 @@
 typedef struct state {
     bool is_sleeping;
     int current_client;
+    int expected_Client;
     pid_t queue[MAX_QUEUE];
     int queue_count;
     int chairs;

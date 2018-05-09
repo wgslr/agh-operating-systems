@@ -21,31 +21,43 @@ void barber_loop(void) {
     while(true) {
         wait(semset, STATE_RWLOCK);
 
-        if(shm->current_client != -1) {
+        if(shm->current_client == -1 && shm->queue_count == 0) {
+            // nothing to do
+            shm->is_sleeping = true;
+            LOG("DEBUG: is_sleeping = true")
+            signal(semset, STATE_RWLOCK);
+            LOG("DEBUG: signaled rwlock")
+            wait(semset, CUSTOMER_AVAIL);
+            LOG("DEBUG: waited customer_avail")
+            LOG("Waking up");
+        } else if(shm->current_client != -1) {
+            // already sat when barber slept
             signal(semset, STATE_RWLOCK);
 
             LOG("Cutting hair of %d", shm->current_client);
 
             // busy work
 
+            wait(semset, STATE_RWLOCK);
             LOG("Cut hair of %d", shm->current_client);
             signal(semset, FINISHED);
+
             // wait for customer to leave
             wait0(semset, CURRENT_SEATED);
+            signal(semset, STATE_RWLOCK);
+
         } else if(shm->queue_count != 0) {
             // pick first one from queue
-            pid_t client = pop_client();
+            pid_t client = shm->expected_Client = pop_client();
 
             LOG("Inviting client %d", client);
 
-            // only if was sleeping?
             signal(semset, INVITATION);
-
-
             signal(semset, STATE_RWLOCK);
 
             wait(semset, CURRENT_SEATED);
-            // counter decrement in wait
+            assert(shm->current_client == client);
+            // counteract decrement in wait
             signal(semset, CURRENT_SEATED);
             LOG("Cutting hair of %d", client);
 
@@ -55,16 +67,17 @@ void barber_loop(void) {
             LOG("Cut ee hair of %d", client);
             signal(semset, FINISHED);
             wait0(semset, CURRENT_SEATED);
-        } else {
-            LOG("Going to sleep");
-            shm->is_sleeping = true;
-//            assert(shm->current_client == -1);
-            signal(semset, STATE_RWLOCK);
-
-            wait(semset, CUSTOMER_AVAIL);
-            LOG("Waking up for %d", shm->current_client);
-            shm->is_sleeping = false;
         }
+//        else {
+//            LOG("Going to sleep");
+//            shm->is_sleeping = true;
+////            assert(shm->current_client == -1);
+//            signal(semset, STATE_RWLOCK);
+//
+//            wait(semset, CUSTOMER_AVAIL);
+//            LOG("Waking up for %d", shm->current_client);
+//            shm->is_sleeping = false;
+//        }
     }
 }
 
