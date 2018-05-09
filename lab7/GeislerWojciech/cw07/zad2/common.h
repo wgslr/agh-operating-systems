@@ -23,7 +23,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define SHARED_NAME "/wgslr"
+#define SHARED_NAME "/wgslrapp"
 #define MAX_QUEUE 500
 
 #define SEMS 5
