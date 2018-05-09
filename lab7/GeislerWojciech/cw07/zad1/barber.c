@@ -12,25 +12,28 @@ state *shm;
 
 pid_t pop_client(void);
 
+// requires customer to be already seated
+void cut(pid_t client) {
+
+}
+
 void barber_loop(void) {
     while(true) {
         wait(semset, STATE_RWLOCK);
 
         if(shm->current_client != -1) {
-            LOG("Cutting hair of %d", shm->current_client);
-
             signal(semset, STATE_RWLOCK);
 
             LOG("Cutting hair of %d", shm->current_client);
 
             // busy work
 
-            PRINTSEM
-            LOG("Cut ee hair of %d", shm->current_client);
+            LOG("Cut hair of %d", shm->current_client);
             signal(semset, FINISHED);
+            // wait for customer to leave
             wait0(semset, CURRENT_SEATED);
-
         } else if(shm->queue_count != 0) {
+            // pick first one from queue
             pid_t client = pop_client();
 
             LOG("Inviting client %d", client);
@@ -59,7 +62,8 @@ void barber_loop(void) {
             signal(semset, STATE_RWLOCK);
 
             wait(semset, CUSTOMER_AVAIL);
-            LOG("Waking up");
+            LOG("Waking up for %d", shm->current_client);
+            shm->is_sleeping = false;
         }
     }
 }

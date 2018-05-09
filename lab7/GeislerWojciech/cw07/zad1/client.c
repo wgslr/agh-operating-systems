@@ -17,34 +17,68 @@ void client_loop(void) {
     LOG("Client is born")
     while(repeats--) {
 
-        LOG("Wait for state rw")
+        LOG("Entering shop")
         wait(semset, STATE_RWLOCK);
-        LOG("Waited for state rw")
         if(shm->is_sleeping) {
+            // barber is sleeping when client already sat!
             assert(shm->current_client == -1);
             assert(shm->queue_count == 0);
 
-            shm->current_client = getpid();
             LOG("Sitting at barber's chair");
+            shm->current_client = getpid();
 
-            signal(semset, STATE_RWLOCK);
-            PRINTSEM
-//            signal(semset, CURRENT_SEATED);
+            signal(semset, CURRENT_SEATED);
+            LOG("Waking up the barber");
             signal(semset, CUSTOMER_AVAIL);
+            // end of modifications
+            signal(semset, STATE_RWLOCK);
 
             wait(semset, FINISHED);
 
-            PRINTSEM
-            LOG("client:35 wait for STATE_RWLOCK");
             wait(semset, STATE_RWLOCK);
+            LOG("Exiting shop with new haircut");
             shm->current_client = -1;
             semctl(semset, CURRENT_SEATED, SETVAL, 0);
-            LOG("Exiting shop with new haircut");
             signal(semset, STATE_RWLOCK);
         } else if(shm->queue_count < shm->chairs) {
-            push_client();
             LOG("Taking seat in the queue");
+            push_client();
             signal(semset, STATE_RWLOCK);
+
+            while(true) {
+                wait(semset, INVITATION);
+                if(shm->queue[0] != getpid()) {
+                    signal(semset, INVITATION); // resume waiting - probably duplicates
+                    PRINTSEM
+                } else {
+                    break;
+                }
+            }
+
+//            do {
+//                wait(semset, INVITATION);
+//            } while(shm->queue[0] != getpid());
+
+
+            wait(semset, STATE_RWLOCK);
+            assert(shm->current_client == -1);
+
+            LOG("Sitting at barber's chair");
+            shm->current_client = getpid();
+
+            signal(semset, CURRENT_SEATED);
+            signal(semset, CUSTOMER_AVAIL);
+            // end of modifications
+            signal(semset, STATE_RWLOCK);
+
+            wait(semset, FINISHED);
+
+            wait(semset, STATE_RWLOCK);
+            LOG("Exiting shop with new haircut");
+            shm->current_client = -1;
+            semctl(semset, CURRENT_SEATED, SETVAL, 0);
+            signal(semset, STATE_RWLOCK);
+
         } else {
             LOG("Exiting because of full queue");
             signal(semset, STATE_RWLOCK);

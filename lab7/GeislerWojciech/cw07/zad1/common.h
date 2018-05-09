@@ -41,11 +41,13 @@
     char msg[256]; \
     sprintf(msg, args); \
     printf("%d %ld.%06ld: %s\n", getpid(), time.tv_nsec, time.tv_nsec / 1000, msg); \
+    fflush(stdout); \
 }
 
 #define PRINTSEM { \
     unsigned short buff[SEMS]; \
     semctl(semset, 0, GETALL, buff); \
+    printf("%d: ", getpid()); \
     for(int i = 0; i < SEMS; ++i) { printf("%u ", buff[i]); } printf("\n"); \
 }
 
