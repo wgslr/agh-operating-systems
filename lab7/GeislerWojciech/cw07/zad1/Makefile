@@ -22,8 +22,8 @@ client: client.c common.c common.h
 	$(CC) $^ -o $@ $(CFLAGS) $(SANITIZER)
 
 test: barber client
-	./client < test.in
-	./client test.in
+	./barber 4 &
+	./client 5 5
 
 clean:
 	-rm *.o *.so *.a *.bin *.out barber client 

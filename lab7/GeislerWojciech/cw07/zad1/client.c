@@ -2,6 +2,7 @@
 // 2018-05
 
 #define _POSIX_C_SOURCE 199309L
+#define _XOPEN_SOURCE 1
 
 #include <assert.h>
 #include "common.h"
@@ -14,9 +15,7 @@ int repeats;
 void push_client(void);
 
 void client_loop(void) {
-    LOG("Client is born")
     while(repeats--) {
-
         LOG("Entering shop")
         wait(semset, STATE_RWLOCK);
         if(shm->is_sleeping) {
@@ -36,7 +35,8 @@ void client_loop(void) {
             // waiting for haircut
             wait(semset, FINISHED);
 
-            // rw lock set in barber
+            // rw lock is set in barber
+
             shm->current_client = -1;
             semctl(semset, CURRENT_SEATED, SETVAL, 0);
             LOG("Exiting shop with new haircut");
@@ -46,28 +46,15 @@ void client_loop(void) {
             push_client();
             signal(semset, STATE_RWLOCK);
 
-            LOG("Wating for personal invitation")
             while(true) {
-                LOG("1")
-                PRINTSEM
                 wait(semset, INVITATION);
-                LOG("2")
-                PRINTSEM
                 if(shm->expected_Client != getpid()) {
-//                    LOG("Still waiting")
-                    signal(semset, INVITATION); // resume waiting - probably duplicates
-                    LOG("3")
-                    PRINTSEM
+                    signal(semset, INVITATION); // resume waiting
                 } else {
-                    LOG("Finished queueing")
                     break;
                 }
-
-                // DELETE
-                sleep(1);
             }
 
-            LOG("DEBUG: wait state_rwlock")
             wait(semset, STATE_RWLOCK);
             assert(shm->current_client == -1);
 

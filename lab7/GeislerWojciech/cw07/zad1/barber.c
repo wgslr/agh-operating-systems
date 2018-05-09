@@ -2,6 +2,7 @@
 // 2018-05
 
 #define _POSIX_C_SOURCE 199309L
+#define _XOPEN_SOURCE 1
 
 #include <assert.h>
 #include "common.h"
@@ -12,10 +13,6 @@ state *shm;
 
 pid_t pop_client(void);
 
-// requires customer to be already seated
-void cut(pid_t client) {
-
-}
 
 void barber_loop(void) {
     while(true) {
@@ -23,12 +20,11 @@ void barber_loop(void) {
 
         if(shm->current_client == -1 && shm->queue_count == 0) {
             // nothing to do
+            LOG("Going to sleep");
             shm->is_sleeping = true;
-            LOG("DEBUG: is_sleeping = true")
             signal(semset, STATE_RWLOCK);
-            LOG("DEBUG: signaled rwlock")
+
             wait(semset, CUSTOMER_AVAIL);
-            LOG("DEBUG: waited customer_avail")
             LOG("Waking up");
         } else if(shm->current_client != -1) {
             // already sat when barber slept
@@ -57,27 +53,22 @@ void barber_loop(void) {
 
             wait(semset, CURRENT_SEATED);
             assert(shm->current_client == client);
-            // counteract decrement in wait
+
+            // counteract decrement in wait as the seat is still taken
             signal(semset, CURRENT_SEATED);
+
             LOG("Cutting hair of %d", client);
 
             // busy work
 
-            PRINTSEM
-            LOG("Cut ee hair of %d", client);
+            wait(semset, STATE_RWLOCK);
+            LOG("Cut hair of %d", shm->current_client);
             signal(semset, FINISHED);
+
+            // wait for customer to leave
             wait0(semset, CURRENT_SEATED);
+            signal(semset, STATE_RWLOCK);
         }
-//        else {
-//            LOG("Going to sleep");
-//            shm->is_sleeping = true;
-////            assert(shm->current_client == -1);
-//            signal(semset, STATE_RWLOCK);
-//
-//            wait(semset, CUSTOMER_AVAIL);
-//            LOG("Waking up for %d", shm->current_client);
-//            shm->is_sleeping = false;
-//        }
     }
 }
 
@@ -126,7 +117,6 @@ int main(int argc, char *argv[]) {
     }
 
     semctl(semset, STATE_RWLOCK, SETVAL, 1);
-//        signal(semset, STATE_RWLOCK);
 
     barber_loop();
 

@@ -2,6 +2,7 @@
 // 2018-05
 
 #define _POSIX_C_SOURCE 199309L
+#define _XOPEN_SOURCE 1
 
 #include <stdio.h>
 #include <time.h>
@@ -35,9 +36,7 @@ void wait0(int semset_id, int sem) {
             .sem_num = sem,
             .sem_flg = 0
     };
-    LOG("wait0")
     OK(semop(semset_id, &buf, 1), "Wait for semaphore to be 0 failed");
-    LOG("waited0")
 }
 
 
