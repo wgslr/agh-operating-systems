@@ -13,11 +13,25 @@
 
 #define SEMS 3
 
-void logmsg(const char *msg) {
-    struct timespec time;
-    clock_gettime(CLOCK_MONOTONIC, &time);
-    printf("%d@%ld.%06ld: %s\n", getpid(), time.tv_nsec, time.tv_nsec / 1000, msg);
+int signal(int semset_id, int sem) {
+    struct sembuf buf = {
+            .sem_op = 1,
+            .sem_num = sem,
+            .sem_flg = 0
+    };
+    return semop(semset_id, &buf, 1);
 }
+
+
+int wait(int semset_id, int sem) {
+    struct sembuf buf = {
+            .sem_op = -1,
+            .sem_num = sem,
+            .sem_flg = 0
+    };
+    return semop(semset_id, &buf, 1);
+}
+
 
 key_t get_ipc_key(void) {
     const char *home = getenv("HOME");

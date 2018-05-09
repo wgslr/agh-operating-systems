@@ -7,6 +7,10 @@
 
 #define _POSIX_C_SOURCE 199309L
 
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <sys/shm.h>
 #include <sys/msg.h>
 #include <sys/sem.h>
 #include <sys/ipc.h>
@@ -20,8 +24,9 @@
 #define MAX_QUEUE 512
 
 #define SEMS 3
-#define EMPTY_SEATS_SEM 0
-#define IS_SLEEPING_SEM 1
+#define STATE_RLOCK 0
+#define STATE_RWLOCK 1
+#define WORK_TO_DO 2
 #define SEAT_TAKEN_SEM 2
 
 
@@ -45,7 +50,9 @@ typedef struct state {
     int seats_taken;
 } state;
 
-void logmsg(const char *msg);
 key_t get_ipc_key(void);
+
+int wait(int semset_id, int sem);
+int signal(int semset_id, int sem);
 
 #endif //LAB7_COMMON_H

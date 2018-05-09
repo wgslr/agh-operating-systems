@@ -3,10 +3,6 @@
 
 #define _POSIX_C_SOURCE 199309L
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <sys/shm.h>
 #include "common.h"
 
 int semset_id;
@@ -22,11 +18,15 @@ void be_barber(void) {
                 .sem_op = -1,
                 .sem_flg = 0
         };
+        LOG("Waiting for client...");
         int result = semop(semset_id, &sop, 1);
         if(result == ENOMSG) {
-            LOG("Going to sleep...");
-        } else if(result < 1) {
-            fprintf(stderr, "Error reading from fifo queue\n");
+            LOG("Going to sleep");
+            sop.sem_num = WORK_TO_DO;
+            semop(semset_id, &sop, 1);
+            LOG("Waking up");
+        } else if(result < 0) {
+            fprintf(stderr, "Error waiting for semaphor: %d %s\n", result, strerror(result));
             exit(1);
         } else {
             LOG("Inviting client %d", pop_client());
@@ -35,8 +35,12 @@ void be_barber(void) {
 }
 
 pid_t pop_client(void) {
+    struct sembuf sop = {.sem_num = STATE_LOCK, .sem_op = 1, .sem_flg = 0};
 
     // TODO lock on queue
+
+    wait(STATE_RWLOCK);
+    signal(STATE_RWLOCK);
 
     pid_t client = shared_state->queue[0];
 
