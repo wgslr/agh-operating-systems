@@ -7,7 +7,7 @@
 #include <assert.h>
 #include "common.h"
 
-int semset;
+int sems;
 int shm_id;
 state *shm;
 
@@ -16,31 +16,31 @@ pid_t pop_client(void);
 
 void barber_loop(void) {
     while(true) {
-        semwait(semset, STATE_RWLOCK);
+        semwait(sems, STATE_RWLOCK);
 
         if(shm->current_client == -1 && shm->queue_count == 0) {
             // nothing to do
             LOG("Going to sleep");
             shm->is_sleeping = true;
-            signal(semset, STATE_RWLOCK);
+            signal(sems, STATE_RWLOCK);
 
-            semwait(semset, CUSTOMER_AVAIL);
+            semwait(sems, CUSTOMER_AVAIL);
             LOG("Waking up");
         } else if(shm->current_client != -1) {
             // already sat when barber slept
-            signal(semset, STATE_RWLOCK);
+            signal(sems, STATE_RWLOCK);
 
             LOG("Cutting hair of %d", shm->current_client);
 
             // busy work
 
-            semwait(semset, STATE_RWLOCK);
+            semwait(sems, STATE_RWLOCK);
             LOG("Cut hair of %d", shm->current_client);
-            signal(semset, FINISHED);
+            signal(sems, FINISHED);
 
             // wait for customer to leave
-            wait0(semset, CURRENT_SEATED);
-            signal(semset, STATE_RWLOCK);
+            wait0(sems, CURRENT_SEATED);
+            signal(sems, STATE_RWLOCK);
 
         } else if(shm->queue_count != 0) {
             // pick first one from queue
@@ -48,26 +48,26 @@ void barber_loop(void) {
 
             LOG("Inviting client %d", client);
 
-            signal(semset, INVITATION);
-            signal(semset, STATE_RWLOCK);
+            signal(sems, INVITATION);
+            signal(sems, STATE_RWLOCK);
 
-            semwait(semset, CURRENT_SEATED);
+            semwait(sems, CURRENT_SEATED);
             assert(shm->current_client == client);
 
             // counteract decrement in wait as the seat is still taken
-            signal(semset, CURRENT_SEATED);
+            signal(sems, CURRENT_SEATED);
 
             LOG("Cutting hair of %d", client);
 
             // busy work
 
-            semwait(semset, STATE_RWLOCK);
+            semwait(sems, STATE_RWLOCK);
             LOG("Cut hair of %d", shm->current_client);
-            signal(semset, FINISHED);
+            signal(sems, FINISHED);
 
             // wait for customer to leave
-            wait0(semset, CURRENT_SEATED);
-            signal(semset, STATE_RWLOCK);
+            wait0(sems, CURRENT_SEATED);
+            signal(sems, STATE_RWLOCK);
         }
     }
 }
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
     int chairs = atoi(argv[1]);
 
     key_t key = get_ipc_key();
-    OK(semset = semget(key, SEMS, IPC_CREAT | 0600u), "Creating semaphore set failed");
+    OK(sems = semget(key, SEMS, IPC_CREAT | 0600u), "Creating semaphore set failed");
 
     OK(shm_id = shmget(key, sizeof(state), IPC_CREAT | 0600u), "Failed creating shared memory");
     shm = shmat(shm_id, NULL, 0);
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
         shm->queue[i] = -1;
     }
 
-    semctl(semset, STATE_RWLOCK, SETVAL, 1);
+    semctl(sems, STATE_RWLOCK, SETVAL, 1);
 
     barber_loop();
 
