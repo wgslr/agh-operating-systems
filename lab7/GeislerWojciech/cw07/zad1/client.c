@@ -1,7 +1,9 @@
-//
-// Created by wojciech on 5/8/18.
-//
+// Wojciech Geisler
+// 2018-05
 
+#define _POSIX_C_SOURCE 199309L
+
+#include <assert.h>
 #include "common.h"
 
 int semset;
@@ -11,30 +13,55 @@ int repeats;
 
 void push_client(void);
 
-void be_client(void) {
+void client_loop(void) {
     LOG("Client is born")
     while(repeats--) {
 
-        //TODO change to baber check
-        LOG("Taking a seat in queue");
-        push_client();
-        struct sembuf sop = {
-                .sem_flg = 0,
-                .sem_num =  SEAT_TAKEN_SEM,
-                .sem_op = 1
-        };
-        semop(semset, &sop, 1);
+        LOG("Wait for state rw")
+        wait(semset, STATE_RWLOCK);
+        LOG("Waited for state rw")
+        if(shm->is_sleeping) {
+            assert(shm->current_client == -1);
+            assert(shm->queue_count == 0);
+            shm->current_client = getpid();
+            signal(semset, CUSTOMER_AVAIL);
+            signal(semset, STATE_RWLOCK);
+            signal(semset, CURRENT_SEATED);
+
+            wait(semset, INVITATION);
+            if(shm->queue[0] == getpid()) {
+                LOG("Seating at barber's chair");
+                wait(semset, FINISHED);
+
+                wait(semset, STATE_RWLOCK);
+                LOG("Exiting shop with new haircut");
+                shm->current_client = -1;
+                signal(semset, STATE_RWLOCK);
+
+            } else {
+                // TODO RISKY!
+                signal(semset, INVITATION); // signal for other customers
+                wait(semset, INVITATION);
+            }
+        } else if(shm->queue_count < shm->chairs) {
+            push_client();
+            LOG("Taking seat in the queue");
+            signal(semset, STATE_RWLOCK);
+        } else {
+            LOG("Exiting because of full queue");
+            signal(semset, STATE_RWLOCK);
+        }
     }
 }
 
 void push_client(void) {
-    shm->queue[shm->seats_taken++] = getpid();
+    shm->queue[shm->queue_count++] = getpid();
 }
 
 void spawn(void) {
     pid_t pid = fork();
     if(pid == 0) {
-        be_client();
+        client_loop();
         exit(0);
     } else {
         return;

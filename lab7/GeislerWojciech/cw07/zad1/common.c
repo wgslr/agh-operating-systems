@@ -1,6 +1,5 @@
-//
-// Created by wojciech on 5/8/18.
-//
+// Wojciech Geisler
+// 2018-05
 
 #define _POSIX_C_SOURCE 199309L
 
@@ -10,8 +9,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "common.h"
-
-#define SEMS 3
 
 int signal(int semset_id, int sem) {
     struct sembuf buf = {

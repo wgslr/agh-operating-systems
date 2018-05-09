@@ -1,6 +1,5 @@
-//
-// Created by wojciech on 5/8/18.
-//
+// Wojciech Geisler
+// 2018-05
 
 #ifndef LAB7_COMMON_H
 #define LAB7_COMMON_H
@@ -21,10 +20,10 @@
 #include <unistd.h>
 
 #define FTOK_PROJ_ID 123
-#define MAX_QUEUE 512
+#define MAX_QUEUE 500
 
 #define SEMS 5
-#define STATE_RLOCK 0
+#define CUSTOMER_AVAIL 0
 #define STATE_RWLOCK 1
 #define CURRENT_SEATED 2
 #define INVITATION 3
@@ -45,9 +44,10 @@
 
 
 typedef struct state {
+    bool is_sleeping;
     int current_client;
     pid_t queue[MAX_QUEUE];
-    int seats_taken;
+    int queue_count;
     int chairs;
 } state;
 
