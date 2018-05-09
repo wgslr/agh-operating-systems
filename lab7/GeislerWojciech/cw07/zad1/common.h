@@ -62,7 +62,7 @@ typedef struct state {
 
 key_t get_ipc_key(void);
 
-void wait(int semset_id, int sem);
+void semwait(int semset_id, int sem);
 void wait0(int semset_id, int sem);
 void signal(int semset_id, int sem);
 

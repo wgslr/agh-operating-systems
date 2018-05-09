@@ -16,7 +16,7 @@ pid_t pop_client(void);
 
 void barber_loop(void) {
     while(true) {
-        wait(semset, STATE_RWLOCK);
+        semwait(semset, STATE_RWLOCK);
 
         if(shm->current_client == -1 && shm->queue_count == 0) {
             // nothing to do
@@ -24,7 +24,7 @@ void barber_loop(void) {
             shm->is_sleeping = true;
             signal(semset, STATE_RWLOCK);
 
-            wait(semset, CUSTOMER_AVAIL);
+            semwait(semset, CUSTOMER_AVAIL);
             LOG("Waking up");
         } else if(shm->current_client != -1) {
             // already sat when barber slept
@@ -34,7 +34,7 @@ void barber_loop(void) {
 
             // busy work
 
-            wait(semset, STATE_RWLOCK);
+            semwait(semset, STATE_RWLOCK);
             LOG("Cut hair of %d", shm->current_client);
             signal(semset, FINISHED);
 
@@ -51,7 +51,7 @@ void barber_loop(void) {
             signal(semset, INVITATION);
             signal(semset, STATE_RWLOCK);
 
-            wait(semset, CURRENT_SEATED);
+            semwait(semset, CURRENT_SEATED);
             assert(shm->current_client == client);
 
             // counteract decrement in wait as the seat is still taken
@@ -61,7 +61,7 @@ void barber_loop(void) {
 
             // busy work
 
-            wait(semset, STATE_RWLOCK);
+            semwait(semset, STATE_RWLOCK);
             LOG("Cut hair of %d", shm->current_client);
             signal(semset, FINISHED);
 

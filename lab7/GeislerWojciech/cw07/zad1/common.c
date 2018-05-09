@@ -21,7 +21,7 @@ void signal(int semset_id, int sem) {
 }
 
 
-void wait(int semset_id, int sem) {
+void semwait(int semset_id, int sem) {
     struct sembuf buf = {
             .sem_op = -1,
             .sem_num = sem,

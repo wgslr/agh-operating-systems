@@ -5,11 +5,12 @@
 #define _XOPEN_SOURCE 1
 
 #include <assert.h>
+#include <sys/wait.h>
 #include "common.h"
 
 int semset;
 int shm_id;
-state *shm;
+state* shm;
 int repeats;
 
 void push_client(void);
@@ -17,7 +18,7 @@ void push_client(void);
 void client_loop(void) {
     while(repeats--) {
         LOG("Entering shop")
-        wait(semset, STATE_RWLOCK);
+        semwait(semset, STATE_RWLOCK);
         if(shm->is_sleeping) {
             assert(shm->current_client == -1);
             assert(shm->queue_count == 0);
@@ -33,7 +34,7 @@ void client_loop(void) {
             signal(semset, STATE_RWLOCK);
 
             // waiting for haircut
-            wait(semset, FINISHED);
+            semwait(semset, FINISHED);
 
             // rw lock is set in barber
 
@@ -47,7 +48,7 @@ void client_loop(void) {
             signal(semset, STATE_RWLOCK);
 
             while(true) {
-                wait(semset, INVITATION);
+                semwait(semset, INVITATION);
                 if(shm->expected_Client != getpid()) {
                     signal(semset, INVITATION); // resume waiting
                 } else {
@@ -55,7 +56,7 @@ void client_loop(void) {
                 }
             }
 
-            wait(semset, STATE_RWLOCK);
+            semwait(semset, STATE_RWLOCK);
             assert(shm->current_client == -1);
 
             LOG("Sitting at barber's chair");
@@ -66,7 +67,7 @@ void client_loop(void) {
             signal(semset, STATE_RWLOCK);
 
             // waiting for haircut
-            wait(semset, FINISHED);
+            semwait(semset, FINISHED);
 
             // rw lock set in barber
             shm->current_client = -1;
@@ -93,7 +94,7 @@ void spawn(void) {
     };
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     if(argc != 3) {
         fprintf(stderr, "Wrong number of arguments!\n");
         exit(1);
@@ -106,15 +107,20 @@ int main(int argc, char *argv[]) {
     OK(semset = semget(key, SEMS, IPC_CREAT | 0600u), "Creating semaphore set failed");
     OK(shm_id = shmget(key, sizeof(state), IPC_CREAT | 0600u), "Failed creating shared memory");
     shm = shmat(shm_id, NULL, 0);
-    if(shm == (void *) -1) {
+    if(shm == (void*) -1) {
         fprintf(stderr, "Failed attaching shared memory");
         exit(1);
     }
 
 
-    while(clients--) {
+    for(int i = 0; i < clients; ++i) {
         spawn();
     }
+
+    while(clients--) {
+        wait(NULL);
+    }
+
 
     return 0;
 }
