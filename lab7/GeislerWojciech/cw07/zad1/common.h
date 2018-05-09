@@ -5,6 +5,7 @@
 #define LAB7_COMMON_H
 
 #define _POSIX_C_SOURCE 199309L
+#define _XOPEN_SOURCE
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -42,6 +43,11 @@
     printf("%d %ld.%06ld: %s\n", getpid(), time.tv_nsec, time.tv_nsec / 1000, msg); \
 }
 
+#define PRINTSEM { \
+    unsigned short buff[SEMS]; \
+    semctl(semset, 0, GETALL, buff); \
+    for(int i = 0; i < SEMS; ++i) { printf("%u ", buff[i]); } printf("\n"); \
+}
 
 typedef struct state {
     bool is_sleeping;
@@ -53,7 +59,8 @@ typedef struct state {
 
 key_t get_ipc_key(void);
 
-int wait(int semset_id, int sem);
-int signal(int semset_id, int sem);
+void wait(int semset_id, int sem);
+void wait0(int semset_id, int sem);
+void signal(int semset_id, int sem);
 
 #endif //LAB7_COMMON_H

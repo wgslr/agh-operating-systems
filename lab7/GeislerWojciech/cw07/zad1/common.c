@@ -10,23 +10,34 @@
 #include <unistd.h>
 #include "common.h"
 
-int signal(int semset_id, int sem) {
+void signal(int semset_id, int sem) {
     struct sembuf buf = {
             .sem_op = 1,
             .sem_num = sem,
             .sem_flg = 0
     };
-    return semop(semset_id, &buf, 1);
+    OK(semop(semset_id, &buf, 1), "Signalling semaphore failed");
 }
 
 
-int wait(int semset_id, int sem) {
+void wait(int semset_id, int sem) {
     struct sembuf buf = {
             .sem_op = -1,
             .sem_num = sem,
             .sem_flg = 0
     };
-    return semop(semset_id, &buf, 1);
+    OK(semop(semset_id, &buf, 1), "Waiting semaphore failed");
+}
+
+void wait0(int semset_id, int sem) {
+    struct sembuf buf = {
+            .sem_op = 0,
+            .sem_num = sem,
+            .sem_flg = 0
+    };
+    LOG("wait0")
+    OK(semop(semset_id, &buf, 1), "Wait for semaphore to be 0 failed");
+    LOG("waited0")
 }
 
 

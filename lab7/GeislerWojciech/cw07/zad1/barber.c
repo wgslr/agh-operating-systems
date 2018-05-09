@@ -15,7 +15,22 @@ pid_t pop_client(void);
 void barber_loop(void) {
     while(true) {
         wait(semset, STATE_RWLOCK);
-        if(shm->queue_count != 0) {
+
+        if(shm->current_client != -1) {
+            LOG("Cutting hair of %d", shm->current_client);
+
+            signal(semset, STATE_RWLOCK);
+
+            LOG("Cutting hair of %d", shm->current_client);
+
+            // busy work
+
+            PRINTSEM
+            LOG("Cut ee hair of %d", shm->current_client);
+            signal(semset, FINISHED);
+            wait0(semset, CURRENT_SEATED);
+
+        } else if(shm->queue_count != 0) {
             pid_t client = pop_client();
 
             LOG("Inviting client %d", client);
@@ -27,12 +42,16 @@ void barber_loop(void) {
             signal(semset, STATE_RWLOCK);
 
             wait(semset, CURRENT_SEATED);
+            // counter decrement in wait
+            signal(semset, CURRENT_SEATED);
             LOG("Cutting hair of %d", client);
 
             // busy work
 
-            LOG("Cut hair of %d", client);
+            PRINTSEM
+            LOG("Cut ee hair of %d", client);
             signal(semset, FINISHED);
+            wait0(semset, CURRENT_SEATED);
         } else {
             LOG("Going to sleep");
             shm->is_sleeping = true;
@@ -89,8 +108,8 @@ int main(int argc, char *argv[]) {
         shm->queue[i] = -1;
     }
 
-//    semctl(semset, STATE_RWLOCK, IPC_SET, 1);
-        signal(semset, STATE_RWLOCK);
+    semctl(semset, STATE_RWLOCK, SETVAL, 1);
+//        signal(semset, STATE_RWLOCK);
 
     barber_loop();
 

@@ -23,26 +23,24 @@ void client_loop(void) {
         if(shm->is_sleeping) {
             assert(shm->current_client == -1);
             assert(shm->queue_count == 0);
+
             shm->current_client = getpid();
-            signal(semset, CUSTOMER_AVAIL);
+            LOG("Sitting at barber's chair");
+
             signal(semset, STATE_RWLOCK);
-            signal(semset, CURRENT_SEATED);
+            PRINTSEM
+//            signal(semset, CURRENT_SEATED);
+            signal(semset, CUSTOMER_AVAIL);
 
-            wait(semset, INVITATION);
-            if(shm->queue[0] == getpid()) {
-                LOG("Seating at barber's chair");
-                wait(semset, FINISHED);
+            wait(semset, FINISHED);
 
-                wait(semset, STATE_RWLOCK);
-                LOG("Exiting shop with new haircut");
-                shm->current_client = -1;
-                signal(semset, STATE_RWLOCK);
-
-            } else {
-                // TODO RISKY!
-                signal(semset, INVITATION); // signal for other customers
-                wait(semset, INVITATION);
-            }
+            PRINTSEM
+            LOG("client:35 wait for STATE_RWLOCK");
+            wait(semset, STATE_RWLOCK);
+            shm->current_client = -1;
+            semctl(semset, CURRENT_SEATED, SETVAL, 0);
+            LOG("Exiting shop with new haircut");
+            signal(semset, STATE_RWLOCK);
         } else if(shm->queue_count < shm->chairs) {
             push_client();
             LOG("Taking seat in the queue");
