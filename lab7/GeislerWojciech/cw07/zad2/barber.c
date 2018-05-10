@@ -85,8 +85,14 @@ pid_t pop_client(void) {
 void cleanup(void) {
     OK(munmap(shm, sizeof(state)), "Unmounting shm failed");
     OK(shm_unlink(SHARED_NAME), "Removing shm failed");
+
+    char semname[30];
     for(int i = 0; i< SEMS; ++i){
         sem_close(sems[i]);
+
+        sprintf(semname, "%s%d", SHARED_NAME, i);
+        printf("Unlink %s\n", semname);
+        sem_unlink(semname);
     }
 }
 
@@ -102,7 +108,7 @@ int main(int argc, char *argv[]) {
     char semname[30];
 
     for(int i = 0; i < SEMS; ++i) {
-        sprintf(semname, "/%s%d", SHARED_NAME, i);
+        sprintf(semname, "%s%d", SHARED_NAME, i);
         sems[i] = sem_open(semname, O_RDWR | O_CREAT,  0600u, i == STATE_RWLOCK);
         if(sems[i] == SEM_FAILED) {
             fprintf(stderr, "Failed opening %dth semafore: %s\n", i, strerror(errno));

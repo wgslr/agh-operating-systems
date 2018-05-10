@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
     char semname[30];
 
     for(int i = 0; i < SEMS; ++i) {
-        sprintf(semname, "/%s%d", SHARED_NAME, i);
+        sprintf(semname, "%s%d", SHARED_NAME, i);
         sems[i] = sem_open(semname, O_RDWR,  0600u, i == STATE_RWLOCK);
         if(sems[i] == SEM_FAILED) {
             fprintf(stderr, "Failed opening %dth semafore\n", i);
