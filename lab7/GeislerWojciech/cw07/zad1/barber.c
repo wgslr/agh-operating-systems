@@ -12,11 +12,7 @@ int sems;
 int shm_id;
 state *shm;
 
-//pid_t next_client = -1;
-
 pid_t pop_client(void);
-
-//enum barber_state next_state = SLEEPING;
 
 pid_t peek_queue(void);
 
@@ -27,7 +23,9 @@ barber_state barber_sleep(void) {
     semsignal(sems, BARBER_STATE);
 
     // do sleep
-    wait(CUSTOMER_AVAIL);
+    semwait(sems, CUSTOMER_AVAIL);
+
+    // TODO wake up before sitting
 
     // assumptions
     assert(shm->seated_client > 0);
@@ -40,7 +38,6 @@ barber_state barber_sleep(void) {
 
 barber_state barber_cut(void) {
     int client_sem;
-    pid_t next;
 
     assert(shm->seated_client > 0);
 //    assert(shm->invited_client <= 0);
@@ -53,8 +50,12 @@ barber_state barber_cut(void) {
 
     // cause client to go away
     client_sem = get_client_sem(shm->seated_client);
+
     semsignal(client_sem, 0);
+
     semwait(client_sem, 0);
+
+    LOG("DEBUG: client exited shop");
 
     // client should empty the chair
     assert(shm->seated_client <= 0);
@@ -72,7 +73,7 @@ barber_state barber_cut(void) {
     }
 }
 
-barber_state barber_inviting(void) {
+barber_state barber_invite(void) {
     assert(shm->seated_client <= 0);
 
     pid_t next_client;
@@ -90,7 +91,7 @@ barber_state barber_inviting(void) {
     client_sem = get_client_sem(next_client);
     semsignal(client_sem, 0);
     // wait for client to sit
-    semwait(client_sem, 0);
+    semwait(CURRENT_SEATED, 0);
     assert(shm->seated_client == next_client);
 
 
@@ -98,9 +99,10 @@ barber_state barber_inviting(void) {
     return CUTTING;
 }
 
-void dispatcher(void) {
+void dispatch(void) {
     barber_state next_state = SLEEPING;
     while(true){
+        PRINTSEM
         switch(next_state) {
             case SLEEPING:
                 next_state = barber_sleep();
@@ -109,7 +111,7 @@ void dispatcher(void) {
                 next_state = barber_cut();
                 break;
             case INVITING:
-                next_state = barber_inviting();
+                next_state = barber_invite();
                 break;
             default:
                 // shouldn't happen
@@ -119,7 +121,7 @@ void dispatcher(void) {
 }
 
 pid_t peek_queue(void){
-    if(shm->queue_count == 0) {
+    if(shm->queue_length == 0) {
         return -1;
     } else {
         return shm->queue[0];
@@ -127,15 +129,15 @@ pid_t peek_queue(void){
 }
 
 pid_t pop_client(void) {
-    if(shm->queue_count == 0) {
+    if(shm->queue_length == 0) {
         return -1;
     } else {
         pid_t client = shm->queue[0];
 
-        for(int i = 0; i < shm->queue_count - 1; ++i) {
+        for(int i = 0; i < shm->queue_length - 1; ++i) {
             shm->queue[i] = shm->queue[i + 1];
         }
-        shm->queue_count--;
+        shm->queue_length--;
         return client;
     }
 }
@@ -154,7 +156,7 @@ int main(int argc, char *argv[]) {
     }
 
     atexit(&cleanup);
-    cleanup();
+    cleanup(); // to be sure
 
     int chairs = atoi(argv[1]);
 
@@ -168,17 +170,19 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    shm->queue_count = 0;
+    shm->queue_length = 0;
     shm->chairs = chairs;
     shm->is_sleeping = false;
     shm->current_client = -1;
+    shm->seated_client = -1;
     for(int i = 0; i < MAX_QUEUE; ++i) {
         shm->queue[i] = -1;
     }
 
     semctl(sems, QUEUE_STATE, SETVAL, 1);
+    semctl(sems, BARBER_STATE, SETVAL, 0);
 
-    barber_loop();
+    dispatch();
 
     return 0;
 }

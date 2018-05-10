@@ -53,7 +53,7 @@
 
 #define PRINTSEM { \
     unsigned short buff[SEMS]; \
-    semctl(semset, 0, GETALL, buff); \
+    semctl(sems, 0, GETALL, buff); \
     printf("%d: ", getpid()); \
     for(int i = 0; i < SEMS; ++i) { printf("%u ", buff[i]); } printf("\n"); \
 }
@@ -64,24 +64,25 @@ typedef enum barber_state {
     CUTTING
 } barber_state;
 
-enum client_state {
+typedef enum client_state {
     OUTSIDE,
     SITTING,
     QUEUING
-};
+} client_state;
 
 typedef struct state {
     barber_state b_state;
 //    pid_t invited_client;
     pid_t seated_client;
 
+    int queue_length;
+    int chairs;
+    pid_t queue[MAX_QUEUE];
+
 
     bool is_sleeping;
     int current_client;
     int expected_Client;
-    pid_t queue[MAX_QUEUE];
-    int queue_count;
-    int chairs;
 } state;
 
 key_t get_ipc_key(int proj_id);

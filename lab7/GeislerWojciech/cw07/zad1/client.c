@@ -15,79 +15,96 @@ int repeats;
 
 void push_client(void);
 
-void client_loop(void) {
-    while(repeats--) {
-        LOG("Entering shop")
+// about this function's handling of locks I am most unsure
+client_state client_come_in(void) {
+    --repeats;
+    semwait(sems, BARBER_STATE);
+    if(shm->b_state == SLEEPING) {
+        LOG("Waking up barber");
+        semsignal(sems, CUSTOMER_AVAIL);
+        semsignal(sems, BARBER_STATE);
+
+        return SITTING;
+    } else {
+
+        // To prevent deadlock no one must wait for barber having queue
         semwait(sems, QUEUE_STATE);
-        if(shm->is_sleeping) {
-            assert(shm->current_client == -1);
-            assert(shm->queue_count == 0);
-
-            LOG("Waking up the barber");
-            shm->is_sleeping = false;
-            semsignal(sems, CUSTOMER_AVAIL);
-            LOG("Sitting at barber's chair");
-            shm->current_client = getpid();
-            semsignal(sems, CURRENT_SEATED);
-
-            // end of modifications
-            semsignal(sems, QUEUE_STATE);
-
-            // waiting for haircut
-            semwait(sems, FINISHED);
-
-            // rw lock is set in barber
-
-            shm->current_client = -1;
-            semctl(sems, CURRENT_SEATED, SETVAL, 0);
-            LOG("Exiting shop with new haircut");
-
-        } else if(shm->queue_count < shm->chairs) {
-            LOG("Taking seat in the queue");
-            push_client();
-            semsignal(sems, QUEUE_STATE);
-
-            while(true) {
-                semwait(sems, INVITATION);
-                if(shm->expected_Client != getpid()) {
-                    semsignal(sems, INVITATION); // resume waiting
-                } else {
-                    break;
-                }
-            }
-
-            semwait(sems, QUEUE_STATE);
-            assert(shm->current_client == -1);
-
-            LOG("Sitting at barber's chair");
-            shm->current_client = getpid();
-            semsignal(sems, CURRENT_SEATED);
-
-            // end of modifications
-            semsignal(sems, QUEUE_STATE);
-
-            // waiting for haircut
-            semwait(sems, FINISHED);
-
-            // rw lock set in barber
-            shm->current_client = -1;
-            semctl(sems, CURRENT_SEATED, SETVAL, 0);
-            LOG("Exiting shop with new haircut");
-        } else {
+        if(shm->queue_length == shm->chairs) {
             LOG("Exiting because of full queue");
+            semsignal(sems, BARBER_STATE);
             semsignal(sems, QUEUE_STATE);
+            return OUTSIDE;
+        } else {
+            return QUEUING;
         }
     }
 }
 
+client_state client_enqueue(void){
+    // queue_state should be locked by previous state
+    push_client();
+    LOG("Sitting at queue");
+
+    semsignal(sems, BARBER_STATE);
+    semsignal(sems, QUEUE_STATE);
+
+    int client_sem = get_client_sem(getpid());
+    semwait(client_sem, 0);
+    return SITTING;
+}
+
+client_state client_sit(void) {
+    assert(shm->seated_client <= 0);
+
+    LOG("Sitting at chair");
+    shm->seated_client = getpid();
+    semsignal(sems, CURRENT_SEATED);
+
+    semwait(sems, BARBER_STATE); // rather unnecessary
+    int client_sem = get_client_sem(getpid());
+    semwait(client_sem, 0);
+    semsignal(sems, BARBER_STATE);
+
+    LOG("Exiting shop with new haircut");
+    shm->seated_client = -1;
+    semsignal(client_sem, 1);
+
+
+    return OUTSIDE;
+}
+
+void dispatch(void) {
+    client_state next_state = OUTSIDE;
+    while(true){
+        switch(next_state) {
+            case OUTSIDE:
+                if(repeats) {
+                    next_state = client_come_in();
+                } else {
+                    exit(0);
+                }
+                break;
+            case QUEUING:
+                next_state = client_enqueue();
+                break;
+            case SITTING:
+                next_state = client_sit();
+                break;
+            default:
+                assert(false);
+        }
+
+    }
+}
+
 void push_client(void) {
-    shm->queue[shm->queue_count++] = getpid();
+    shm->queue[shm->queue_length++] = getpid();
 }
 
 void spawn(void) {
     pid_t pid = fork();
     if(pid == 0) {
-        client_loop();
+        dispatch();
         exit(0);
     } else {
         return;
@@ -103,7 +120,7 @@ int main(int argc, char* argv[]) {
     int clients = atoi(argv[1]);
     repeats = atoi(argv[2]);
 
-    key_t key = get_ipc_key();
+    key_t key = get_ipc_key(FTOK_PROJ_ID);
     OK(sems = semget(key, SEMS, IPC_CREAT | 0600u), "Creating semaphore set failed");
     OK(shm_id = shmget(key, sizeof(state), IPC_CREAT | 0600u), "Failed creating shared memory");
     shm = shmat(shm_id, NULL, 0);
