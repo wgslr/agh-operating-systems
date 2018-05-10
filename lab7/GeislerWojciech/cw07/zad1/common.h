@@ -20,15 +20,22 @@
 #include <time.h>
 #include <unistd.h>
 
-#define FTOK_PROJ_ID 123
-#define MAX_QUEUE 500
+#define FTOK_PROJ_ID 1
+#define MAX_QUEUE 50
 
-#define SEMS 5
+#define SEMS (6 + MAX_QUEUE)
+#define QUEUE_STATE 1
+
+// lock on barber FSM state
+// and (maybe?) seated/invitied client
+#define BARBER_STATE 5
+
 #define CUSTOMER_AVAIL 0
-#define STATE_RWLOCK 1
 #define CURRENT_SEATED 2
 #define INVITATION 3
 #define FINISHED 4
+
+#define CLIENT_ACTION(id) 6
 
 
 // Check success and exit with log on error
@@ -51,7 +58,24 @@
     for(int i = 0; i < SEMS; ++i) { printf("%u ", buff[i]); } printf("\n"); \
 }
 
+typedef enum barber_state {
+    SLEEPING,
+    INVITING,
+    CUTTING
+} barber_state;
+
+enum client_state {
+    OUTSIDE,
+    SITTING,
+    QUEUING
+};
+
 typedef struct state {
+    barber_state b_state;
+//    pid_t invited_client;
+    pid_t seated_client;
+
+
     bool is_sleeping;
     int current_client;
     int expected_Client;
@@ -60,10 +84,12 @@ typedef struct state {
     int chairs;
 } state;
 
-key_t get_ipc_key(void);
+key_t get_ipc_key(int proj_id);
 
 void semwait(int semset_id, int sem);
 void wait0(int semset_id, int sem);
-void signal(int semset_id, int sem);
+void semsignal(int semset_id, int sem);
+
+int get_client_sem(pid_t pid);
 
 #endif //LAB7_COMMON_H

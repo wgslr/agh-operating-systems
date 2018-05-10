@@ -18,20 +18,20 @@ void push_client(void);
 void client_loop(void) {
     while(repeats--) {
         LOG("Entering shop")
-        semwait(sems, STATE_RWLOCK);
+        semwait(sems, QUEUE_STATE);
         if(shm->is_sleeping) {
             assert(shm->current_client == -1);
             assert(shm->queue_count == 0);
 
             LOG("Waking up the barber");
             shm->is_sleeping = false;
-            signal(sems, CUSTOMER_AVAIL);
+            semsignal(sems, CUSTOMER_AVAIL);
             LOG("Sitting at barber's chair");
             shm->current_client = getpid();
-            signal(sems, CURRENT_SEATED);
+            semsignal(sems, CURRENT_SEATED);
 
             // end of modifications
-            signal(sems, STATE_RWLOCK);
+            semsignal(sems, QUEUE_STATE);
 
             // waiting for haircut
             semwait(sems, FINISHED);
@@ -45,26 +45,26 @@ void client_loop(void) {
         } else if(shm->queue_count < shm->chairs) {
             LOG("Taking seat in the queue");
             push_client();
-            signal(sems, STATE_RWLOCK);
+            semsignal(sems, QUEUE_STATE);
 
             while(true) {
                 semwait(sems, INVITATION);
                 if(shm->expected_Client != getpid()) {
-                    signal(sems, INVITATION); // resume waiting
+                    semsignal(sems, INVITATION); // resume waiting
                 } else {
                     break;
                 }
             }
 
-            semwait(sems, STATE_RWLOCK);
+            semwait(sems, QUEUE_STATE);
             assert(shm->current_client == -1);
 
             LOG("Sitting at barber's chair");
             shm->current_client = getpid();
-            signal(sems, CURRENT_SEATED);
+            semsignal(sems, CURRENT_SEATED);
 
             // end of modifications
-            signal(sems, STATE_RWLOCK);
+            semsignal(sems, QUEUE_STATE);
 
             // waiting for haircut
             semwait(sems, FINISHED);
@@ -75,7 +75,7 @@ void client_loop(void) {
             LOG("Exiting shop with new haircut");
         } else {
             LOG("Exiting because of full queue");
-            signal(sems, STATE_RWLOCK);
+            semsignal(sems, QUEUE_STATE);
         }
     }
 }

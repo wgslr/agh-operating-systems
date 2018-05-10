@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include "common.h"
 
-void signal(int semset_id, int sem) {
+void semsignal(int semset_id, int sem) {
     struct sembuf buf = {
             .sem_op = 1,
             .sem_num = sem,
@@ -40,9 +40,14 @@ void wait0(int semset_id, int sem) {
 }
 
 
-key_t get_ipc_key(void) {
+key_t get_ipc_key(int proj_id) {
     const char *home = getenv("HOME");
-    return ftok(home, FTOK_PROJ_ID);
+    return ftok(home, proj_id);
 }
 
+int get_client_sem(pid_t pid) {
+    int fd;
+    OK(fd = semget(get_ipc_key(pid), 1, IPC_CREAT | 0600u), "Creating semaphore set failed");
+    return fd;
+}
 
