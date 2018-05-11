@@ -61,7 +61,7 @@
     clock_gettime(CLOCK_MONOTONIC, &time); \
     char msg[256]; \
     sprintf(msg, args); \
-    printf("%ld.%06ld %d (%d): %s\n", time.tv_nsec, time.tv_nsec / 1000, getpid(), shm->b_state, msg); \
+    printf("%ld.%06ld %d: %s\n", time.tv_nsec, time.tv_nsec / 1000, getpid(), msg); \
     fflush(stdout); \
 }
 

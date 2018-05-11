@@ -17,10 +17,8 @@ pid_t pop_client(void);
 pid_t peek_queue(void);
 
 barber_state barber_sleep(void) {
-    print_state(*shm);
     shm->b_state = SLEEPING;
     LOG("Going to sleep");
-    print_state(*shm);
 
     // state stabilised
     semsignal(sems, BARBER_STATE);
@@ -31,8 +29,6 @@ barber_state barber_sleep(void) {
 
     semwait(sems, CURRENT_SEATED);
 
-    LOG("DEBUG: Customer's sitting");
-
     // assumptions
     assert(shm->seated_client > 0);
 
@@ -41,61 +37,25 @@ barber_state barber_sleep(void) {
 }
 
 barber_state barber_cut(void) {
-    //DEBUG
-    unsigned short buff[1]; \
-
-    int client_sem;
-
     assert(shm->seated_client > 0);
-//    assert(shm->invited_client <= 0);
 
     shm->b_state = CUTTING;
     LOG("Cutting hair of %d", shm->seated_client);
     semsignal(sems, BARBER_STATE);
 
     LOG("Finished cutting hair of %d", shm->seated_client);
-    print_state(*shm);
 
     // cause client to go away
-    client_sem = get_client_sem(shm->seated_client);
-
-
-    semwait(sems, BARBER_STATE);
-    // expecting modification by current client
-
-//    LOG("semsginal finished cut %d", client_sem);
-//    semctl(client_sem, 0, GETALL, buff); \
-//    printf("%d: ", getpid()); \
-//    for(int i = 0; i < 1; ++i) { printf("%u ", buff[i]); } printf("\n");
-
     semsignal(sems, FINISHED);
 
-    LOG("semwait client exit %d", client_sem);
-    semctl(client_sem, 0, GETALL, buff); \
-    printf("%d: ", getpid()); \
-    for(int i = 0; i < 1; ++i) { printf("%u ", buff[i]); } printf("\n");
-
-    // TODO fix this wait beign trigger by next "semwait for haicrut"
-
-//    while(shm->seated_client != -1) {
-//        LOG("DEBUG: semwait for client to leave %d", client_sem);
-//    }
     semwait(sems, LEFT);
-
-    semctl(client_sem, 0, GETALL, buff); \
-    printf("%d: ", getpid()); \
-    for(int i = 0; i < 1; ++i) { printf("%u ", buff[i]); } printf("\n");
-
-    LOG("DEBUG: client exited shop");
-    print_state(*shm);
 
     // client should empty the chair
     assert(shm->seated_client <= 0);
 
-
     // lock on queue shouldn't be necessary
     // since nonempty queue won't become empty
-    // withour barber action
+    // without barber action
 
     if(peek_queue() < 0) {
         return SLEEPING;
@@ -133,7 +93,6 @@ barber_state barber_invite(void) {
 void dispatch(void) {
     barber_state next_state = SLEEPING;
     while(true){
-        PRINTSEM
         switch(next_state) {
             case SLEEPING:
                 next_state = barber_sleep();
