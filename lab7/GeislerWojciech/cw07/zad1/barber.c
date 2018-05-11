@@ -63,12 +63,12 @@ barber_state barber_cut(void) {
     semwait(sems, BARBER_STATE);
     // expecting modification by current client
 
-    LOG("semsginal finished cut %d", client_sem);
-    semctl(client_sem, 0, GETALL, buff); \
-    printf("%d: ", getpid()); \
-    for(int i = 0; i < 1; ++i) { printf("%u ", buff[i]); } printf("\n");
+//    LOG("semsginal finished cut %d", client_sem);
+//    semctl(client_sem, 0, GETALL, buff); \
+//    printf("%d: ", getpid()); \
+//    for(int i = 0; i < 1; ++i) { printf("%u ", buff[i]); } printf("\n");
 
-    semsignal(client_sem, 0);
+    semsignal(sems, FINISHED);
 
     LOG("semwait client exit %d", client_sem);
     semctl(client_sem, 0, GETALL, buff); \
@@ -77,10 +77,10 @@ barber_state barber_cut(void) {
 
     // TODO fix this wait beign trigger by next "semwait for haicrut"
 
-    while(shm->seated_client != -1) {
-        LOG("DEBUG: semwait for client to leave %d", client_sem);
-        semwait(client_sem, 0);
-    }
+//    while(shm->seated_client != -1) {
+//        LOG("DEBUG: semwait for client to leave %d", client_sem);
+//    }
+    semwait(sems, LEFT);
 
     semctl(client_sem, 0, GETALL, buff); \
     printf("%d: ", getpid()); \
@@ -120,7 +120,7 @@ barber_state barber_invite(void) {
     LOG("Inviting client %d", next_client)
 
     client_sem = get_client_sem(next_client);
-    semsignal(client_sem, 0);
+    semsignal(client_sem, CLIENT_INVITED);
     // wait for client to sit
     semwait(sems, CURRENT_SEATED);
     assert(shm->seated_client == next_client);

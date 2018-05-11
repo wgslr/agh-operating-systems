@@ -23,7 +23,7 @@
 #define FTOK_PROJ_ID 1
 #define MAX_QUEUE 50
 
-#define SEMS 6
+#define SEMS 7
 #define QUEUE_STATE 1
 
 // lock on barber FSM state
@@ -35,6 +35,11 @@
 
 #define INVITATION 3
 #define FINISHED 4
+#define LEFT 6
+
+#define CLIENT_INVITED 0
+//#define CLIENT_CUT 1
+//#define CLIENT_LEFT 2
 
 #define CLIENT_ACTION(id) 6
 

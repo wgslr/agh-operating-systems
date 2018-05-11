@@ -66,15 +66,15 @@ client_state client_sit(void) {
     semsignal(sems, CURRENT_SEATED);
 
     int client_sem = get_client_sem(getpid());
-    LOG("semwait for haircut %d", client_sem);
-    semwait(client_sem, 0);
+//    LOG("semwait for haircut %d", client_sem);
+    semwait(sems, FINISHED);
 
     LOG("Exiting shop with new haircut");
     shm->seated_client = -1;
     assert(shm->seated_client <= 0);
     LOG("semsginal after exiting %d", client_sem);
-    semsignal(client_sem, 0);
-
+//    semsignal(client_sem, 0);
+    semsignal(sems, LEFT);
 
     return OUTSIDE;
 }
