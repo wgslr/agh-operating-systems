@@ -17,26 +17,33 @@ pid_t pop_client(void);
 pid_t peek_queue(void);
 
 barber_state barber_sleep(void) {
+    print_state(*shm);
     shm->b_state = SLEEPING;
     LOG("Going to sleep");
+    print_state(*shm);
+
     // state stabilised
     semsignal(sems, BARBER_STATE);
 
     // do sleep
     semwait(sems, CUSTOMER_AVAIL);
+    LOG("Waking up");
 
-    // TODO wake up before sitting
+    semwait(sems, CURRENT_SEATED);
+
+    LOG("DEBUG: Customer's sitting");
 
     // assumptions
     assert(shm->seated_client > 0);
-//    assert(shm->invited_client <= 0);
 
     semwait(sems, BARBER_STATE);
-    LOG("Waking up");
     return CUTTING;
 }
 
 barber_state barber_cut(void) {
+    //DEBUG
+    unsigned short buff[1]; \
+
     int client_sem;
 
     assert(shm->seated_client > 0);
@@ -47,20 +54,44 @@ barber_state barber_cut(void) {
     semsignal(sems, BARBER_STATE);
 
     LOG("Finished cutting hair of %d", shm->seated_client);
+    print_state(*shm);
 
     // cause client to go away
     client_sem = get_client_sem(shm->seated_client);
 
+
+    semwait(sems, BARBER_STATE);
+    // expecting modification by current client
+
+    LOG("semsginal finished cut %d", client_sem);
+    semctl(client_sem, 0, GETALL, buff); \
+    printf("%d: ", getpid()); \
+    for(int i = 0; i < 1; ++i) { printf("%u ", buff[i]); } printf("\n");
+
     semsignal(client_sem, 0);
 
-    semwait(client_sem, 0);
+    LOG("semwait client exit %d", client_sem);
+    semctl(client_sem, 0, GETALL, buff); \
+    printf("%d: ", getpid()); \
+    for(int i = 0; i < 1; ++i) { printf("%u ", buff[i]); } printf("\n");
+
+    // TODO fix this wait beign trigger by next "semwait for haicrut"
+
+    while(shm->seated_client != -1) {
+        LOG("DEBUG: semwait for client to leave %d", client_sem);
+        semwait(client_sem, 0);
+    }
+
+    semctl(client_sem, 0, GETALL, buff); \
+    printf("%d: ", getpid()); \
+    for(int i = 0; i < 1; ++i) { printf("%u ", buff[i]); } printf("\n");
 
     LOG("DEBUG: client exited shop");
+    print_state(*shm);
 
     // client should empty the chair
     assert(shm->seated_client <= 0);
 
-    semwait(sems, BARBER_STATE);
 
     // lock on queue shouldn't be necessary
     // since nonempty queue won't become empty
@@ -91,7 +122,7 @@ barber_state barber_invite(void) {
     client_sem = get_client_sem(next_client);
     semsignal(client_sem, 0);
     // wait for client to sit
-    semwait(CURRENT_SEATED, 0);
+    semwait(sems, CURRENT_SEATED);
     assert(shm->seated_client == next_client);
 
 
@@ -161,7 +192,7 @@ int main(int argc, char *argv[]) {
     int chairs = atoi(argv[1]);
 
     key_t key = get_ipc_key(FTOK_PROJ_ID);
-    OK(sems = semget(key, SEMS, IPC_CREAT | 0600u), "Creating semaphore set failed");
+    OK(sems = semget(key, SEMS, IPC_CREAT | IPC_EXCL | 0600u), "Creating semaphore set failed");
 
     OK(shm_id = shmget(key, sizeof(state), IPC_CREAT | 0600u), "Failed creating shared memory");
     shm = shmat(shm_id, NULL, 0);
@@ -172,8 +203,6 @@ int main(int argc, char *argv[]) {
 
     shm->queue_length = 0;
     shm->chairs = chairs;
-    shm->is_sleeping = false;
-    shm->current_client = -1;
     shm->seated_client = -1;
     for(int i = 0; i < MAX_QUEUE; ++i) {
         shm->queue[i] = -1;
@@ -181,6 +210,8 @@ int main(int argc, char *argv[]) {
 
     semctl(sems, QUEUE_STATE, SETVAL, 1);
     semctl(sems, BARBER_STATE, SETVAL, 0);
+    semctl(sems, CUSTOMER_AVAIL, SETVAL, 0);
+    semctl(sems, CURRENT_SEATED, SETVAL, 0);
 
     dispatch();
 

@@ -51,3 +51,23 @@ int get_client_sem(pid_t pid) {
     return fd;
 }
 
+
+const char * barber_state_to_str(barber_state BS) {
+    switch(BS) {
+        case SLEEPING:
+            return "SLEEPING";
+        case INVITING:
+            return "INVITING";
+        case CUTTING:
+            return "CUTTING";
+        case WAKING:
+            return "WAKING";
+        default:
+            return "unknown";
+    }
+}
+
+void print_state(state shm) {
+    fprintf(stdout, "b_state: %s\nseated_client: %d\nqueue_length: %d\n",
+            barber_state_to_str(shm.b_state), shm.seated_client, shm.queue_length);
+}

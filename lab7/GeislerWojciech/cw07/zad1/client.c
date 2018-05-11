@@ -21,9 +21,11 @@ client_state client_come_in(void) {
     semwait(sems, BARBER_STATE);
     if(shm->b_state == SLEEPING) {
         LOG("Waking up barber");
+        shm->b_state = WAKING; // ugly
         semsignal(sems, CUSTOMER_AVAIL);
         semsignal(sems, BARBER_STATE);
 
+        semwait(sems, BARBER_STATE);
         return SITTING;
     } else {
 
@@ -43,13 +45,15 @@ client_state client_come_in(void) {
 client_state client_enqueue(void){
     // queue_state should be locked by previous state
     push_client();
-    LOG("Sitting at queue");
+    LOG("Sitting in queue");
 
     semsignal(sems, BARBER_STATE);
     semsignal(sems, QUEUE_STATE);
 
     int client_sem = get_client_sem(getpid());
+    LOG("DEBUG: waiting for invitation %d", client_sem);
     semwait(client_sem, 0);
+    semwait(sems, BARBER_STATE);
     return SITTING;
 }
 
@@ -58,16 +62,18 @@ client_state client_sit(void) {
 
     LOG("Sitting at chair");
     shm->seated_client = getpid();
+    semsignal(sems, BARBER_STATE);
     semsignal(sems, CURRENT_SEATED);
 
-    semwait(sems, BARBER_STATE); // rather unnecessary
     int client_sem = get_client_sem(getpid());
+    LOG("semwait for haircut %d", client_sem);
     semwait(client_sem, 0);
-    semsignal(sems, BARBER_STATE);
 
     LOG("Exiting shop with new haircut");
     shm->seated_client = -1;
-    semsignal(client_sem, 1);
+    assert(shm->seated_client <= 0);
+    LOG("semsginal after exiting %d", client_sem);
+    semsignal(client_sem, 0);
 
 
     return OUTSIDE;

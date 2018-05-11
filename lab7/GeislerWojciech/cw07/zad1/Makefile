@@ -2,7 +2,7 @@ CC=gcc
 O=-O0
 override CFLAGS+=-lm -lrt -Wall -Wextra -Wall -std=c11 \
 	-Wformat=2 \
-	-g -DNDEBUG \
+	-g \
 	-Wswitch-default -Wswitch-enum -Wcast-align -Wpointer-arith \
 	-Wbad-function-cast -Wstrict-overflow=5 -Wstrict-prototypes -Winline \
 	-Wundef -Wnested-externs -Wcast-qual -Wshadow  \
