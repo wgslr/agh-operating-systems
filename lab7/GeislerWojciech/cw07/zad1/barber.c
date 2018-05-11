@@ -57,6 +57,8 @@ barber_state barber_cut(void) {
     // since nonempty queue won't become empty
     // without barber action
 
+    semwait(sems, BARBER_STATE);
+
     if(peek_queue() < 0) {
         return SLEEPING;
     } else {

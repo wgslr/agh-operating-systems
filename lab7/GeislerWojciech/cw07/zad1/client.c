@@ -69,7 +69,6 @@ client_state client_sit(void) {
     semwait(sems, FINISHED);
     LOG("Exiting shop with new haircut");
 
-    semwait(sems, BARBER_STATE);
     shm->seated_client = -1;
     semsignal(sems, LEFT);
 
