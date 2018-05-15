@@ -23,14 +23,13 @@
 #define FTOK_PROJ_ID 1
 #define MAX_QUEUE 50
 
-#define SEMS 7
+#define SEMS 6
 #define QUEUE_LOCK 0
 #define BARBER_STATE_LOCK 1
 #define CUSTOMER_AVAIL 2
-#define INVITATION 3
-#define CURRENT_SEATED 4
-#define FINISHED 5
-#define LEFT 6
+#define CURRENT_SEATED 3
+#define FINISHED 4
+#define LEFT 5
 
 #define CLIENT_INVITED 0
 

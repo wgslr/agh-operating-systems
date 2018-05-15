@@ -126,8 +126,8 @@ int main(int argc, char* argv[]) {
     repeats = atoi(argv[2]);
 
     key_t key = get_ipc_key(FTOK_PROJ_ID);
-    OK(sems = semget(key, SEMS, IPC_CREAT | 0600u), "Creating semaphore set failed");
-    OK(shm_id = shmget(key, sizeof(state), IPC_CREAT | 0600u), "Failed creating shared memory");
+    OK(sems = semget(key, SEMS, 0600u), "Opening semaphore set failed");
+    OK(shm_id = shmget(key, sizeof(state), 0600u), "Opening shared memory failed");
     shm = shmat(shm_id, NULL, 0);
     if(shm == (void*) -1) {
         fprintf(stderr, "Failed attaching shared memory");

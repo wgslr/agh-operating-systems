@@ -144,12 +144,17 @@ void cleanup(void) {
 int main(int argc, char *argv[]) {
     if(argc != 2) {
         fprintf(stderr, "Wrong number of arguments!\n");
+        exit(1);
     }
 
     atexit(&cleanup);
     cleanup(); // to be sure
 
     int chairs = atoi(argv[1]);
+    if(chairs >= MAX_QUEUE) {
+        fprintf(stderr, "Maximum length of queue is %d\n", MAX_QUEUE);
+        exit(1);
+    }
 
     key_t key = get_ipc_key(FTOK_PROJ_ID);
     OK(sems = semget(key, SEMS, IPC_CREAT | IPC_EXCL | 0600u), "Creating semaphore set failed");
