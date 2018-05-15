@@ -21,7 +21,7 @@ barber_state barber_sleep(void) {
     LOG("Going to sleep");
 
     // state stabilised
-    semsignal(sems, BARBER_STATE);
+    semsignal(sems, BARBER_STATE_LOCK);
 
     // do sleep
     semwait(sems, CUSTOMER_AVAIL);
@@ -32,7 +32,7 @@ barber_state barber_sleep(void) {
     // assumptions
     assert(shm->seated_client > 0);
 
-    semwait(sems, BARBER_STATE);
+    semwait(sems, BARBER_STATE_LOCK);
     return CUTTING;
 }
 
@@ -41,7 +41,7 @@ barber_state barber_cut(void) {
 
     shm->b_state = CUTTING;
     LOG("Cutting hair of %d", shm->seated_client);
-    semsignal(sems, BARBER_STATE);
+    semsignal(sems, BARBER_STATE_LOCK);
 
     LOG("Finished cutting hair of %d", shm->seated_client);
 
@@ -57,7 +57,7 @@ barber_state barber_cut(void) {
     // since nonempty queue won't become empty
     // without barber action
 
-    semwait(sems, BARBER_STATE);
+    semwait(sems, BARBER_STATE_LOCK);
 
     if(peek_queue() < 0) {
         return SLEEPING;
@@ -73,11 +73,11 @@ barber_state barber_invite(void) {
     int client_sem;
 
     shm->b_state=INVITING;
-    semsignal(sems, BARBER_STATE);
+    semsignal(sems, BARBER_STATE_LOCK);
 
-    semwait(sems, QUEUE_STATE);
+    semwait(sems, QUEUE_LOCK);
     next_client = pop_client();
-    semsignal(sems, QUEUE_STATE);
+    semsignal(sems, QUEUE_LOCK);
 
     LOG("Inviting client %d", next_client)
 
@@ -88,7 +88,7 @@ barber_state barber_invite(void) {
     assert(shm->seated_client == next_client);
 
 
-    semwait(sems, BARBER_STATE);
+    semwait(sems, BARBER_STATE_LOCK);
     return CUTTING;
 }
 
@@ -168,8 +168,8 @@ int main(int argc, char *argv[]) {
         shm->queue[i] = -1;
     }
 
-    semctl(sems, QUEUE_STATE, SETVAL, 1);
-    semctl(sems, BARBER_STATE, SETVAL, 0);
+    semctl(sems, QUEUE_LOCK, SETVAL, 1);
+    semctl(sems, BARBER_STATE_LOCK, SETVAL, 0);
     semctl(sems, CUSTOMER_AVAIL, SETVAL, 0);
     semctl(sems, CURRENT_SEATED, SETVAL, 0);
 

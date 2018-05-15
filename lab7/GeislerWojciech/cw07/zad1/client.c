@@ -18,23 +18,23 @@ void push_client(void);
 // about this function's handling of locks I am most unsure
 client_state client_come_in(void) {
     --repeats;
-    semwait(sems, BARBER_STATE);
+    semwait(sems, BARBER_STATE_LOCK);
     if(shm->b_state == SLEEPING) {
         LOG("Waking up barber");
         shm->b_state = WAKING; // ugly
         semsignal(sems, CUSTOMER_AVAIL);
-        semsignal(sems, BARBER_STATE);
+        semsignal(sems, BARBER_STATE_LOCK);
 
-        semwait(sems, BARBER_STATE);
+        semwait(sems, BARBER_STATE_LOCK);
         return SITTING;
     } else {
 
         // To prevent deadlock no one must wait for barber having queue
-        semwait(sems, QUEUE_STATE);
+        semwait(sems, QUEUE_LOCK);
         if(shm->queue_length == shm->chairs) {
             LOG("Exiting because of full queue");
-            semsignal(sems, BARBER_STATE);
-            semsignal(sems, QUEUE_STATE);
+            semsignal(sems, BARBER_STATE_LOCK);
+            semsignal(sems, QUEUE_LOCK);
             return OUTSIDE;
         } else {
             return QUEUING;
@@ -47,8 +47,8 @@ client_state client_enqueue(void){
     push_client();
     LOG("Sitting in queue");
 
-    semsignal(sems, QUEUE_STATE);
-    semsignal(sems, BARBER_STATE);
+    semsignal(sems, QUEUE_LOCK);
+    semsignal(sems, BARBER_STATE_LOCK);
 
     int client_sem = get_client_sem(getpid());
     semwait(client_sem, CLIENT_INVITED);
@@ -57,7 +57,7 @@ client_state client_enqueue(void){
     // client semaphore no longer needed
     OK(semctl(client_sem, 0, IPC_RMID), "Deleting semaphore set failed");
 
-    semwait(sems, BARBER_STATE);
+    semwait(sems, BARBER_STATE_LOCK);
     return SITTING;
 }
 
@@ -66,7 +66,7 @@ client_state client_sit(void) {
 
     LOG("Sitting at chair");
     shm->seated_client = getpid();
-    semsignal(sems, BARBER_STATE);
+    semsignal(sems, BARBER_STATE_LOCK);
     semsignal(sems, CURRENT_SEATED);
 
     semwait(sems, FINISHED);
