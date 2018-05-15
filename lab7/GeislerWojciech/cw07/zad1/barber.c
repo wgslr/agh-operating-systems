@@ -105,6 +105,7 @@ void dispatch(void) {
             case INVITING:
                 next_state = barber_invite();
                 break;
+            case WAKING:
             default:
                 // shouldn't happen
                 assert(false);
