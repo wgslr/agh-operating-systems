@@ -24,15 +24,18 @@
 #include <unistd.h>
 
 #define SHARED_NAME "/wgslrapp"
-#define MAX_QUEUE 500
+#define MAX_QUEUE 50
 
-#define SEMS 5
-#define CUSTOMER_AVAIL 0
-#define STATE_RWLOCK 1
-#define CURRENT_SEATED 2
+#define SEMS 7
+#define QUEUE_LOCK 0
+#define BARBER_STATE_LOCK 1
+#define CUSTOMER_AVAIL 2
 #define INVITATION 3
-#define FINISHED 4
+#define CURRENT_SEATED 4
+#define FINISHED 5
+#define LEFT 6
 
+#define CLIENT_INVITED 0
 
 // Check success and exit with log on error
 #define OK(_EXPR, _ERR_MSG) if((_EXPR) < -1) { fprintf(stderr, "%s: %d %s\n", _ERR_MSG, errno, strerror(errno)); exit(1); }
@@ -43,32 +46,40 @@
     clock_gettime(CLOCK_MONOTONIC, &time); \
     char msg[256]; \
     sprintf(msg, args); \
-    printf("%d %ld.%06ld: %s\n", getpid(), time.tv_nsec, time.tv_nsec / 1000, msg); \
+    printf("%ld.%06ld %d: %s\n", time.tv_nsec, time.tv_nsec / 1000, getpid(), msg); \
     fflush(stdout); \
 }
 
-#define PRINTSEM { \
-    unsigned short buff[SEMS]; \
-    semctl(semset, 0, GETALL, buff); \
-    printf("%d: ", getpid()); \
-    for(int i = 0; i < SEMS; ++i) { printf("%u ", buff[i]); } printf("\n"); \
-}
+typedef enum barber_state {
+    SLEEPING = 10,
+    INVITING = 20,
+    CUTTING = 30,
+    WAKING = 40
+} barber_state;
+
+typedef enum client_state {
+    OUTSIDE,
+    SITTING,
+    QUEUING
+} client_state;
 
 typedef struct state {
-    bool is_sleeping;
-    int current_client;
-    int expected_Client;
-    pid_t queue[MAX_QUEUE];
-    int queue_count;
+    barber_state b_state;
+    pid_t seated_client;
+
+    int queue_length;
     int chairs;
+    pid_t queue[MAX_QUEUE];
 } state;
 
-key_t get_ipc_key(void);
+key_t get_ipc_key(int proj_id);
 
 void semwait(sem_t* sems[], int sem);
 
-void wait0(sem_t* sems[], int sem);
+void semsignal(sem_t* sems[], int sem);
 
-void signal(sem_t* sems[], int sem);
+sem_t* get_client_sem(pid_t pid);
+
+char* get_sem_name(int id);
 
 #endif //LAB7_COMMON_H
