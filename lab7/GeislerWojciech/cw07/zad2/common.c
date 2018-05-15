@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include "common.h"
 
-void signal(sem_t* sems[], int sem) {
+void semsignal(sem_t* sems[], int sem) {
     OK(sem_post(sems[sem]), "Semaphore post failed");
 }
 
@@ -41,3 +41,11 @@ sem_t* get_client_sem(pid_t pid) {
     }
     return result;
 }
+
+void remove_client_sem(pid_t pid) {
+    char * semname = get_sem_name(SEMS + pid);
+    OK(sem_close(get_client_sem(pid)), "Closing client semaphore failed");
+    OK(sem_unlink(semname), "Deleting client semaphore failed");
+    free(semname);
+}
+

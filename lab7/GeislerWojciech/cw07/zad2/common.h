@@ -80,6 +80,8 @@ void semsignal(sem_t* sems[], int sem);
 
 sem_t* get_client_sem(pid_t pid);
 
+void remove_client_sem(pid_t pid);
+
 char* get_sem_name(int id);
 
 #endif //LAB7_COMMON_H
