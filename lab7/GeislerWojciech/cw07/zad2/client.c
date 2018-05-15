@@ -17,7 +17,6 @@ void push_client(void);
 
 // about this function's handling of locks I am most unsure
 client_state client_come_in(void) {
-    --repeats;
     semwait(sems, BARBER_STATE_LOCK);
     if(shm->b_state == SLEEPING) {
         LOG("Waking up barber");
@@ -70,6 +69,7 @@ client_state client_sit(void) {
     semsignal(sems, CURRENT_SEATED);
 
     semwait(sems, FINISHED);
+    --repeats;
     LOG("Exiting shop with new haircut");
 
     shm->seated_client = -1;
