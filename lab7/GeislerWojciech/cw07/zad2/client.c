@@ -109,6 +109,7 @@ void push_client(void) {
 void spawn(void) {
     pid_t pid = fork();
     if(pid == 0) {
+        dispatch();
         exit(0);
     } else {
         return;
@@ -153,8 +154,6 @@ int main(int argc, char* argv[]) {
     while(clients--) {
         wait(NULL);
     }
-
-    dispatch();
 
     return 0;
 }
