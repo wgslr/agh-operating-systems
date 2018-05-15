@@ -17,14 +17,14 @@ pid_t peek_queue(void);
 
 barber_state barber_sleep(void) {
     shm->b_state = SLEEPING;
-    LOG("Going to sleep");
+    LOG("Barber: Going to sleep");
 
     // state stabilised
     semsignal(sems, BARBER_STATE_LOCK);
 
     // do sleep
     semwait(sems, CUSTOMER_AVAIL);
-    LOG("Waking up");
+    LOG("Barber: Waking up");
 
     semwait(sems, CURRENT_SEATED);
 
@@ -39,10 +39,10 @@ barber_state barber_cut(void) {
     assert(shm->seated_client > 0);
 
     shm->b_state = CUTTING;
-    LOG("Cutting hair of %d", shm->seated_client);
+    LOG("Barber: Cutting hair of %d", shm->seated_client);
     semsignal(sems, BARBER_STATE_LOCK);
 
-    LOG("Finished cutting hair of %d", shm->seated_client);
+    LOG("Barber: Finished cutting hair of %d", shm->seated_client);
 
     // cause client to go away
     semsignal(sems, FINISHED);
@@ -78,7 +78,7 @@ barber_state barber_invite(void) {
     next_client = pop_client();
     semsignal(sems, QUEUE_LOCK);
 
-    LOG("Inviting client %d", next_client)
+    LOG("Barber: Inviting client %d", next_client)
 
     client_sem = get_client_sem(next_client);
     semsignal(&client_sem, CLIENT_INVITED);
