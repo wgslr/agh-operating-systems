@@ -51,8 +51,11 @@ client_state client_enqueue(void){
     semsignal(sems, BARBER_STATE);
 
     int client_sem = get_client_sem(getpid());
-    semwait(client_sem, 0);
+    semwait(client_sem, CLIENT_INVITED);
     // invited
+
+    // client semaphore no longer needed
+    OK(semctl(client_sem, 0, IPC_RMID), "Deleting semaphore set failed");
 
     semwait(sems, BARBER_STATE);
     return SITTING;

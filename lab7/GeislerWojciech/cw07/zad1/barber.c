@@ -139,8 +139,6 @@ void cleanup(void) {
     OK(semctl(semget(get_ipc_key(FTOK_PROJ_ID), 0, 0600u), 0, IPC_RMID), "Deleting semaphore set failed");
     OK(shmdt(shm), "Failed deattaching shm");
     OK(shmctl(shm_id, IPC_RMID, NULL), "Failed deleting shm");
-
-    // TODO clean client semaphores
 }
 
 int main(int argc, char *argv[]) {
