@@ -28,7 +28,7 @@ test: barber client
 	pkill client
 
 clean:
-	-rm *.o *.so *.a *.bin *.out barber client 
+	-rm *.o *.so *.a *.bin *.out barber client out
 	-find -type p -delete
 
 
