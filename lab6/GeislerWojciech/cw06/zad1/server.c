@@ -91,20 +91,20 @@ void handle_mirror(msgbuf *msg) {
 }
 
 void handle_calc(msgbuf *msg) {
-    arith_req req = *(arith_req *) msg->content;
+    arith_req *req = (arith_req *) msg->content;
     int result;
-    switch(req.op) {
+    switch(req->op) {
         case ADD:
-            result = req.arg1 + req.arg2;
+            result = req->arg1 + req->arg2;
             break;
         case SUB:
-            result = req.arg1 - req.arg2;
+            result = req->arg1 - req->arg2;
             break;
         case MUL:
-            result = req.arg1 * req.arg2;
+            result = req->arg1 * req->arg2;
             break;
         case DIV:
-            result = req.arg1 / req.arg2;
+            result = req->arg1 / req->arg2;
             break;
         default:
             fprintf(stderr, "Unknown arithmetic operation requested by %d\n", msg->sender_id);
