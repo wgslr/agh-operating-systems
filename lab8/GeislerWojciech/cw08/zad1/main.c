@@ -17,6 +17,8 @@ int **image_out;
 
 int get_idx(int origin, int offset, int size) ;
 
+int calc_pixel_value(int d1, int d2) ;
+
 void read_filter(const char *path) {
     FILE *fd = fopen(path, "r");
     fscanf(fd, "%d\n", &filter_size);
@@ -34,9 +36,11 @@ void read_filter(const char *path) {
 }
 
 void read_image(const char *path) {
+    // TODO handle comment lines
+
     FILE *fd = fopen(path, "r");
-    int maxval;
-    fscanf(fd, "P2\n%d %d\n%d", &image_w, &image_h, &maxval);
+    int maxval = 0;
+    fscanf(fd, "P2 %d %d %d", &image_w, &image_h, &maxval);
 
     if(maxval != MAX_PIX) {
         fprintf(stderr, "Unsupported color palette, max pixel value should be %d, got: %d\n", MAX_PIX, maxval);
@@ -45,16 +49,37 @@ void read_image(const char *path) {
 
     fprintf(stderr, "Reading image of size %dx%d\n", image_w, image_h);
 
-    filter = calloc(image_h, sizeof(int *));
-
+    image_in = calloc(image_h, sizeof(int *));
+    image_out = calloc(image_h, sizeof(int *));
     for(int i = 0; i < image_h; ++i) {
-        filter[i] = calloc(image_w, sizeof(int));
+        image_in[i] = calloc(image_w, sizeof(int));
+        image_out[i] = calloc(image_w, sizeof(int));
         for(int j = 0; j < image_w; ++j) {
             fscanf(fd, "%d ", &image_in[i][j]);
         }
     }
     fclose(fd);
 }
+
+void write_output(const char *path) {
+    FILE *fd = fopen(path, "w");
+    fprintf(fd, "P2\n%d %d\n%d\n", image_w, image_h, MAX_PIX);
+    for(int i = 0; i < image_h; ++i) {
+        for(int j = 0; j < image_w; ++j) {
+            fprintf(fd, "%d ", image_out[i][j]);
+        }
+    }
+    fprintf(fd, "\n");
+}
+
+void process_image(void) {
+    for(int i = 0; i < image_h; ++i) {
+        for(int j = 0; j < image_w; ++j) {
+            image_out[i][j] = calc_pixel_value(i, j);
+        }
+    }
+}
+
 
 int calc_pixel_value(int d1, int d2) {
     double sum = 0;
@@ -94,6 +119,10 @@ int main(int argc, char *argv[]) {
 
     read_image(inpath);
     read_filter(filterpath);
+
+    process_image();
+
+    write_output(outpath);
 
 
     return 0;
