@@ -78,8 +78,10 @@ void write_output(const char* path) {
 }
 
 
-void* process_part(const int begin, const int end) {
-    fprintf(stderr, "Process %d processing from %d to %d\n", pthread_self(), begin, end);
+void* process_part(int* args) {
+    const int begin = args[0];
+    const int end = args[1];
+    fprintf(stderr, "Process %lu processing from %d to %d\n", pthread_self(), begin, end);
 
     for(int i = begin; i < end; ++i) {
         for(int j = 0; j < image_w; ++j) {
@@ -87,8 +89,8 @@ void* process_part(const int begin, const int end) {
         }
     }
 
+    free(args);
     return (void*) 0;
-//    free(params);
 }
 
 
@@ -102,13 +104,16 @@ void process_image(const int threads) {
 
         int* params = calloc(2, sizeof(int));
         params[0] = i * part_len;
-        params[1] = (i + 1) * part_len > image_h ? image_h : i + part_len;
+        params[1] = params[0] + part_len <= image_h ? params[0] + part_len : image_h;
 
         fprintf(stderr, "Creating thread for %d..%d\n", params[0], params[1]);
-        pthread_create(tids + i, attr, &process_part, params);
-
+        pthread_create(tids + i, attr, (void* (*)(void*)) &process_part, params);
 
         pthread_attr_destroy(attr);
+    }
+
+    for(int i = 0; i < threads; ++i) {
+        pthread_join(tids[i], NULL);
     }
 }
 
