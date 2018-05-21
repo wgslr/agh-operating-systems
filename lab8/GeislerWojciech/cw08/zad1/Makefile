@@ -10,17 +10,22 @@ override CFLAGS+=-lm -lpthread -lrt -Wall -Wextra -Wall -std=c11 \
 	-Wold-style-definition -Wuninitialized -Winit-self \
 	-fdiagnostics-color=always \
 	$(O)
-SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak -lasan -lubsan
+#SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak -lasan -lubsan
 .PHONY: all test clean debug
 
 all: main
 
-barber: barber.c
+main: main.c
 	$(CC) $^ -o $@ $(CFLAGS) $(SANITIZER)
 
 clean:
 	-rm *.o *.so *.a *.bin *.out main 
 	-find -type p -delete
+
+test: main
+	mkdir -p out
+	echo "threads;time;img;filter" > Times.txt
+	bash -c 'for I in {3..65}; do for T in {1,2,4,8}; do ./main $$T input600.pgm filters/filter$$I.in out/out.$$T.$$I.pgm >> Times.txt; done; done'
 
 %.png: %.pgm
 	convert $< png:$@
