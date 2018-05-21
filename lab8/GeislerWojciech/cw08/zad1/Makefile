@@ -23,8 +23,7 @@ clean:
 	-find -type p -delete
 
 %.png: %.pgm
-	convert $< -compress png:$@
+	convert $< png:$@
 
 %.pgm: %.png
 	convert $< -compress none pgm:$@
-
