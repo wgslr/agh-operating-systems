@@ -1,6 +1,8 @@
 // 2018-05
 // Wojciech Geisler
 
+#define _POSIX_C_SOURCE 199309L
+
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
@@ -16,6 +18,9 @@ double** filter;
 int** image_in;
 int** image_out;
 
+int threads;
+int image_size;
+
 int get_idx(int origin, int offset, int size);
 
 int calc_pixel_value(int d1, int d2);
@@ -24,11 +29,11 @@ int calc_pixel_value(int d1, int d2);
 // ceil(x/2)
 int divceil(int x, int divisor) ;
 
+void print_typespec(struct timespec start, struct timespec end) ;
+
 void read_filter(const char* path) {
     FILE* fd = fopen(path, "r");
     fscanf(fd, "%d\n", &filter_size);
-
-    fprintf(stderr, "Reading filter of size %d\n", filter_size);
 
     filter = calloc(filter_size, sizeof(double*));
     for(int i = 0; i < filter_size; ++i) {
@@ -47,12 +52,12 @@ void read_image(const char* path) {
     int maxval = 0;
     fscanf(fd, "P2 %d %d %d", &image_w, &image_h, &maxval);
 
+    image_size = image_h * image_w;
+
     if(maxval != MAX_PIX) {
         fprintf(stderr, "Unsupported color palette, max pixel value should be %d, got: %d\n", MAX_PIX, maxval);
         exit(1);
     }
-
-    fprintf(stderr, "Reading image of size %dx%d\n", image_w, image_h);
 
     image_in = calloc(image_h, sizeof(int*));
     image_out = calloc(image_h, sizeof(int*));
@@ -81,7 +86,6 @@ void write_output(const char* path) {
 void* process_part(int* args) {
     const int begin = args[0];
     const int end = args[1];
-    fprintf(stderr, "Process %lu processing from %d to %d\n", pthread_self(), begin, end);
 
     for(int i = begin; i < end; ++i) {
         for(int j = 0; j < image_w; ++j) {
@@ -94,10 +98,13 @@ void* process_part(int* args) {
 }
 
 
-void process_image(const int threads) {
+void process_image(void) {
     const int part_len = divceil(image_h, threads);
     pthread_t tids[threads];
     pthread_attr_t* attr = calloc(1, sizeof(pthread_attr_t));
+
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_REALTIME, &start_time);
 
     for(int i = 0; i < threads; ++i) {
         pthread_attr_init(attr);
@@ -106,7 +113,6 @@ void process_image(const int threads) {
         params[0] = i * part_len;
         params[1] = params[0] + part_len <= image_h ? params[0] + part_len : image_h;
 
-        fprintf(stderr, "Creating thread for %d..%d\n", params[0], params[1]);
         pthread_create(tids + i, attr, (void* (*)(void*)) &process_part, params);
 
         pthread_attr_destroy(attr);
@@ -115,6 +121,16 @@ void process_image(const int threads) {
     for(int i = 0; i < threads; ++i) {
         pthread_join(tids[i], NULL);
     }
+
+    clock_gettime(CLOCK_REALTIME, &end_time);
+    print_typespec(start_time, end_time);
+}
+
+
+void print_typespec(struct timespec start, struct timespec end) {
+    unsigned long long ms = (end.tv_sec - start.tv_sec) * 1000000;
+    ms += (end.tv_nsec - start.tv_nsec) / 1000;
+    printf("%d; %llu; %d; %d\n", threads, ms, image_size, filter_size * filter_size);
 }
 
 
@@ -129,8 +145,7 @@ int calc_pixel_value(const int d1, const int d2) {
 }
 
 
-// calculates
-// ceil(x/2)
+// calculates ceil(x/y)
 int divceil(int x, int divisor) {
     return x % divisor == 0 ? x / divisor : x / divisor + 1;
 }
@@ -150,7 +165,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    const int threads = atoi(argv[1]);
+    threads = atoi(argv[1]);
     const char* inpath = argv[2];
     const char* filterpath = argv[3];
     const char* outpath = argv[4];
@@ -158,7 +173,7 @@ int main(int argc, char* argv[]) {
     read_image(inpath);
     read_filter(filterpath);
 
-    process_image(threads);
+    process_image();
 
     write_output(outpath);
 
