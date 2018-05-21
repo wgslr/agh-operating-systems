@@ -124,6 +124,8 @@ void process_image(void) {
 
     clock_gettime(CLOCK_REALTIME, &end_time);
     print_typespec(start_time, end_time);
+
+    free(attr);
 }
 
 
