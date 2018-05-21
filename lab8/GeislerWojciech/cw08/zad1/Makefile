@@ -1,6 +1,6 @@
 CC=gcc
 O=-O0
-override CFLAGS+=-lm -lrt -Wall -Wextra -Wall -std=c11 \
+override CFLAGS+=-lm -lpthread -lrt -Wall -Wextra -Wall -std=c11 \
 	-Wformat=2 \
 	-g \
 	-Wswitch-default -Wswitch-enum -Wcast-align -Wpointer-arith \
