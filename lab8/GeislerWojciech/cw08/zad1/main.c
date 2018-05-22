@@ -46,8 +46,6 @@ void read_filter(const char* path) {
 }
 
 void read_image(const char* path) {
-    // TODO handle comment lines
-
     FILE* fd = fopen(path, "r");
     int maxval = 0;
     fscanf(fd, "P2 %d %d %d", &image_w, &image_h, &maxval);
