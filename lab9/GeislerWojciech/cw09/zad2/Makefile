@@ -9,7 +9,7 @@ override CFLAGS+=-lm -lpthread -lrt -Wall -Wextra -Wall -std=c11 \
 	-Wold-style-definition -Wuninitialized -Winit-self \
 	-fdiagnostics-color=always \
 	$(O)
-#SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak -lasan -lubsan
+SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak -lasan -lubsan
 .PHONY: all test clean debug
 
 all: main
