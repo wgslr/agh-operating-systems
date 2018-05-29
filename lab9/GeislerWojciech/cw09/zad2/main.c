@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 
 #define OK(_EXPR, _ERR_MSG) if((_EXPR) < -1) { fprintf(stderr, "%s: %d %s\n", _ERR_MSG, errno, strerror(errno)); exit(1); }
 
@@ -26,8 +27,8 @@
 
 typedef struct {
     char **buffer;
+    size_t first_pending;
     size_t last_write;
-    size_t last_read;
 } buffer;
 
 typedef enum {
@@ -75,6 +76,20 @@ void *produce(const config *c) {
             break;
         }
 
+        OK(sem_wait(free_slots), "Error waiting for free buffer slot");
+        OK(sem_wait(queue_lock), "Error locking queue state");
+
+        const size_t pos = buff.last_write = (buff.last_write + 1) % c->buffor_size;
+        (buff.buffer[pos] == NULL);
+        OK(sem_post(queue_lock), "Error posting queue_lock semaphore");
+
+        LOG(1,1, "Locking slot %zu", pos);
+        OK(sem_wait(slot_locks[pos]), "Error locking buffer slot");
+
+        LOG(1,1, "Writing line to slot %zu", pos);
+        buff.buffer[pos] = calloc(strlen(line) + 1, sizeof(char));
+        strcpy(buff.buffer[pos], line);
+        OK(sem_post(slot_locks[pos]), "Error posting buffer slot");
     }
     fclose(fd);
     free(line);
@@ -94,8 +109,12 @@ config load_config(const char *path) {
         fprintf(stderr, "Could not open config file\n");
         exit(1);
     }
-    fscanf(f, "%s %d %d %zu %d %d %d", c.input_path, &c.producers_cnt, &c.consumers_cnt,
-           &c.buffor_size, &c.thread_ttl, &c.search_mode, &verbose_int);
+    if(fscanf(f, "%s %d %d %zu %d %d %d", c.input_path, &c.producers_cnt, &c.consumers_cnt,
+           &c.buffor_size, &c.thread_ttl, &c.search_mode, &verbose_int) < 7) {
+        fprintf(stderr, "Too few values in config file\n");
+        exit(1);
+    }
+
     c.verbose = (bool) verbose_int;
     fclose(f);
     return c;
@@ -136,8 +155,8 @@ int main(int argc, char *argv[]) {
     verbose = c.verbose;
 
     buff.buffer = calloc(c.buffor_size, sizeof(char *));
-    buff.last_read = 0;
-    buff.last_write = 0;
+    buff.last_write = c.buffor_size - 1;
+    buff.first_pending = 0;
 
     slot_locks = calloc(c.buffor_size, sizeof(sem_t *));
     queue_lock = calloc(1, sizeof(sem_t));
@@ -148,7 +167,7 @@ int main(int argc, char *argv[]) {
         sem_init(slot_locks[i], 0, 1);
     }
     sem_init(queue_lock, 0, 1);
-    sem_init(free_slots, 0, c.buffor_size);
+    sem_init(free_slots, 0, (unsigned int) c.buffor_size);
 
     LOG(1, 0, "Main");
 
