@@ -56,7 +56,7 @@ sem_t *queue_lock;
 sem_t *free_slots;
 
 void *produce(const config *c) {
-    LOG(1,1, "Read file %s", c->input_path);
+    LOG(1, 1, "Read file %s", c->input_path);
 
     FILE *fd = fopen(c->input_path, "r");
 
@@ -68,21 +68,23 @@ void *produce(const config *c) {
     char *line = NULL;
     size_t len = 0;
 
-//    while(c->thread_ttl == 0 || (time(NULL) - start_time) < c->thread_ttl) {
-    while(true) {
+    while(c->thread_ttl == 0 || (time(NULL) - start_time) < c->thread_ttl) {
         // TODO end on ctrl+c
         if(getline(&line, &len, fd) == -1) {
             LOG(1, 1, "End of file");
             break;
         }
 
-//        LOG(1, 1, "Read line of length %zu", strlen(line));
     }
     fclose(fd);
     free(line);
     return NULL;
 }
 
+
+void *consume(const config *c) {
+    return NULL;
+}
 
 config load_config(const char *path) {
     config c;
@@ -99,39 +101,62 @@ config load_config(const char *path) {
     return c;
 }
 
+void spawn(config *c) {
+    pthread_attr_t *attr = calloc(1, sizeof(pthread_attr_t));
+
+    pthread_t p_tids[c->producers_cnt];
+    pthread_t c_tids[c->consumers_cnt];
+    pthread_attr_init(attr);
+
+    for(int i = 0; i < c->producers_cnt; ++i) {
+        pthread_create(p_tids + i, attr, (void *(*)(void *)) &produce, (void *) c);
+    }
+    for(int i = 0; i < c->consumers_cnt; ++i) {
+        pthread_create(c_tids + i, attr, (void *(*)(void *)) &consume, (void *) c);
+    }
+
+    for(int i = 0; i < c->producers_cnt; ++i) {
+        pthread_join(p_tids[i], NULL);
+    }
+    for(int i = 0; i < c->consumers_cnt; ++i) {
+        pthread_join(c_tids[i], NULL);
+    }
+
+    pthread_attr_destroy(attr);
+    free(attr);
+}
+
 
 int main(int argc, char *argv[]) {
     if(argc < 2) {
         fprintf(stderr, "Please provide path to config file\n");
         exit(1);
     }
-    const config c = load_config(argv[1]);
+    config c = load_config(argv[1]);
     verbose = c.verbose;
 
     buff.buffer = calloc(c.buffor_size, sizeof(char *));
     buff.last_read = 0;
     buff.last_write = 0;
 
-    slot_locks = calloc(c.buffor_size, sizeof(sem_t*));
+    slot_locks = calloc(c.buffor_size, sizeof(sem_t *));
     queue_lock = calloc(1, sizeof(sem_t));
     free_slots = calloc(1, sizeof(sem_t));
 
-    for(int i = 0; i < c.buffor_size; ++i) {
+    for(size_t i = 0; i < c.buffor_size; ++i) {
         slot_locks[i] = calloc(1, sizeof(sem_t));
         sem_init(slot_locks[i], 0, 1);
     }
-//    queue_lock = calloc(1, sizeof(sem_t));
     sem_init(queue_lock, 0, 1);
-//    free_slots = calloc(1, sizeof(sem_t));
     sem_init(free_slots, 0, c.buffor_size);
 
     LOG(1, 0, "Main");
 
-    produce(&c);
+    spawn(&c);
 
     LOG(1, 0, "Freeing");
 
-    for(int i = 0; i < c.buffor_size; ++i) {
+    for(size_t i = 0; i < c.buffor_size; ++i) {
         sem_destroy(slot_locks[i]);
         free(slot_locks[i]);
     }
