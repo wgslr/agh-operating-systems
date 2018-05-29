@@ -27,6 +27,10 @@ test: main
 	echo "threads;time;img;filter" > Times.txt
 	bash -c 'for I in {3..65}; do for T in {1,2,4,8}; do ./main $$T input600.pgm filters/filter$$I.in out/out.$$T.$$I.pgm >> Times.txt; done; done'
 
+test2: main
+	mkdir -p out2
+	echo "threads;time;img;filter" > Times2.txt
+	bash -c 'for I in {3..65}; do for T in {1..16}; do ./main $$T input600.pgm filters/filter$$I.in out2/out.$$T.$$I.pgm >> Times2.txt; done; done'
 %.png: %.pgm
 	convert $< png:$@
 
