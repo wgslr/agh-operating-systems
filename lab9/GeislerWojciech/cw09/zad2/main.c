@@ -50,8 +50,6 @@ typedef struct {
 
 bool matching(const char* line, const config *c);
 
-void print_buf(size_t s) ;
-
 bool verbose;
 
 buffer buff;
@@ -60,8 +58,6 @@ sem_t **slot_locks;
 sem_t *queue_lock;
 sem_t *free_slots;
 sem_t *filled_slots;
-
-int skipped = 0;
 
 void semsignal(sem_t* sem) {
     OK(sem_post(sem), "Semaphore post failed");
@@ -268,8 +264,6 @@ int main(int argc, char *argv[]) {
     sem_init(queue_lock, 0, 1);
     sem_init(free_slots, 0, (unsigned int) c.buffor_size);
     sem_init(filled_slots, 0, 0);
-
-    LOG(1, 0, "Main");
 
     spawn(&c);
 

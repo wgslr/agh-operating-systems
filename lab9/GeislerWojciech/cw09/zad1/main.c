@@ -100,19 +100,15 @@ void *produce(const config *c) {
             if(c->thread_ttl == 0) {
                 pthread_cond_wait(filled_slots_cond, filled_slots_mutex);
             } else {
-
-                int t= (int) time(NULL);
-                LOG(1,1,"Timed wait from %d to %ld", t, timeout.tv_sec);
                 if(pthread_cond_timedwait(filled_slots_cond, filled_slots_mutex, &timeout) != 0) {
                     LOG(1,1,"Timeout");
-//                    mutexunlock(filled_slots_mutex);
+                    mutexunlock(filled_slots_mutex);
                     free(line);
                     fclose(fd);
                     pthread_exit(NULL);
                 }
             }
         }
-        mutexunlock(filled_slots_mutex);
 
         size_t pos = buff.next_write;
 
@@ -133,7 +129,6 @@ void *produce(const config *c) {
                 LOG(1,1, "Unlocking buffer[%zu]", pos);
                 mutexunlock(slot_locks[pos]);
 
-                mutexlock(filled_slots_mutex);
                 ++filled_slots;
                 pthread_cond_broadcast(filled_slots_cond);
                 mutexunlock(filled_slots_mutex);
@@ -157,13 +152,10 @@ void *consume(const config *c) {
     while(c->thread_ttl == 0 || time(NULL) <= timeout.tv_sec) {
         LOG(1,0,"Waiting for new portion of information to consume");
         mutexlock(filled_slots_mutex);
-        LOG(1,0,"Locked filled_slots_mutex");
         while(filled_slots == 0) {
             if(c->thread_ttl == 0) {
                 pthread_cond_wait(filled_slots_cond, filled_slots_mutex);
             } else {
-                int t= (int) time(NULL);
-                LOG(1,0,"Timed wait from %d to %ld", t, timeout.tv_sec);
                 if(pthread_cond_timedwait(filled_slots_cond, filled_slots_mutex, &timeout) != 0) {
                     LOG(1,0,"Timeout");
                     mutexunlock(filled_slots_mutex);
@@ -171,7 +163,6 @@ void *consume(const config *c) {
                 }
             }
         }
-        mutexunlock(filled_slots_mutex);
         size_t pos = buff.next_read;
 
         do {
@@ -195,7 +186,6 @@ void *consume(const config *c) {
 
                 LOG(1,0, "Unlocking buffer[%zu]", pos);
                 mutexunlock(slot_locks[pos]);
-                mutexlock(filled_slots_mutex);
                 --filled_slots;
                 pthread_cond_broadcast(filled_slots_cond);
                 mutexunlock(filled_slots_mutex);
