@@ -27,8 +27,8 @@
 
 typedef struct {
     char **buffer;
-    size_t first_filled;
-    size_t last_write;
+    size_t pos_begin;
+    size_t pos_end; // 1 past last written
 } buffer;
 
 typedef enum {
@@ -61,6 +61,15 @@ sem_t *queue_lock;
 sem_t *free_slots;
 sem_t *filled_slots;
 
+void semsignal(sem_t* sem) {
+    OK(sem_post(sem), "Semaphore post failed");
+}
+
+
+void semwait(sem_t* sem) {
+    OK(sem_wait(sem), "Waiting for semaphore failed");
+}
+
 void *produce(const config *c) {
     LOG(1, 1, "Read file %s", c->input_path);
 
@@ -81,25 +90,36 @@ void *produce(const config *c) {
             break;
         }
 
-        OK(sem_wait(free_slots), "Error waiting for free buffer slot");
-        OK(sem_wait(queue_lock), "Error locking queue state");
+        struct timespec timeout;
+        clock_gettime(CLOCK_REALTIME, &timeout);
+        timeout.tv_sec = start_time + c->thread_ttl;
 
-        const size_t pos = buff.last_write = (buff.last_write + 1) % c->buffor_size;
-        LOG(1,1, "Position is %zu", pos);
-        print_buf(c->buffor_size);
-        assert(buff.buffer[pos] == NULL);
+        LOG(1,1,"Waiting for a place in buffer");
+        OK(sem_timedwait(free_slots, &timeout), "Timeout");
 
-        OK(sem_post(queue_lock), "Error posting queue_lock semaphore");
+        LOG(1,1,"Waiting for queue lock");
+        semwait(queue_lock);
+
+        const size_t pos = buff.pos_end;
+        buff.pos_end = (buff.pos_end + 1) % c->buffor_size;
+
+        LOG(1,1, "Will write to buff[%zu]. New queue range: %d..%d. Freeing queue lock", pos, buff.pos_begin, buff.pos_end);
 
         LOG(1,1, "Locking slot %zu", pos);
-        OK(sem_wait(slot_locks[pos]), "Error locking buffer slot");
+        semwait(slot_locks[pos]);
+        LOG(1,1, "Locked slot %zu", pos);
+
+        semsignal(queue_lock);
+        assert(buff.buffer[pos] == NULL);
 
         LOG(1,1, "Writing line to slot %zu", pos);
         buff.buffer[pos] = calloc(strlen(line) + 1, sizeof(char));
         strcpy(buff.buffer[pos], line);
+
+        LOG(1,1, "Written line to slot %zu. Freeing lock", pos);
         OK(sem_post(slot_locks[pos]), "Error posting buffer slot sem");
         OK(sem_post(filled_slots), "Error posting sem");
-        LOG(1,1, "Slot %zu available for read", pos);
+        LOG(1,1, "Increased filled_slots count", pos);
     }
     fclose(fd);
     free(line);
@@ -114,28 +134,38 @@ void *consume(const config *c) {
     int tmp;
 
     while(c->thread_ttl == 0 || (time(NULL) - start_time) < c->thread_ttl) {
-        sem_getvalue(filled_slots, &tmp);
-        LOG(1,0, "Filled slots count is %d", tmp)
+//        sem_getvalue(filled_slots, &tmp);
+//        LOG(1,0, "Filled slots count is %d", tmp)
 
-        OK(sem_wait(filled_slots), "Error in sem_wait");
+        struct timespec timeout;
+        clock_gettime(CLOCK_REALTIME, &timeout);
+        timeout.tv_sec = start_time + c->thread_ttl;
+
+        LOG(1,0,"Waiting for information place in buffer");
+        OK(sem_timedwait(filled_slots, &timeout), "Timeout");
+
+        LOG(1,0,"Waiting for queue lock");
         OK(sem_wait(queue_lock), "Error locking queue state");
 
-        const size_t pos = buff.first_filled = (buff.first_filled + 1) % c->buffor_size;
-        LOG(1,1, "Position is %zu", pos);
-        print_buf(c->buffor_size);
+        const size_t pos = buff.pos_begin;
+        buff.pos_begin = (buff.pos_begin + 1) % c->buffor_size;
+        LOG(1,0, "Position is %zu. New queue range: %d..%d. Locking slot %zu", pos, buff.pos_begin, buff.pos_end, pos);
+
+//        print_buf(c->buffor_size);
+
+
+        OK(sem_wait(slot_locks[pos]), "Error locking buffer slot");
         assert(buff.buffer[pos] != NULL);
 
         OK(sem_post(queue_lock), "Error posting queue_lock semaphore");
 
-        LOG(1,0, "Locking slot %zu", pos);
-        OK(sem_wait(slot_locks[pos]), "Error locking buffer slot");
-
         if(matching(buff.buffer[pos], c)) {
-            LOG(0, 0, "buff[%zu]: %s", pos, buff.buffer[pos]);
+            LOG(0, 0, "buff[%zu]: %.*s", pos, (int)strlen(buff.buffer[pos]) - 1, buff.buffer[pos]);
         } else {
             LOG(1, 0, "skipping buff[%zu]", pos);
         }
 
+        LOG(1, 0, "Emptying slot %zu", pos);
         free(buff.buffer[pos]);
         buff.buffer[pos] = NULL;
 
@@ -151,7 +181,7 @@ void print_buf(size_t s) {
     for(int i = 0; i < s; ++i) {
         printf("%3d", i);
     }
-    printf("\t%d..%d", buff.first_filled, buff.last_write);
+    printf("\t%d..%d", buff.pos_begin, buff.pos_end);
     printf("\n");
     for(int i = 0; i < s; ++i) {
         printf("%3d", buff.buffer[i] != NULL);
@@ -229,8 +259,8 @@ int main(int argc, char *argv[]) {
     verbose = c.verbose;
 
     buff.buffer = calloc(c.buffor_size, sizeof(char *));
-    buff.last_write = c.buffor_size - 1;
-    buff.first_filled = c.buffor_size - 1;
+    buff.pos_end = 0;
+    buff.pos_begin = 0;
 
     slot_locks = calloc(c.buffor_size, sizeof(sem_t *));
     queue_lock = calloc(1, sizeof(sem_t));

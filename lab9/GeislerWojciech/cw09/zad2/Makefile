@@ -14,6 +14,10 @@ SANITIZER=-fsanitize=address -fsanitize=undefined -fsanitize=leak -lasan -lubsan
 
 all: main
 
+test: main
+	./main config.in > out
+	diff <(sort ../iliada.txt | uniq) <(sort out | uniq)
+
 main: main.c
 	$(CC) $^ -o $@ $(CFLAGS) $(SANITIZER)
 
