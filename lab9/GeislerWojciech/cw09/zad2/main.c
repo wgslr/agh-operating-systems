@@ -20,7 +20,7 @@
         clock_gettime(CLOCK_MONOTONIC, &time); \
         char msg[1024]; \
         sprintf(msg, args); \
-        printf("%ld.%06ld %lu(%c): %s\n", time.tv_sec, time.tv_nsec / 1000, pthread_self()%10000, _PRODUCER ? 'P' : 'C', msg); \
+        printf("%ld.%06ld %04lu(%c): %s\n", time.tv_sec, time.tv_nsec / 1000, pthread_self()%10000, _PRODUCER ? 'P' : 'C', msg); \
         fflush(stdout); \
     }\
 }
@@ -73,7 +73,7 @@ void semwait(sem_t* sem) {
 }
 
 void *produce(const config *c) {
-    LOG(1, 1, "Read file %s", c->input_path);
+    LOG(1, 1, "Opening file %s", c->input_path);
 
     FILE *fd = fopen(c->input_path, "r");
 
@@ -81,55 +81,50 @@ void *produce(const config *c) {
         fprintf(stderr, "Error opening input file for reading: %s\n", strerror(errno));
     }
 
-    const time_t start_time = time(NULL);
+    struct timespec timeout;
+    clock_gettime(CLOCK_REALTIME, &timeout);
+    timeout.tv_sec += c->thread_ttl;
+
     char *line = NULL;
     size_t len = 0;
-    int line_number = 0;
 
-    while(c->thread_ttl == 0 || (time(NULL) - start_time) < c->thread_ttl) {
-        // TODO end on ctrl+c
+    while(c->thread_ttl == 0 || time(NULL) <= timeout.tv_sec) {
         if(getline(&line, &len, fd) == -1) {
             LOG(1, 1, "End of file");
             break;
         }
-        ++line_number;
 
-        struct timespec timeout;
-        clock_gettime(CLOCK_REALTIME, &timeout);
-        timeout.tv_sec = start_time + c->thread_ttl;
-
-        LOG(1,1,"Waiting for a place in buffer");
-        OK(sem_timedwait(free_slots, &timeout), "Timeout");
-//
-//        LOG(1,1,"Waiting for queue lock");
-//        semwait(queue_lock);
+        LOG(1,1,"Waiting for a free place in buffer");
+        if(c->thread_ttl == 0) {
+            semwait(free_slots);
+        } else {
+            if(sem_timedwait(free_slots, &timeout) < 0) {
+                LOG(1,1,"Timeout");
+                free(line);
+                fclose(fd);
+                pthread_exit(NULL);
+            }
+        }
 
         size_t pos = buff.next_write;
 
         do {
-            LOG(1,1, "Locking slot %zu", pos);
             semwait(slot_locks[pos]);
-            LOG(1,1, "Locked slot %zu", pos);
 
             if(buff.buffer[pos] != NULL) {
-                LOG(1,1, "Slot %zu not empty, looking for another", pos);
                 semsignal(slot_locks[pos]);
                 pos = (pos + 1) % c->buffor_size;
-                ++skipped;
-                fprintf(stderr, "Skipped %d\n", skipped);
             } else {
                 buff.next_write = (pos + 1) % c->buffor_size;
-                LOG(1,1, "Set next write to %zu", (pos + 1) % c->buffor_size);
 
-//                printf("%d Line\n", line_number);
+                LOG(1,1, "Writing line at buffer[%zu]", pos);
+
                 buff.buffer[pos] = calloc(strlen(line) + 1 + 0, sizeof(char));
                 strcpy(buff.buffer[pos], line);
-//                *((int*) (buff.buffer[pos] + (strlen(line) + 2))) = line_number;
 
-                LOG(1,1, "Written line to slot %zu. Freeing lock", pos);
+                LOG(1,1, "Unlocking buffer[%zu]", pos);
                 semsignal(slot_locks[pos]);
                 semsignal(filled_slots);
-                LOG(1,1, "Increased filled_slots count", pos);
                 break;
             }
         } while(true);
@@ -141,49 +136,44 @@ void *produce(const config *c) {
 
 
 void *consume(const config *c) {
-    const time_t start_time = time(NULL);
     LOG(1,0, "Consumer is born");
 
-    while(c->thread_ttl == 0 || (time(NULL) - start_time) < c->thread_ttl) {
-        struct timespec timeout;
-        clock_gettime(CLOCK_REALTIME, &timeout);
-        timeout.tv_sec = start_time + c->thread_ttl;
+    struct timespec timeout;
+    clock_gettime(CLOCK_REALTIME, &timeout);
+    timeout.tv_sec += c->thread_ttl;
 
-        LOG(1,0,"Waiting for information place in buffer");
-        OK(sem_timedwait(filled_slots, &timeout), "Timeout");
-
+    while(c->thread_ttl == 0 || time(NULL) <= timeout.tv_sec) {
+        LOG(1,0,"Waiting for new portion of information to consume");
+        if(c->thread_ttl == 0) {
+            semwait(filled_slots);
+        } else {
+            if(sem_timedwait(filled_slots, &timeout) < 0) {
+                LOG(1,0,"Timeout");
+                pthread_exit(NULL);
+            }
+        }
         size_t pos = buff.next_read;
 
         do {
-            LOG(1,0, "Locking slot %zu", pos);
             semwait(slot_locks[pos]);
 
-            LOG(1,0, "Locked slot %zu", pos);
-
             if(buff.buffer[pos] == NULL) {
-                LOG(1,0, "Slot %zu not filled, looking for another", pos);
                 semsignal(slot_locks[pos]);
                 pos = (pos + 1) % c->buffor_size;
-                ++skipped;
-                fprintf(stderr, "Skipped %d\n", skipped);
             } else {
                 buff.next_read = (pos + 1) % c->buffor_size;
-                LOG(1,0, "Set next read to %zu", (pos + 1) % c->buffor_size);
-
-//                size_t len = strlen(buff.buffer[pos]);
-//                int line_number = *((int*) (buff.buffer[pos] + (strlen(buff.buffer[pos]) + 2)));
 
                 if(matching(buff.buffer[pos], c)) {
-                    LOG(0, 0, "buff[%zu]: %.*s", pos, (int)strlen(buff.buffer[pos]) - 1, buff.buffer[pos]);
+                    LOG(0, 0, "buffer[%4zu]: %.*s", pos, (int)strlen(buff.buffer[pos]) - 1, buff.buffer[pos]);
                 } else {
-                    LOG(1, 0, "skipping buff[%zu]", pos);
+                    LOG(1, 0, "skipping buffer[%zu]", pos);
                 }
 
-                LOG(1, 0, "Emptying slot %zu", pos);
+                LOG(1, 0, "Emptying buffer[%zu]", pos);
                 free(buff.buffer[pos]);
                 buff.buffer[pos] = NULL;
 
-                LOG(1,0, "Unlocking slot %zu", pos);
+                LOG(1,0, "Unlocking buffer[%zu]", pos);
                 semsignal(slot_locks[pos]);
                 semsignal(free_slots);
                 break;
@@ -194,22 +184,8 @@ void *consume(const config *c) {
     return NULL;
 }
 
-void print_buf(size_t s) {
-    for(int i = 0; i < s; ++i) {
-        printf("%3d", i);
-    }
-    printf("\t%d..%d", buff.next_read, buff.next_write);
-    printf("\n");
-    for(int i = 0; i < s; ++i) {
-        printf("%3d", buff.buffer[i] != NULL);
-    }
-    printf("\n");
-
-}
-
 bool matching(const char* line, const config *c) {
-    return true;
-    const size_t len = strlen(line);
+    const int len = (const int) strlen(line);
     switch(c->search_mode) {
         case BIGGER:
             return len > c->threshold;
@@ -296,9 +272,6 @@ int main(int argc, char *argv[]) {
     LOG(1, 0, "Main");
 
     spawn(&c);
-
-
-    LOG(1, 0, "Freeing");
 
     for(size_t i = 0; i < c.buffor_size; ++i) {
         sem_destroy(slot_locks[i]);
