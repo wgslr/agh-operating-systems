@@ -1,10 +1,11 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include <stdio.h>
+#include <unistd.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <semaphore.h>
-#include <bits/time.h>
+#include <time.h>
 #include <time.h>
 #include <pthread.h>
 #include <string.h>
@@ -20,7 +21,7 @@
         clock_gettime(CLOCK_MONOTONIC, &time); \
         char msg[1024]; \
         sprintf(msg, args); \
-        printf("%ld.%06ld %04lu(%c): %s\n", time.tv_sec, time.tv_nsec / 1000, pthread_self()%10000, _PRODUCER ? 'P' : 'C', msg); \
+        printf("%ld.%06ld %04d %04lu(%c): %s\n", time.tv_sec, time.tv_nsec / 1000, getpid(), pthread_self()%10000, _PRODUCER ? 'P' : 'C', msg); \
         fflush(stdout); \
     }\
 }
@@ -57,9 +58,6 @@ buffer buff;
 pthread_mutex_t **slot_locks;
 pthread_mutex_t *queue_lock;
 
-pthread_mutex_t *free_slots_mutex;
-pthread_cond_t *free_slots_cond;
-int free_slots;
 pthread_mutex_t *filled_slots_mutex;
 pthread_cond_t *filled_slots_cond;
 int filled_slots;
@@ -97,23 +95,24 @@ void *produce(const config *c) {
 
         LOG(1,1,"Waiting for a free place in buffer");
 
-        mutexlock(free_slots_mutex);
-        while(free_slots == 0) {
+        mutexlock(filled_slots_mutex);
+        while(filled_slots == (int)c->buffor_size) {
             if(c->thread_ttl == 0) {
-                pthread_cond_wait(free_slots_cond, free_slots_mutex);
+                pthread_cond_wait(filled_slots_cond, filled_slots_mutex);
             } else {
 
-                LOG(1,1,"Timed wait");
-                if(pthread_cond_timedwait(free_slots_cond, free_slots_mutex, &timeout) == ETIMEDOUT) {
+                int t= (int) time(NULL);
+                LOG(1,1,"Timed wait from %d to %ld", t, timeout.tv_sec);
+                if(pthread_cond_timedwait(filled_slots_cond, filled_slots_mutex, &timeout) != 0) {
                     LOG(1,1,"Timeout");
+//                    mutexunlock(filled_slots_mutex);
                     free(line);
                     fclose(fd);
-                    mutexunlock(free_slots_mutex);
                     pthread_exit(NULL);
                 }
             }
         }
-        mutexunlock(free_slots_mutex);
+        mutexunlock(filled_slots_mutex);
 
         size_t pos = buff.next_write;
 
@@ -163,8 +162,9 @@ void *consume(const config *c) {
             if(c->thread_ttl == 0) {
                 pthread_cond_wait(filled_slots_cond, filled_slots_mutex);
             } else {
-                LOG(1,0,"Timed wait");
-                if(pthread_cond_timedwait(filled_slots_cond, filled_slots_mutex, &timeout) == ETIMEDOUT) {
+                int t= (int) time(NULL);
+                LOG(1,0,"Timed wait from %d to %ld", t, timeout.tv_sec);
+                if(pthread_cond_timedwait(filled_slots_cond, filled_slots_mutex, &timeout) != 0) {
                     LOG(1,0,"Timeout");
                     mutexunlock(filled_slots_mutex);
                     pthread_exit(NULL);
@@ -186,7 +186,7 @@ void *consume(const config *c) {
                 if(matching(buff.buffer[pos], c)) {
                     LOG(0, 0, "buffer[%4zu]: %.*s", pos, (int)strlen(buff.buffer[pos]) - 1, buff.buffer[pos]);
                 } else {
-                    LOG(1, 0, "skipping buffer[%zu]", pos);
+                    LOG(1, 0, "Skipping buffer[%zu] (condition not met)", pos);
                 }
 
                 LOG(1, 0, "Emptying buffer[%zu]", pos);
@@ -195,10 +195,10 @@ void *consume(const config *c) {
 
                 LOG(1,0, "Unlocking buffer[%zu]", pos);
                 mutexunlock(slot_locks[pos]);
-                mutexlock(free_slots_mutex);
-                ++free_slots;
-                pthread_cond_broadcast(free_slots_cond);
-                mutexunlock(free_slots_mutex);
+                mutexlock(filled_slots_mutex);
+                --filled_slots;
+                pthread_cond_broadcast(filled_slots_cond);
+                mutexunlock(filled_slots_mutex);
                 break;
             }
         } while(true);
@@ -279,14 +279,11 @@ int main(int argc, char *argv[]) {
     buff.next_write = 0;
     buff.next_read = 0;
 
-    free_slots = (int) c.buffor_size;
     filled_slots = 0;
 
     slot_locks = calloc(c.buffor_size, sizeof(pthread_mutex_t *));
     queue_lock = calloc(1, sizeof(pthread_mutex_t));
-    free_slots_mutex = calloc(1, sizeof(pthread_mutex_t));
     filled_slots_mutex = calloc(1, sizeof(pthread_mutex_t));
-    free_slots_cond = calloc(1, sizeof(pthread_cond_t));
     filled_slots_cond = calloc(1, sizeof(pthread_cond_t));
 
     for(size_t i = 0; i < c.buffor_size; ++i) {
@@ -294,9 +291,7 @@ int main(int argc, char *argv[]) {
         pthread_mutex_init(slot_locks[i], NULL);
     }
     pthread_mutex_init(queue_lock, NULL);
-    pthread_mutex_init(free_slots_mutex, NULL);
     pthread_mutex_init(filled_slots_mutex, NULL);
-    pthread_cond_init(free_slots_cond, NULL);
     pthread_cond_init(filled_slots_cond, NULL);
 
     spawn(&c);
@@ -308,11 +303,11 @@ int main(int argc, char *argv[]) {
     free(slot_locks);
 
     pthread_mutex_destroy(queue_lock);
-    pthread_mutex_destroy(free_slots_mutex);
     pthread_mutex_destroy(filled_slots_mutex);
+    pthread_cond_destroy(filled_slots_cond);;
     free(queue_lock);
-    free(free_slots_mutex);
     free(filled_slots_mutex);
+    free(filled_slots_cond);
 
     return 0;
 }
