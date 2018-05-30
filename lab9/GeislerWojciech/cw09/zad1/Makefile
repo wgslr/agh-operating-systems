@@ -14,6 +14,10 @@ override CFLAGS+=-lm -lpthread -lrt -Wall -Wextra -Wall -std=c11 \
 
 all: main
 
+test: main
+	./main config.in > out
+	diff <(sort ../iliada.txt | uniq) <(sort out | uniq)
+
 main: main.c
 	$(CC) $^ -o $@ $(CFLAGS) $(SANITIZER)
 
