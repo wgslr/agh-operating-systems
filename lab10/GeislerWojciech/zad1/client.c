@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 #include "common.h"
 
 bool use_inet;
@@ -85,8 +86,20 @@ void do_register(int fd, const char * name) {
     fprintf(stderr, "Registering\n");
 
     ssize_t sent = send(fd, &buff, sizeof(buff), 0);
-    OK(sent, "Error sending header");
-    printf("Sent %zd bytes", sent);
+    OK(sent, "Error sending message");
+    printf("Sent %zd bytes\n", sent);
+
+    // receive result
+    recv(fd, &buff, sizeof(buff), 0);
+
+    if(buff.type == REGISTER_ACK) {
+        printf("Client '%s' registered succesfully\n", name);
+    } else if (buff.type == NAME_TAKEN) {
+        printf("Cannot register due to name conflict\n");
+        exit(1);
+    } else {
+        fprintf(stderr, "Unexpected server response: %d\n", buff.type);
+    }
 
 }
 
@@ -121,6 +134,8 @@ int main(int argc, char *argv[]) {
     }
 
     do_register(socketfd, name);
+
+    pause();
 
     return 0;
 }

@@ -140,6 +140,8 @@ void handle_register(const char *name, int socket) {
 
     strncpy(clients[available_idx].name, name, MAX_NAME);
     clients[available_idx].socket = socket;
+
+    printf("Registered client '%.*s'\n", MAX_NAME, name);
     send_message(socket, REGISTER_ACK, NULL, 0);
 }
 
