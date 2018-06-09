@@ -57,11 +57,23 @@ void connect_inet(int fd, const char * addr_str) {
             .sin_addr = addr,
             .sin_port =  htons(port),
     };
-    fprintf(stderr, "Connecting to %08x:%u\n", addr.s_addr, port);
+    fprintf(stderr, "Connecting to %#08x:%u\n", addr.s_addr, port);
 
     OK(connect(fd, (const struct sockaddr *) &sockaddr, sizeof(sockaddr)), "Error connecting to inet socket");
 
-    fprintf(stderr, "Connected to %08x:%u\n", addr.s_addr, port);
+    fprintf(stderr, "Connected to 0x%08X:%u\n", addr.s_addr, port);
+}
+
+
+void connect_local(int fd, const char * path) {
+    struct sockaddr_un sockaddr = {
+            .sun_family = AF_UNIX,
+    };
+    strncpy(sockaddr.sun_path, path, UNIX_PATH_MAX);
+
+    OK(connect(fd, (const struct sockaddr *) &sockaddr, sizeof(sockaddr)), "Error connecting to inet socket");
+
+    fprintf(stderr, "Connected to %s\n", path);
 }
 
 
@@ -89,7 +101,10 @@ int main(int argc, char *argv[]) {
 
     if(use_inet) {
         connect_inet(socketfd, path);
+    } else {
+        connect_local(socketfd, path);
     }
+
 
     return 0;
 }
