@@ -27,7 +27,8 @@ int open_network_socket(const short port) {
 
     const int fd = socket(AF_INET, SOCK_STREAM, 0);
     OK(fd, "Error opening inet socket");
-    OK(bind(fd, (const struct sockaddr *) &addr, sizeof(addr)), "Error binding inet socket")
+    OK(bind(fd, (const struct sockaddr *) &addr, sizeof(addr)), "Error binding inet socket");
+    OK(listen(fd, MAX_CLIENTS), "Error listening on inet socket");
 
     return fd;
 }
@@ -41,13 +42,18 @@ int open_local_socket(const char *path) {
 
     const int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     OK(fd, "Error opening unix socket");
-    OK(bind(fd, (struct sockaddr *) &addr, sizeof(addr)), "Error binding unix socket")
+    OK(bind(fd, (struct sockaddr *) &addr, sizeof(addr)), "Error binding unix socket");
+    OK(listen(fd, MAX_CLIENTS), "Error listening on local socket");
 
     return fd;
 }
 
 
 void network_handler(void) {
+    struct sockaddr_in addr;
+    socklen_t addrlen = sizeof(addr);
+
+    OK(accept(inet_socket, (struct sockaddr *) &addr, &addrlen), "Error accepting inet connection");
 
 
 }
@@ -59,6 +65,7 @@ pthread_t spawn_network_handler(void) {
     pthread_t tid;
 
     OK(pthread_create(&tid, attr, (void *(*)(void *)) &network_handler, NULL), "Error creating network handler thread");
+    return tid;
 }
 
 
@@ -78,7 +85,9 @@ int main(int argc, char *argv[]) {
     unix_socket = open_local_socket(argv[2]);
     inet_socket = open_network_socket(port);
 
-    sleep(10);
+    spawn_network_handler();
+
+    pause();
 
     return 0;
 }
