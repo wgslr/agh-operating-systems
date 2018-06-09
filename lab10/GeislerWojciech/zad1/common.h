@@ -38,7 +38,7 @@ typedef enum arith_op {
 
 typedef struct {
     msg_type type;
-    char client_name[MAX_NAME];
+    char client_name[MAX_NAME + 1];
     size_t len;
     char data[0];
 } message; // parent type

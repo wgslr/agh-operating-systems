@@ -12,6 +12,10 @@
 
 bool use_inet;
 
+int _socket_fd;
+
+void cleanup(void) ;
+
 bool connection_type(char *arg) {
     if(strcmp(arg, "UNIX") == 0) {
         return false;
@@ -79,7 +83,8 @@ void connect_local(int fd, const char * path) {
 void do_register(int fd, const char * name) {
     message buff = {
             .type = REGISTER,
-            .len = 0
+            .len = 0,
+            .client_name = {0}
     };
     strncpy(buff.client_name, name, MAX_NAME);
 
@@ -110,8 +115,10 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    atexit(&cleanup);
+
     int socketfd;
-    char name[MAX_NAME];
+    char name[MAX_NAME + 1] = {0};
     char path[UNIX_PATH_MAX];
 
     strncpy(name, argv[1], MAX_NAME);
@@ -126,6 +133,7 @@ int main(int argc, char *argv[]) {
         socketfd = socket(AF_UNIX, SOCK_STREAM, 0);;
     };
     OK(socketfd, "Error opening socket")
+    _socket_fd = socketfd;
 
     if(use_inet) {
         connect_inet(socketfd, path);
@@ -138,4 +146,10 @@ int main(int argc, char *argv[]) {
     pause();
 
     return 0;
+}
+
+
+void cleanup(void) {
+    shutdown(_socket_fd, SHUT_RDWR);
+    close(_socket_fd);
 }

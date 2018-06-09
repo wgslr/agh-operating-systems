@@ -12,7 +12,7 @@
 #include "common.h"
 
 typedef struct {
-    char name[MAX_NAME];
+    char name[MAX_NAME + 1];
     int socket;
 } client;
 
@@ -26,6 +26,8 @@ client clients[MAX_CLIENTS] = {0};
 void process_message(const message *msg, int socket) ;
 
 void handle_register(const char *name, int socket) ;
+
+void cleanup(void) ;
 
 int open_network_socket(const short port) {
     const struct sockaddr_in addr = {
@@ -62,7 +64,7 @@ void accept_connection(int socket, int epoll_fd) {
     int client_fd = accept(socket, NULL, NULL);
     OK(client_fd, "Error accepting connection");
 
-    fprintf(stderr, "New connection accepted\n");
+    fprintf(stderr, "New connection accepted as socket %d\n", client_fd);
 
     if(client_count >= MAX_CLIENTS) {
         fprintf(stderr, "Cannot add client, maximum number reached");
@@ -80,7 +82,7 @@ void accept_connection(int socket, int epoll_fd) {
 //
 //    // register client socket in fd
     struct epoll_event event = {
-            .events = EPOLLIN | EPOLLPRI,
+            .events = EPOLLIN,
             .data.fd = client_fd
     };
     OK(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event), "Could not add client socket to epoll");
@@ -95,23 +97,31 @@ void handle_message(int socket) {
     bytes = recv(socket, buff, sizeof(message), 0);
     OK(bytes, "Error receiving message header")
 
+    if(bytes == 0){
+        fprintf(stderr, "Client closed connection\n");
+        shutdown(socket, SHUT_RDWR);
+        close(socket);
+        return;
+    }
+
     if(buff->len > 0) {
         bytes = recv(socket, &buff->data, buff->len, 0);
         OK(bytes, "Error receiving message body")
     }
 
     process_message(buff, socket);
+    free(buff);
 }
 
 
 void process_message(const message *msg, int socket) {
     switch(msg->type) {
         case REGISTER:
-            fprintf(stderr, "Client %.*s registering\n", MAX_NAME, msg->client_name);
+            fprintf(stderr, "Client %s registering\n", msg->client_name);
             handle_register(msg->client_name, socket);
             break;
         default:
-            fprintf(stderr, "Unexpected message type: %d", msg->type);
+            fprintf(stderr, "Unexpected message type: %d at socket %d\n", msg->type, socket);
     }
 }
 
@@ -122,6 +132,7 @@ void send_message(int socket, msg_type type, void * data, size_t len) {
     msg->len = len;
     memcpy(msg->data, data, len);
     OK(send(socket, msg, sizeof(msg) + len, 0), "Error sending message");
+    free(msg);
 }
 
 
@@ -169,32 +180,6 @@ void network_handler(void) {
             handle_message(event_socket);
         }
     }
-
-//
-//    printf("Accept()\n");
-//
-//
-//    int client_fd = accept(inet_socket, (struct sockaddr *) &addr, &addrlen);
-//    OK(client_fd, "Error accepting inet connection");
-//
-//    printf("Accepted new connection\n");
-//
-//    message h;
-//    char data[100];
-//    ssize_t bytes;
-//    // accept one register
-//    bytes = recv(client_fd, &h, sizeof(h), 0);
-////    OK(bytes, "Error in recv")
-//    printf("received %zd bytes\n", bytes);
-//
-//    if(h.type == REGISTER) {
-//        printf("Client %.*s registering\n", MAX_NAME, h.client_name);
-//    }
-//
-//    recv(client_fd, &data, h.len > 100 ? 100 : h.len, 0);
-//    OK(bytes, "Error in recv")
-//    printf("received %zd bytes\n", bytes);
-
 }
 
 
@@ -205,6 +190,8 @@ pthread_t spawn(void *(* func) (void *)) {
     pthread_t tid;
 
     OK(pthread_create(&tid, attr, func, NULL), "Error creating network handler thread");
+    pthread_attr_destroy(attr);
+    free(attr);
     return tid;
 }
 
@@ -214,6 +201,8 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Incorrect number of arguments (expected 2)");
         exit(1);
     }
+
+    atexit(&cleanup);
 
     const short port = (short) atoi(argv[1]);
     client_count = 0;
@@ -226,4 +215,19 @@ int main(int argc, char *argv[]) {
     pause();
 
     return 0;
+}
+
+
+void cleanup(void) {
+    for(int i = 0; i < MAX_CLIENTS; ++i) {
+        if(clients[i].socket > 0){
+            shutdown(clients[i].socket, SHUT_RDWR);
+            close(clients[i].socket);
+        }
+    }
+
+    shutdown(inet_socket, SHUT_RDWR);
+    shutdown(unix_socket, SHUT_RDWR);
+    close(inet_socket);
+    close(unix_socket);
 }
