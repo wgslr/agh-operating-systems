@@ -46,7 +46,7 @@
     clock_gettime(CLOCK_MONOTONIC, &time); \
     char msg[256]; \
     sprintf(msg, args); \
-    printf("%ld.%06ld %d: %s\n", time.tv_nsec, time.tv_nsec / 1000, getpid(), msg); \
+    printf("%ld.%06ld %d: %s\n", time.tv_sec, time.tv_nsec / 1000, getpid(), msg); \
     fflush(stdout); \
 }
 

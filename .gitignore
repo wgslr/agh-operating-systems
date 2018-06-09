@@ -16,3 +16,5 @@ example
 cmake-build-debug/
 cmake-build-release/
 
+*.png
+*.pgm
