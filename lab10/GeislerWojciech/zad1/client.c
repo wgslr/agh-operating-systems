@@ -8,19 +8,23 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <assert.h>
+#include <signal.h>
+#include <signal.h>
 #include "common.h"
 
-bool use_inet;
-
 int _socket_fd;
+char name[MAX_NAME + 1];
 
-void cleanup(void) ;
+void cleanup(void);
 
-bool connection_type(char *arg) {
+int calculate(arith_req *req) ;
+
+sa_family_t connection_type(char *arg) {
     if(strcmp(arg, "UNIX") == 0) {
-        return false;
-    } else if (strcmp(arg, "INET") == 0) {
-        return true;
+        return AF_UNIX;
+    } else if(strcmp(arg, "INET") == 0) {
+        return AF_INET;
     } else {
         fprintf(stderr, "Invalid socket type. Expected UNIX or INET");
         exit(1);
@@ -28,25 +32,7 @@ bool connection_type(char *arg) {
 }
 
 
-//int open_network_socket() {
-//    const int fd =
-//    OK(fd, "Error opening inet socket");
-//    return fd;
-//}
-
-
-int open_local_socket(const char *path) {
-    struct sockaddr_un addr = {
-            .sun_family = AF_UNIX,
-    };
-    strncpy(addr.sun_path, path, UNIX_PATH_MAX);
-
-    const int fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    OK(fd, "Error opening unix socket");
-    return fd;
-}
-
-void connect_inet(int fd, const char * addr_str) {
+void connect_inet(int fd, const char *addr_str) {
     // split address and port
     fprintf(stderr, "Splitting %s\n", addr_str);
 
@@ -70,7 +56,7 @@ void connect_inet(int fd, const char * addr_str) {
 }
 
 
-void connect_local(int fd, const char * path) {
+void connect_local(int fd, const char *path) {
     struct sockaddr_un sockaddr = {
             .sun_family = AF_UNIX,
     };
@@ -80,7 +66,17 @@ void connect_local(int fd, const char * path) {
     fprintf(stderr, "Connected to %s\n", path);
 }
 
-void do_register(int fd, const char * name) {
+void send_message(int socket, msg_type type, void *data, size_t len) {
+    message *msg = calloc(1, sizeof(message) + len);
+    msg->type = type;
+    msg->len = len;
+    strncpy(msg->client_name, name, MAX_NAME);
+    memcpy(msg->data, data, len);
+    OK(send(socket, msg, sizeof(msg) + len, 0), "Error sending message");
+    free(msg);
+}
+
+void do_register(int fd) {
     message buff = {
             .type = REGISTER,
             .len = 0,
@@ -88,24 +84,71 @@ void do_register(int fd, const char * name) {
     };
     strncpy(buff.client_name, name, MAX_NAME);
 
-    fprintf(stderr, "Registering\n");
-
     ssize_t sent = send(fd, &buff, sizeof(buff), 0);
     OK(sent, "Error sending message");
-    printf("Sent %zd bytes\n", sent);
 
     // receive result
     recv(fd, &buff, sizeof(buff), 0);
 
     if(buff.type == REGISTER_ACK) {
         printf("Client '%s' registered succesfully\n", name);
-    } else if (buff.type == NAME_TAKEN) {
+    } else if(buff.type == NAME_TAKEN) {
         printf("Cannot register due to name conflict\n");
         exit(1);
     } else {
         fprintf(stderr, "Unexpected server response: %d\n", buff.type);
     }
+}
 
+void do_listen(int fd) {
+    while(true) {
+        message *buff = calloc(1, sizeof(message) + sizeof(arith_req));
+        ssize_t bytes = recv(fd, buff, sizeof(message), 0);
+        OK(bytes, "Error receiving message header");
+        if(bytes == 0) {
+            fprintf(stderr, "Server closed the connection\n");
+            exit(1);
+        }
+
+        if(buff->type != ARITH) {
+            fprintf(stderr, "Received unexpected message of type %d\n", buff->type);
+            continue;
+        }
+
+        int result = calculate((arith_req *) buff->data);
+        artih_resp resp = {
+                .id = ((arith_req *) buff->data)->id,
+                .result = result
+        };
+        send_message(fd, RESULT, &resp, sizeof(resp));
+    }
+}
+
+int calculate(arith_req *req) {
+    int result;
+    switch(req->op) {
+        case ADD:
+            result = req->arg1 + req->arg2;
+            break;
+        case SUB:
+            result = req->arg1 - req->arg2;
+            break;
+        case MUL:
+            result = req->arg1 * req->arg2;
+            break;
+        case DIV:
+            result = req->arg1 / req->arg2;
+            break;
+        default:
+            fprintf(stderr, "Unknown arithmetic operation\n");
+            result = 0;
+    }
+    return result;
+}
+
+void sigint(int signo) {
+    assert(signo == SIGINT);
+    send_message(_socket_fd, UNREGISTER, NULL, 0);
 }
 
 
@@ -116,34 +159,26 @@ int main(int argc, char *argv[]) {
     }
 
     atexit(&cleanup);
+    signal(SIGINT, &sigint);
 
     int socketfd;
-    char name[MAX_NAME + 1] = {0};
-    char path[UNIX_PATH_MAX];
 
     strncpy(name, argv[1], MAX_NAME);
-    strncpy(path, argv[3], UNIX_PATH_MAX);
 
-    use_inet = connection_type(argv[2]);
+    sa_family_t family = connection_type(argv[2]);
 
-    if(use_inet) {
-        socketfd = socket(AF_INET, SOCK_STREAM, 0);;
-    } else {
-        strncpy(path, argv[3], UNIX_PATH_MAX);
-        socketfd = socket(AF_UNIX, SOCK_STREAM, 0);;
-    };
+    socketfd = socket(family, SOCK_STREAM, 0);;
     OK(socketfd, "Error opening socket")
     _socket_fd = socketfd;
 
-    if(use_inet) {
-        connect_inet(socketfd, path);
+    if(family == AF_UNIX) {
+        connect_local(socketfd, argv[3]);
     } else {
-        connect_local(socketfd, path);
+        connect_inet(socketfd, argv[3]);
     }
 
-    do_register(socketfd, name);
-
-    pause();
+    do_register(socketfd);
+    do_listen(socketfd);
 
     return 0;
 }

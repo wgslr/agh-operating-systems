@@ -23,7 +23,6 @@ typedef enum {
     REGISTER = 1,
     REGISTER_ACK,
     NAME_TAKEN,
-    MIRROR,
     ARITH,
     RESULT,
     UNREGISTER
@@ -49,6 +48,12 @@ typedef struct {
     int arg1;
     int arg2;
 } arith_req;
+
+typedef struct {
+    int id;
+    int result;
+} artih_resp;
+
 
 
 #endif //LAB10_COMMON_H
