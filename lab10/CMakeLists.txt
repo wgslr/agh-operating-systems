@@ -3,4 +3,5 @@ project(lab10 C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(lab10 GeislerWojciech/zad1/server.c)
+add_executable(server1 GeislerWojciech/zad1/server.c)
+add_executable(client1 GeislerWojciech/zad1/client.c)
