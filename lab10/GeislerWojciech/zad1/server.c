@@ -1,6 +1,9 @@
 // Wojciech Geisler
 // 2018-06
 
+#define _XOPEN_SOURCE
+#define _POSIX_C_SOURCE 200809L
+
 #include <sys/epoll.h>
 #include <stdio.h>
 #include <arpa/inet.h>
@@ -18,13 +21,21 @@ typedef struct {
 
 typedef struct {
     short port;
-    char path[UNIX_PATH_MAX];
+    char path[UNIX_PATH_MAX + 1];
 } listener_args;
 
+
+#define MAX_TOKENS 5
+const char *const WHITESPACE = " \r\n\t";
+typedef struct {
+    int size;
+    char *toks[MAX_TOKENS + 1];
+} tokens;
 
 int unix_socket;
 int inet_socket;
 int client_count;
+int op_id = 1;
 
 client clients[MAX_CLIENTS] = {0};
 
@@ -47,6 +58,15 @@ pthread_t spawn(void *(*func)(void *), void *args);
 
 void *listener(void *arg);
 
+arith_op char_to_op(char c) ;
+
+client *get_random_client(void) ;
+
+void *reader(void) ;
+
+// Splits string on whitespace
+tokens *tokenize(char *string) ;
+
 int main(int argc, char *argv[]) {
     if(argc != 3) {
         fprintf(stderr, "Incorrect number of arguments (expected 2)");
@@ -54,14 +74,15 @@ int main(int argc, char *argv[]) {
     }
 
     atexit(&cleanup);
+    srand((unsigned int) time(NULL));
     client_count = 0;
 
     listener_args *args = calloc(1, sizeof(listener_args));
     args->port = (short) atoi(argv[1]);
-    strncpy(args->path, argv[3], UNIX_PATH_MAX);
+    strncpy(args->path, argv[2], UNIX_PATH_MAX);
 
-
-    spawn((void *(*)(void *)) &listener, (void *) args);
+    spawn(&listener, (void *) args);
+    reader();
 
     pause();
 
@@ -98,7 +119,6 @@ void *listener(void *arg) {
             process_message(msg, event_socket);
         }
     }
-    return NULL;
 }
 
 int open_network_socket(const short port) {
@@ -181,8 +201,10 @@ void send_message(int socket, msg_type type, void *data, size_t len) {
 }
 
 
+
+
 /*********************************************************************************
-* Application-logic functions
+* Message handler
 *********************************************************************************/
 
 
@@ -220,6 +242,87 @@ void handle_register(const char *name, int socket) {
 
 
 /*********************************************************************************
+* Input reader
+*********************************************************************************/
+
+void *reader(void) {
+    char *line = NULL;
+    size_t n = 0;
+    while(true) {
+        OK(getline(&line, &n, stdin), "Error reading line from stdin");
+        tokens * expr = tokenize(line);
+        if(expr->size < 3) {
+            fprintf(stderr, "You must provider <operand> <operator> <operand>\n");
+        } else {
+            arith_req req = {
+                    .id = op_id++,
+                    .op = char_to_op(expr->toks[1][0]),
+                    .arg1 = atoi(expr->toks[0]),
+                    .arg2 = atoi(expr->toks[2])
+            };
+
+            client *c = get_random_client();
+            if(c == NULL) {
+                printf("No client registered to handle the request\n");
+                continue;
+            }
+
+            fprintf(stderr, "Sending request %d to client '%s'\n", req.id, c->name);
+            send_message(c->socket, ARITH, &req, sizeof(req));
+        };
+    }
+}
+
+
+// Splits string on whitespace
+tokens *tokenize(char *string) {
+    tokens *result = calloc(1, sizeof(tokens));
+    size_t wordlen;
+
+    // find beginning of string
+    string += strspn(string, WHITESPACE);
+
+    while(string != NULL && *string != '\0') {
+        wordlen = strcspn(string, WHITESPACE);
+        result->toks[result->size] = calloc(1, wordlen);
+        strncpy(result->toks[result->size], string, wordlen);
+        ++result->size;
+
+        string += wordlen;
+        string += strspn(string, WHITESPACE); // skip whitespace
+    }
+    return result;
+}
+
+arith_op char_to_op(char c) {
+    switch(c) {
+        case '+':
+            return ADD;
+        case '-':
+            return SUB;
+        case '*':
+            return MUL;
+        case '/':
+            return DIV;
+        default:
+            fprintf(stderr, "Unknown arithemetic operator\n");
+            exit(1);
+    }
+}
+
+client *get_random_client(void) {
+    if(client_count < 1) {
+        return NULL;
+    }
+    int i = rand() % MAX_CLIENTS;
+    while(clients[i].socket <= 0) {
+        i = (i + 1) % MAX_CLIENTS;
+    }
+    return clients + i;
+}
+
+
+/*********************************************************************************
 * Utils
 *********************************************************************************/
 
@@ -234,7 +337,6 @@ pthread_t spawn(void *(*func)(void *), void *args) {
     free(attr);
     return tid;
 }
-
 
 void cleanup(void) {
     for(int i = 0; i < MAX_CLIENTS; ++i) {

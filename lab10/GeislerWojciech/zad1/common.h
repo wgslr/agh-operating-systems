@@ -44,6 +44,7 @@ typedef struct {
 } message; // parent type
 
 typedef struct {
+    int id;
     arith_op op;
     int arg1;
     int arg2;
