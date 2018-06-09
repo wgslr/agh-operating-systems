@@ -16,16 +16,17 @@
 
 #define UNIX_PATH_MAX    108
 #define MAX_NAME 16
+#define MAX_CLIENTS 20
 
 typedef enum {
     REGISTER,
     REGISTER_ACK,
     NAME_TAKEN,
     MIRROR,
-    ARTIH,
+    ARITH,
     RESULT,
     UNREGISTER
-} MSG_TYPE;
+} msg_type;
 
 typedef enum arith_op {
     ADD,
@@ -35,7 +36,7 @@ typedef enum arith_op {
 } arith_op;
 
 typedef struct {
-    MSG_TYPE type;
+    msg_type type;
     char name[MAX_NAME];
 } register_req;
 

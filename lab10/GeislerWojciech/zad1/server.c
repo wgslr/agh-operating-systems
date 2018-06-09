@@ -4,7 +4,19 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <pthread.h>
 #include "common.h"
+
+typedef struct {
+    char name[MAX_NAME];
+    int socket;
+} client;
+
+
+int unix_socket;
+int inet_socket;
+
+client clients[MAX_CLIENTS];
 
 int open_network_socket(const short port) {
     const struct sockaddr_in addr = {
@@ -20,6 +32,7 @@ int open_network_socket(const short port) {
     return fd;
 }
 
+
 int open_local_socket(const char *path) {
     struct sockaddr_un addr = {
         .sun_family = AF_UNIX,
@@ -31,8 +44,28 @@ int open_local_socket(const char *path) {
     OK(bind(fd, (struct sockaddr *) &addr, sizeof(addr)), "Error binding unix socket")
 
     return fd;
+}
+
+
+void network_handler(void) {
+
 
 }
+
+
+pthread_t spawn_network_handler(void) {
+    pthread_attr_t *attr = calloc(1, sizeof(pthread_attr_t));
+    pthread_attr_init(attr);
+    pthread_t tid;
+
+    OK(pthread_create(&tid, attr, (void *(*)(void *)) &network_handler, NULL), "Error creating network handler thread");
+}
+
+
+void read_input() {
+
+}
+
 
 int main(int argc, char *argv[]) {
     if(argc != 3) {
@@ -40,10 +73,10 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    short port = (short) atoi(argv[1]);
+    const short port = (short) atoi(argv[1]);
 
-    open_local_socket(argv[2]);
-    open_network_socket(port);
+    unix_socket = open_local_socket(argv[2]);
+    inet_socket = open_network_socket(port);
 
     sleep(10);
 
