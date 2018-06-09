@@ -17,6 +17,7 @@
 #define UNIX_PATH_MAX    108
 #define MAX_NAME 20
 #define MAX_CLIENTS 20
+#define MAX_LEN 64
 
 typedef enum {
     REGISTER = 1,
@@ -39,13 +40,8 @@ typedef struct {
     msg_type type;
     char client_name[MAX_NAME];
     size_t len;
-} header; // parent type
-
-typedef struct {
-    msg_type type;
-    size_t len;
-    char client_name[MAX_NAME];
-} register_req;
+    char data[MAX_LEN];
+} message; // parent type
 
 typedef struct {
     arith_op op;

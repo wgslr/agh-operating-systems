@@ -78,15 +78,15 @@ void connect_local(int fd, const char * path) {
 }
 
 void do_register(int fd, const char * name) {
-    header head = {
+    message buff = {
             .type = REGISTER,
             .len = 0
     };
-    strncpy(head.client_name, name, MAX_NAME);
+    strncpy(buff.client_name, name, MAX_NAME);
 
     fprintf(stderr, "Registering\n");
 
-    ssize_t sent = send(fd, &head, sizeof(head), 0);
+    ssize_t sent = send(fd, &buff, sizeof(buff), 0);
     OK(sent, "Error sending header");
     printf("Sent %zd bytes", sent);
 

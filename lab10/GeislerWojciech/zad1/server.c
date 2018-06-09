@@ -63,7 +63,7 @@ void network_handler(void) {
 
     printf("Accepted new connection\n");
 
-    header h;
+    message h;
     char data[100];
     ssize_t bytes;
     // accept one register
