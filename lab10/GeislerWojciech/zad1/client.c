@@ -62,7 +62,6 @@ void connect_inet(int fd, const char * addr_str) {
     OK(connect(fd, (const struct sockaddr *) &sockaddr, sizeof(sockaddr)), "Error connecting to inet socket");
 
     fprintf(stderr, "Connected to 0x%08X:%u\n", addr.s_addr, port);
-
 }
 
 
@@ -73,7 +72,6 @@ void connect_local(int fd, const char * path) {
     strncpy(sockaddr.sun_path, path, UNIX_PATH_MAX);
 
     OK(connect(fd, (const struct sockaddr *) &sockaddr, sizeof(sockaddr)), "Error connecting to inet socket");
-
     fprintf(stderr, "Connected to %s\n", path);
 }
 

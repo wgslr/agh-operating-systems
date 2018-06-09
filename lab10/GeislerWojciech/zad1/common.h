@@ -40,7 +40,7 @@ typedef struct {
     msg_type type;
     char client_name[MAX_NAME];
     size_t len;
-    char data[MAX_LEN];
+    char data[0];
 } message; // parent type
 
 typedef struct {
