@@ -15,11 +15,11 @@
 #define OK(_EXPR, _ERR_MSG) if((_EXPR) < 0) { fprintf(stderr, "%s: %d %s\n", _ERR_MSG, errno, strerror(errno)); exit(1); }
 
 #define UNIX_PATH_MAX    108
-#define MAX_NAME 16
+#define MAX_NAME 20
 #define MAX_CLIENTS 20
 
 typedef enum {
-    REGISTER,
+    REGISTER = 1,
     REGISTER_ACK,
     NAME_TAKEN,
     MIRROR,
@@ -37,7 +37,14 @@ typedef enum arith_op {
 
 typedef struct {
     msg_type type;
-    char name[MAX_NAME];
+    char client_name[MAX_NAME];
+    size_t len;
+} header; // parent type
+
+typedef struct {
+    msg_type type;
+    size_t len;
+    char client_name[MAX_NAME];
 } register_req;
 
 typedef struct {

@@ -5,11 +5,11 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include <arpa/inet.h>
 #include "common.h"
 
 bool use_inet;
-int socketfd;
 
 bool connection_type(char *arg) {
     if(strcmp(arg, "UNIX") == 0) {
@@ -57,11 +57,12 @@ void connect_inet(int fd, const char * addr_str) {
             .sin_addr = addr,
             .sin_port =  htons(port),
     };
-    fprintf(stderr, "Connecting to %#08x:%u\n", addr.s_addr, port);
+    fprintf(stderr, "Connecting to 0x%08x:%u\n", addr.s_addr, port);
 
     OK(connect(fd, (const struct sockaddr *) &sockaddr, sizeof(sockaddr)), "Error connecting to inet socket");
 
     fprintf(stderr, "Connected to 0x%08X:%u\n", addr.s_addr, port);
+
 }
 
 
@@ -76,6 +77,21 @@ void connect_local(int fd, const char * path) {
     fprintf(stderr, "Connected to %s\n", path);
 }
 
+void do_register(int fd, const char * name) {
+    header head = {
+            .type = REGISTER,
+            .len = 0
+    };
+    strncpy(head.client_name, name, MAX_NAME);
+
+    fprintf(stderr, "Registering\n");
+
+    ssize_t sent = send(fd, &head, sizeof(head), 0);
+    OK(sent, "Error sending header");
+    printf("Sent %zd bytes", sent);
+
+}
+
 
 int main(int argc, char *argv[]) {
     if(argc != 4) {
@@ -83,6 +99,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    int socketfd;
     char name[MAX_NAME];
     char path[UNIX_PATH_MAX];
 
@@ -105,6 +122,7 @@ int main(int argc, char *argv[]) {
         connect_local(socketfd, path);
     }
 
+    do_register(socketfd, name);
 
     return 0;
 }

@@ -50,11 +50,34 @@ int open_local_socket(const char *path) {
 
 
 void network_handler(void) {
+    fprintf(stderr, "network handler says hello\n");
+
     struct sockaddr_in addr;
     socklen_t addrlen = sizeof(addr);
 
-    OK(accept(inet_socket, (struct sockaddr *) &addr, &addrlen), "Error accepting inet connection");
+    printf("Accept()\n");
 
+
+    int client_fd = accept(inet_socket, (struct sockaddr *) &addr, &addrlen);
+    OK(client_fd, "Error accepting inet connection");
+
+    printf("Accepted new connection\n");
+
+    header h;
+    char data[100];
+    ssize_t bytes;
+    // accept one register
+    bytes = recv(client_fd, &h, sizeof(h), 0);
+//    OK(bytes, "Error in recv")
+    printf("received %zd bytes\n", bytes);
+
+    if(h.type == REGISTER) {
+        printf("Client %.*s registering\n", MAX_NAME, h.client_name);
+    }
+
+    recv(client_fd, &data, h.len > 100 ? 100 : h.len, 0);
+    OK(bytes, "Error in recv")
+    printf("received %zd bytes\n", bytes);
 
 }
 
