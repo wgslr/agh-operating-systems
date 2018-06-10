@@ -69,6 +69,8 @@ tokens *tokenize(char *string) ;
 
 void handle_result(const arith_resp *resp, const char *client_name) ;
 
+void handle_unregister(const char *name) ;
+
 int main(int argc, char *argv[]) {
     if(argc != 3) {
         fprintf(stderr, "Incorrect number of arguments (expected 2)");
@@ -121,7 +123,9 @@ void *listener(void *arg) {
             accept_connection(event_socket, epoll_fd);
         } else {
             message *msg = read_message(event_socket);
-            process_message(msg, event_socket);
+            if(msg != NULL){
+                process_message(msg, event_socket);
+            }
         }
     }
 }
@@ -224,6 +228,9 @@ void process_message(const message *msg, int socket) {
         case RESULT:
             handle_result((const arith_resp *) msg->data, msg->client_name);
             break;
+        case UNREGISTER:
+            handle_unregister(msg->client_name);
+            break;
         default:
             fprintf(stderr, "Unexpected message type: %d at socket %d\n", msg->type, socket);
     }
@@ -251,8 +258,25 @@ void handle_register(const char *name, int socket) {
     send_message(socket, REGISTER_ACK, NULL, 0);
 }
 
+
 void handle_result(const arith_resp *resp, const char *client_name) {
     printf("Client '%s' calculated #%d as %d\n", client_name, resp->id, resp->result);
+}
+
+
+void handle_unregister(const char *name) {
+    for(int i = 0; i < MAX_CLIENTS; ++i) {
+        if(strcmp(clients[i].name, name) == 0) {
+            shutdown(clients[i].socket,SHUT_RDWR);
+            close(clients[i].socket);
+            clients[i].socket = 0;
+            clients[i].name[0] = '\0';
+            --client_count;
+
+            printf("Client '%.*s' unregistered\n", MAX_NAME, name);
+            break;
+        }
+    }
 }
 
 /*********************************************************************************
@@ -281,7 +305,7 @@ void *reader(void) {
                 continue;
             }
 
-            fprintf(stderr, "Sending request %d to client '%s' with args %d and %d\n", req.id, c->name, req.arg1, req.arg2);
+            fprintf(stderr, "Sending request #%d to client '%s' with args %d and %d\n", req.id, c->name, req.arg1, req.arg2);
             send_message(c->socket, ARITH, &req, sizeof(arith_req));
         };
     }
