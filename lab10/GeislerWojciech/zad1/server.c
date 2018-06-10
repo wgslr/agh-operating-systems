@@ -11,6 +11,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <signal.h>
 #include "common.h"
 
 typedef struct {
@@ -37,7 +38,7 @@ char unix_socket_path[UNIX_PATH_MAX];
 int client_count;
 int op_id = 1;
 
-client clients[MAX_CLIENTS] = {0};
+client clients[MAX_CLIENTS] = {{{0}, 0, 0}};
 
 void process_message(const message *msg, int socket);
 
@@ -77,6 +78,12 @@ void *monitor(void *) ;
 
 client *find_client_by_socket(const int socket) ;
 
+void sigint(int signum) {
+    (void) signum;
+    exit(0);
+}
+
+
 int main(int argc, char *argv[]) {
     if(argc != 3) {
         fprintf(stderr, "Incorrect number of arguments (expected 2)");
@@ -84,6 +91,7 @@ int main(int argc, char *argv[]) {
     }
 
     atexit(&cleanup);
+    signal(SIGINT, &sigint);
     srand((unsigned int) time(NULL));
     client_count = 0;
     strncpy(unix_socket_path, argv[2], UNIX_PATH_MAX);
@@ -315,6 +323,7 @@ void *reader(void * arg) {
         tokens *expr = tokenize(line);
         if(expr->size < 3) {
             fprintf(stderr, "You must provider <operand> <operator> <operand>\n");
+            free(expr);
         } else {
             arith_req req = {
                     .id = op_id++,
@@ -322,6 +331,7 @@ void *reader(void * arg) {
                     .arg1 = atoi(expr->toks[0]),
                     .arg2 = atoi(expr->toks[2])
             };
+            free(expr);
 
             client *c = get_random_client();
             if(c == NULL) {
@@ -449,7 +459,7 @@ void cleanup(void) {
 
     shutdown(inet_socket, SHUT_RDWR);
     shutdown(unix_socket, SHUT_RDWR);
-    close(inet_socket);
     close(unix_socket);
-    unlink(unix_socket_path);
+    OK(close(inet_socket), "Error closing inet socket");
+    OK(unlink(unix_socket_path), "Error unlinking local socket");
 }
