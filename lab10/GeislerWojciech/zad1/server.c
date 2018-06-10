@@ -154,6 +154,11 @@ int open_network_socket(const short port) {
 
     const int fd = socket(AF_INET, SOCK_STREAM, 0);
     OK(fd, "Error opening inet socket");
+
+    // prevent error after restrt
+    int val = 1;
+    OK(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)), "Error setting socket opt");
+
     OK(bind(fd, (const struct sockaddr *) &addr, sizeof(addr)), "Error binding inet socket");
     OK(listen(fd, MAX_CLIENTS), "Error listening on inet socket");
 
