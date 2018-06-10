@@ -67,6 +67,8 @@ void *reader(void) ;
 // Splits string on whitespace
 tokens *tokenize(char *string) ;
 
+void handle_result(const arith_resp *resp, const char *client_name) ;
+
 int main(int argc, char *argv[]) {
     if(argc != 3) {
         fprintf(stderr, "Incorrect number of arguments (expected 2)");
@@ -179,6 +181,8 @@ message *read_message(int socket) {
     bytes = recv(socket, buff, sizeof(message), 0);
     OK(bytes, "Error receiving message header")
 
+    fprintf(stderr, "Received message %zub (+ %zub body) from '%s' at %d\n", bytes, buff->len, buff->client_name, socket);
+
     if(bytes == 0) {
         fprintf(stderr, "Client closed connection\n");
         shutdown(socket, SHUT_RDWR);
@@ -187,8 +191,10 @@ message *read_message(int socket) {
     }
 
     if(buff->len > 0) {
+        fprintf(stderr, "Reading %zu bytes of body\n", buff->len);
         bytes = recv(socket, &buff->data, buff->len, 0);
         OK(bytes, "Error receiving message body")
+        assert(bytes == buff->len);
     }
 
     return buff;
@@ -214,6 +220,9 @@ void process_message(const message *msg, int socket) {
         case REGISTER:
             fprintf(stderr, "Client %s registering\n", msg->client_name);
             handle_register(msg->client_name, socket);
+            break;
+        case RESULT:
+            handle_result((const arith_resp *) msg->data, msg->client_name);
             break;
         default:
             fprintf(stderr, "Unexpected message type: %d at socket %d\n", msg->type, socket);
@@ -242,6 +251,9 @@ void handle_register(const char *name, int socket) {
     send_message(socket, REGISTER_ACK, NULL, 0);
 }
 
+void handle_result(const arith_resp *resp, const char *client_name) {
+    printf("Client '%s' calculated #%d as %d\n", client_name, resp->id, resp->result);
+}
 
 /*********************************************************************************
 * Input reader

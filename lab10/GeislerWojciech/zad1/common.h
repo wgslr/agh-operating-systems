@@ -52,7 +52,7 @@ typedef struct {
 typedef struct {
     int id;
     int result;
-} artih_resp;
+} arith_resp;
 
 
 

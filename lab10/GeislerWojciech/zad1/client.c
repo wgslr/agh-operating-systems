@@ -72,7 +72,9 @@ void send_message(int socket, msg_type type, void *data, size_t len) {
     msg->len = len;
     strncpy(msg->client_name, name, MAX_NAME);
     memcpy(msg->data, data, len);
-    OK(send(socket, msg, sizeof(msg) + len, 0), "Error sending message");
+
+    fprintf(stderr, "Sending %zub + %zub\n", sizeof(message), len);
+    OK(send(socket, msg, sizeof(message) + len, 0), "Error sending message");
     free(msg);
 }
 
@@ -123,23 +125,19 @@ void do_listen(int fd) {
             continue;
         }
 
-//        fprintf(stderr, "Reading %zu bytes of body\n", sizeof(arith_req));
-//
-//        bytes = recv(fd, buff->data, sizeof(arith_req), 0);
-//        OK(bytes, "Error receiving message body");
-//
-//        fprintf(stderr, "Read %zu bytes of body\n", bytes);
-
         arith_req *req = (arith_req *) buff->data;
 
         fprintf(stderr, "Calculating #%d with %d and %d\n", req->id, req->arg1, req->arg2);
 
         int result = calculate(req);
-        artih_resp resp = {
+        arith_resp resp = {
                 .id = req->id,
                 .result = result
         };
-        send_message(fd, RESULT, &resp, sizeof(resp));
+
+        fprintf(stderr, "Sending response for #%d\n", req->id);
+        send_message(fd, RESULT, &resp, sizeof(arith_resp));
+        fprintf(stderr, "Sent response for #%d\n", req->id);
     }
 }
 
