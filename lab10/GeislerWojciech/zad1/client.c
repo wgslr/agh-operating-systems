@@ -67,7 +67,9 @@ void send_message(int socket, msg_type type, void *data, size_t len) {
     msg->type = type;
     msg->len = len;
     strncpy(msg->client_name, name, MAX_NAME);
-    memcpy(msg->data, data, len);
+    if(len > 0) {
+        memcpy(msg->data, data, len);
+    }
 
     OK(send(socket, msg, sizeof(message) + len, 0), "Error sending message");
     free(msg);
