@@ -199,5 +199,5 @@ int main(int argc, char *argv[]) {
 void cleanup(void) {
     CHECK(shutdown(_socket_fd, SHUT_RDWR), "Shutdown error of client socket");
     CHECK(close(_socket_fd), "Error closing client socket");
-    fprintf(stderr, "Cleanup finished\n");
+    fprintf(stderr, "Cleanup finished, exiting\n");
 }

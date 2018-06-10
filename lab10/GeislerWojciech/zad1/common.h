@@ -21,7 +21,7 @@
 #define MAX_CLIENTS 20
 #define MAX_LEN 64
 #define MAX_TOKENS 5
-#define PING_PERIOD 15
+#define PING_PERIOD 10
 
 typedef enum {
     REGISTER = 0x11,

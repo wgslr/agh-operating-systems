@@ -59,7 +59,7 @@ pthread_t spawn(void *(*func)(void *), void *args);
 
 void *listener(void *arg);
 
-arith_op char_to_op(char c);
+int char_to_op(char c, arith_op *op);
 
 client *get_random_client(void);
 
@@ -331,23 +331,33 @@ void *reader(void * arg) {
         OK(getline(&line, &n, stdin), "Error reading line from stdin");
         tokens *expr = tokenize(line);
         if(expr->size < 3) {
-            fprintf(stderr, "You must provider <operand> <operator> <operand>\n");
+            printf("You must provider <operand> <operator> <operand>\n");
             free(expr);
         } else {
             arith_req req = {
                     .id = op_id++,
-                    .op = char_to_op(expr->toks[1][0]),
                     .arg1 = atoi(expr->toks[0]),
                     .arg2 = atoi(expr->toks[2])
             };
+
+            arith_op op;
+            if(char_to_op(expr->toks[1][0], &op) != 0) {
+                fprintf(stdout, "Unknown arithmetic operator\n");
+                continue;
+            } else {
+                req.op = op;
+            }
+
+
             free(expr);
 
             client *c = get_random_client();
             if(c == NULL) {
                 printf("No client registered to handle the request\n");
-                continue;
+            } else {
+                printf("Sending request #%d to '%.*s'\n", req.id, MAX_NAME, c->name);
+                send_message(c->socket, ARITH, &req, sizeof(arith_req));
             }
-            send_message(c->socket, ARITH, &req, sizeof(arith_req));
         };
     }
 }
@@ -374,20 +384,24 @@ tokens *tokenize(char *string) {
     return result;
 }
 
-arith_op char_to_op(char c) {
+int char_to_op(char c, arith_op *op) {
     switch(c) {
         case '+':
-            return ADD;
+            *op = ADD;
+            break;
         case '-':
-            return SUB;
+            *op = SUB;
+            break;
         case '*':
-            return MUL;
+            *op = MUL;
+            break;
         case '/':
-            return DIV;
+            *op = DIV;
+            break;
         default:
-            fprintf(stderr, "Unknown arithmetic operator\n");
-            exit(1);
+            return -1;
     }
+    return 0;
 }
 
 client *get_random_client(void) {
@@ -472,5 +486,5 @@ void cleanup(void) {
     CHECK(close(inet_socket), "Error closing inet socket");
     CHECK(unlink(unix_socket_path), "Error unlinking local socket");
 
-    fprintf(stderr, "Cleanup finished\n");
+    fprintf(stderr, "Cleanup finished, exiting\n");
 }
