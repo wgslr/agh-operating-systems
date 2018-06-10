@@ -128,7 +128,7 @@ void *listener(void *arg) {
     event.data.fd = inet_socket;
     OK(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, inet_socket, &event), "Could not add inet socket to epoll");
 
-    fprintf(stderr, "Server listening at 0.0.0.0:%d and '%s'\n", args->port, args->path);
+    fprintf(stdout, "Server listening at 0.0.0.0:%d and '%s'\n", args->port, args->path);
 
     while(true) {
         OK(epoll_wait(epoll_fd, &event, 1, -1), "Error waiting for message");
