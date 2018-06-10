@@ -155,7 +155,7 @@ void *listener(void *arg) {
         if(msg != NULL) {
             process_message(msg, &sender);
         }
-        free(buff);
+        free(msg);
     }
 }
 

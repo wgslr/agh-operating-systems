@@ -145,6 +145,7 @@ void *listener(void *arg) {
             if(msg != NULL) {
                 process_message(msg, event_socket);
             }
+            free(msg);
         }
     }
 }
@@ -212,6 +213,7 @@ message *read_message(int socket) {
             shutdown(socket, SHUT_RDWR);
             close(socket);
         }
+        free(buff);
         return NULL;
     }
 
@@ -347,13 +349,12 @@ void *reader(void * arg) {
             arith_op op;
             if(char_to_op(expr->toks[1][0], &op) != 0) {
                 fprintf(stdout, "Unknown arithmetic operator\n");
+                free(expr);
                 continue;
             } else {
                 req.op = op;
+                free(expr);
             }
-
-
-            free(expr);
 
             client *c = get_random_client();
             if(c == NULL) {
