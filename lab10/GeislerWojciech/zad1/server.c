@@ -73,6 +73,9 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    printf("sizeof(message): %zu\n", sizeof(message));
+    printf("sizeof(arith_req): %zu\n", sizeof(arith_req));
+
     atexit(&cleanup);
     srand((unsigned int) time(NULL));
     client_count = 0;
@@ -196,11 +199,9 @@ void send_message(int socket, msg_type type, void *data, size_t len) {
     msg->type = type;
     msg->len = len;
     memcpy(msg->data, data, len);
-    OK(send(socket, msg, sizeof(msg) + len, 0), "Error sending message");
+    OK(send(socket, msg, sizeof(message) + len, 0), "Error sending message");
     free(msg);
 }
-
-
 
 
 /*********************************************************************************
@@ -268,8 +269,8 @@ void *reader(void) {
                 continue;
             }
 
-            fprintf(stderr, "Sending request %d to client '%s'\n", req.id, c->name);
-            send_message(c->socket, ARITH, &req, sizeof(req));
+            fprintf(stderr, "Sending request %d to client '%s' with args %d and %d\n", req.id, c->name, req.arg1, req.arg2);
+            send_message(c->socket, ARITH, &req, sizeof(arith_req));
         };
     }
 }

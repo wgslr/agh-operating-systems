@@ -18,7 +18,7 @@ char name[MAX_NAME + 1];
 
 void cleanup(void);
 
-int calculate(arith_req *req) ;
+int calculate(arith_req *req);
 
 sa_family_t connection_type(char *arg) {
     if(strcmp(arg, "UNIX") == 0) {
@@ -91,7 +91,7 @@ void do_register(int fd) {
     recv(fd, &buff, sizeof(buff), 0);
 
     if(buff.type == REGISTER_ACK) {
-        printf("Client '%s' registered succesfully\n", name);
+        printf("Client '%s' registered successfully\n", name);
     } else if(buff.type == NAME_TAKEN) {
         printf("Cannot register due to name conflict\n");
         exit(1);
@@ -101,13 +101,21 @@ void do_register(int fd) {
 }
 
 void do_listen(int fd) {
+    const size_t LEN = sizeof(message) + sizeof(arith_req);
+    message *buff = calloc(1, LEN);
     while(true) {
-        message *buff = calloc(1, sizeof(message) + sizeof(arith_req));
-        ssize_t bytes = recv(fd, buff, sizeof(message), 0);
+        ssize_t bytes = recv(fd, buff, LEN, 0);
         OK(bytes, "Error receiving message header");
         if(bytes == 0) {
             fprintf(stderr, "Server closed the connection\n");
             exit(1);
+        }
+
+        fprintf(stderr, "Read %zu bytes of header and body\n", bytes);
+
+        if(bytes < LEN) {
+            fprintf(stderr, "Received trunacted message, skipping\n");
+            continue;
         }
 
         if(buff->type != ARITH) {
@@ -115,9 +123,20 @@ void do_listen(int fd) {
             continue;
         }
 
-        int result = calculate((arith_req *) buff->data);
+//        fprintf(stderr, "Reading %zu bytes of body\n", sizeof(arith_req));
+//
+//        bytes = recv(fd, buff->data, sizeof(arith_req), 0);
+//        OK(bytes, "Error receiving message body");
+//
+//        fprintf(stderr, "Read %zu bytes of body\n", bytes);
+
+        arith_req *req = (arith_req *) buff->data;
+
+        fprintf(stderr, "Calculating #%d with %d and %d\n", req->id, req->arg1, req->arg2);
+
+        int result = calculate(req);
         artih_resp resp = {
-                .id = ((arith_req *) buff->data)->id,
+                .id = req->id,
                 .result = result
         };
         send_message(fd, RESULT, &resp, sizeof(resp));

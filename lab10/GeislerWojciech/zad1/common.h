@@ -20,12 +20,12 @@
 #define MAX_LEN 64
 
 typedef enum {
-    REGISTER = 1,
-    REGISTER_ACK,
-    NAME_TAKEN,
-    ARITH,
-    RESULT,
-    UNREGISTER
+    REGISTER = 10,
+    REGISTER_ACK = 20,
+    NAME_TAKEN = 30,
+    ARITH = 40,
+    RESULT = 50,
+    UNREGISTER = 60
 } msg_type;
 
 typedef enum arith_op {
