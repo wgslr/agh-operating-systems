@@ -18,6 +18,8 @@
 #define MAX_NAME 20
 #define MAX_CLIENTS 20
 #define MAX_LEN 64
+#define MAX_TOKENS 5
+#define PING_PERIOD 5
 
 typedef enum {
     REGISTER = 10,
@@ -25,7 +27,8 @@ typedef enum {
     NAME_TAKEN = 30,
     ARITH = 40,
     RESULT = 50,
-    UNREGISTER = 60
+    UNREGISTER = 60,
+    PING = 70,
 } msg_type;
 
 typedef enum arith_op {

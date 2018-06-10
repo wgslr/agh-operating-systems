@@ -17,6 +17,7 @@
 typedef struct {
     char name[MAX_NAME + 1];
     int socket;
+    bool responsive;
 } client;
 
 typedef struct {
@@ -25,7 +26,6 @@ typedef struct {
 } listener_args;
 
 
-#define MAX_TOKENS 5
 const char *const WHITESPACE = " \r\n\t";
 typedef struct {
     int size;
@@ -58,18 +58,22 @@ pthread_t spawn(void *(*func)(void *), void *args);
 
 void *listener(void *arg);
 
-arith_op char_to_op(char c) ;
+arith_op char_to_op(char c);
 
-client *get_random_client(void) ;
+client *get_random_client(void);
 
-void *reader(void) ;
+void *reader(void);
 
 // Splits string on whitespace
-tokens *tokenize(char *string) ;
+tokens *tokenize(char *string);
 
-void handle_result(const arith_resp *resp, const char *client_name) ;
+void handle_result(const arith_resp *resp, const char *client_name);
 
-void handle_unregister(const char *name) ;
+void handle_unregister(const char *name);
+
+void handle_ping(int socket) ;
+
+void *monitor(void) ;
 
 int main(int argc, char *argv[]) {
     if(argc != 3) {
@@ -89,7 +93,8 @@ int main(int argc, char *argv[]) {
     strncpy(args->path, argv[2], UNIX_PATH_MAX);
 
     spawn(&listener, (void *) args);
-    reader();
+    spawn((void *(*)(void *)) &reader, NULL);
+    spawn((void *(*)(void *)) &monitor, NULL);
 
     pause();
 
@@ -123,7 +128,7 @@ void *listener(void *arg) {
             accept_connection(event_socket, epoll_fd);
         } else {
             message *msg = read_message(event_socket);
-            if(msg != NULL){
+            if(msg != NULL) {
                 process_message(msg, event_socket);
             }
         }
@@ -185,7 +190,8 @@ message *read_message(int socket) {
     bytes = recv(socket, buff, sizeof(message), 0);
     OK(bytes, "Error receiving message header")
 
-    fprintf(stderr, "Received message %zub (+ %zub body) from '%s' at %d\n", bytes, buff->len, buff->client_name, socket);
+    fprintf(stderr, "Received message %zub (+ %zub body) from '%s' at %d\n", bytes, buff->len, buff->client_name,
+            socket);
 
     if(bytes == 0) {
         fprintf(stderr, "Client closed connection\n");
@@ -198,7 +204,7 @@ message *read_message(int socket) {
         fprintf(stderr, "Reading %zu bytes of body\n", buff->len);
         bytes = recv(socket, &buff->data, buff->len, 0);
         OK(bytes, "Error receiving message body")
-        assert(bytes == buff->len);
+        assert(bytes == (ssize_t) buff->len);
     }
 
     return buff;
@@ -231,6 +237,9 @@ void process_message(const message *msg, int socket) {
         case UNREGISTER:
             handle_unregister(msg->client_name);
             break;
+        case PING:
+            handle_ping(socket);
+            break;
         default:
             fprintf(stderr, "Unexpected message type: %d at socket %d\n", msg->type, socket);
     }
@@ -252,6 +261,7 @@ void handle_register(const char *name, int socket) {
 
     strncpy(clients[available_idx].name, name, MAX_NAME);
     clients[available_idx].socket = socket;
+    clients[available_idx].responsive = true;
     ++client_count;
 
     printf("Registered client '%.*s'\n", MAX_NAME, name);
@@ -267,13 +277,24 @@ void handle_result(const arith_resp *resp, const char *client_name) {
 void handle_unregister(const char *name) {
     for(int i = 0; i < MAX_CLIENTS; ++i) {
         if(strcmp(clients[i].name, name) == 0) {
-            shutdown(clients[i].socket,SHUT_RDWR);
+            printf("Client '%.*s' unregistered\n", MAX_NAME, name);
+
+            shutdown(clients[i].socket, SHUT_RDWR);
             close(clients[i].socket);
             clients[i].socket = 0;
             clients[i].name[0] = '\0';
             --client_count;
 
-            printf("Client '%.*s' unregistered\n", MAX_NAME, name);
+            break;
+        }
+    }
+}
+
+void handle_ping(int socket) {
+    for(int i = 0; i< MAX_CLIENTS; ++i) {
+        if(clients[i].socket == socket) {
+            fprintf(stderr, "Client '%s' responded to ping\n", clients[i].name);
+            clients[i].responsive = true;
             break;
         }
     }
@@ -288,7 +309,7 @@ void *reader(void) {
     size_t n = 0;
     while(true) {
         OK(getline(&line, &n, stdin), "Error reading line from stdin");
-        tokens * expr = tokenize(line);
+        tokens *expr = tokenize(line);
         if(expr->size < 3) {
             fprintf(stderr, "You must provider <operand> <operator> <operand>\n");
         } else {
@@ -305,7 +326,8 @@ void *reader(void) {
                 continue;
             }
 
-            fprintf(stderr, "Sending request #%d to client '%s' with args %d and %d\n", req.id, c->name, req.arg1, req.arg2);
+            fprintf(stderr, "Sending request #%d to client '%s' with args %d and %d\n", req.id, c->name, req.arg1,
+                    req.arg2);
             send_message(c->socket, ARITH, &req, sizeof(arith_req));
         };
     }
@@ -359,6 +381,27 @@ client *get_random_client(void) {
     return clients + i;
 }
 
+/*********************************************************************************
+* Monitor
+*********************************************************************************/
+
+void *monitor(void) {
+    while(true) {
+        for(int i = 0; i < MAX_CLIENTS; ++i) {
+            if(clients[i].socket <= 0)
+                continue;
+            if(!clients[i].responsive) {
+                printf("Client '%s' did not respond to ping, removing\n", clients[i].name);
+                handle_unregister(clients[i].name);
+            } else {
+                send_message(clients[i].socket, PING, NULL, 0);
+                clients[i].responsive = false;
+            }
+        }
+
+        sleep(PING_PERIOD);
+    }
+}
 
 /*********************************************************************************
 * Utils

@@ -105,6 +105,7 @@ void do_register(int fd) {
 void do_listen(int fd) {
     const size_t LEN = sizeof(message) + sizeof(arith_req);
     message *buff = calloc(1, LEN);
+    arith_req *req;
     while(true) {
         ssize_t bytes = recv(fd, buff, LEN, 0);
         OK(bytes, "Error receiving message header");
@@ -113,31 +114,28 @@ void do_listen(int fd) {
             exit(1);
         }
 
-        fprintf(stderr, "Read %zu bytes of header and body\n", bytes);
+        switch(buff->type) {
+            case PING:
+                send_message(fd, PING, NULL, 0);
+                break;
+            case ARITH:
+                req = (arith_req *) buff->data;
+                fprintf(stderr, "Calculating #%d with %d and %d\n", req->id, req->arg1, req->arg2);
 
-        if(bytes < LEN) {
-            fprintf(stderr, "Received trunacted message, skipping\n");
-            continue;
+                int result = calculate(req);
+                arith_resp resp = {
+                        .id = req->id,
+                        .result = result
+                };
+
+                fprintf(stderr, "Sending response for #%d\n", req->id);
+                send_message(fd, RESULT, &resp, sizeof(arith_resp));
+                fprintf(stderr, "Sent response for #%d\n", req->id);
+                break;
+            default:
+                fprintf(stderr, "Received unexpected message of type %d\n", buff->type);
+                continue;
         }
-
-        if(buff->type != ARITH) {
-            fprintf(stderr, "Received unexpected message of type %d\n", buff->type);
-            continue;
-        }
-
-        arith_req *req = (arith_req *) buff->data;
-
-        fprintf(stderr, "Calculating #%d with %d and %d\n", req->id, req->arg1, req->arg2);
-
-        int result = calculate(req);
-        arith_resp resp = {
-                .id = req->id,
-                .result = result
-        };
-
-        fprintf(stderr, "Sending response for #%d\n", req->id);
-        send_message(fd, RESULT, &resp, sizeof(arith_resp));
-        fprintf(stderr, "Sent response for #%d\n", req->id);
     }
 }
 
