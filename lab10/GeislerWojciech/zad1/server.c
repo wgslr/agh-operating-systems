@@ -86,7 +86,7 @@ void sigint(int signum) {
 
 int main(int argc, char *argv[]) {
     if(argc != 3) {
-        fprintf(stderr, "Incorrect number of arguments (expected 2)");
+        fprintf(stderr, "Incorrect number of arguments (expected 2)\n");
         exit(1);
     }
 

@@ -27,7 +27,7 @@ sa_family_t connection_type(char *arg) {
     } else if(strcmp(arg, "INET") == 0) {
         return AF_INET;
     } else {
-        fprintf(stderr, "Invalid socket type. Expected UNIX or INET");
+        fprintf(stderr, "Invalid socket type. Expected UNIX or INET\n");
         exit(1);
     }
 }
@@ -166,7 +166,7 @@ void sigint(int signo) {
 
 int main(int argc, char *argv[]) {
     if(argc != 4) {
-        fprintf(stderr, "Incorrect number of arguments (expected 2)");
+        fprintf(stderr, "Incorrect number of arguments (expected 2)\n");
         exit(1);
     }
 
