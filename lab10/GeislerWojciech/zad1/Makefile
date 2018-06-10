@@ -21,7 +21,8 @@ test: server client
 	for i in {1..10}; do ./client c$$i UNIX $(SOCKET) & done
 	for i in {1..10}; do ./client c$$i INET 127.0.0.1:$(PORT) & done
 
-%: %. common.h
+%: %.c common.h
+	$(CC) $^ -o $@ $(CFLAGS) $(SANITIZER)
 
 clean:
 	-rm *.o *.so *.a *.bin *.out server client 
