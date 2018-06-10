@@ -340,10 +340,11 @@ tokens *tokenize(char *string) {
     // find beginning of string
     string += strspn(string, WHITESPACE);
 
-    while(string != NULL && *string != '\0') {
+    while(string != NULL && *string != '\0' && result->size < MAX_TOKENS) {
         wordlen = strcspn(string, WHITESPACE);
-        result->toks[result->size] = calloc(1, wordlen);
+        result->toks[result->size] = calloc(1, wordlen + 1);
         strncpy(result->toks[result->size], string, wordlen);
+        result->toks[result->size][wordlen] = '\0';
         ++result->size;
 
         string += wordlen;
