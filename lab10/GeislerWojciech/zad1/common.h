@@ -58,6 +58,15 @@ typedef struct {
     int32_t result;
 } arith_resp;
 
+void dumpmem(void * pointer, size_t len) {
+    uint8_t *p = pointer;
+    for(size_t i = 0; i < len; ++i) {
+        printf("%02hX", *(p + i));
+        if(i % 4 == 3)
+            printf(" ");
+    }
+    printf("\n");
+}
 
 
 #endif //LAB10_COMMON_H
