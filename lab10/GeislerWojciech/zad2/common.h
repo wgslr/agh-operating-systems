@@ -19,7 +19,7 @@
 #define UNIX_PATH_MAX    108
 #define MAX_NAME 23
 #define MAX_CLIENTS 20
-#define MAX_LEN 64
+#define MAX_LEN 16
 #define MAX_TOKENS 5
 #define PING_PERIOD 10
 
@@ -44,7 +44,7 @@ typedef struct {
     uint16_t type;
     uint32_t len;
     char client_name[MAX_NAME + 1];
-    uint32_t data[0]; // usign uint32_t for alignment portability
+    uint32_t data[4]; // usign uint32_t for alignment portability
 } message; // parent type
 
 typedef struct {

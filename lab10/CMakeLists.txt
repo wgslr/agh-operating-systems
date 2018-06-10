@@ -6,3 +6,6 @@ set(CMAKE_C_FLAGS "-lrt -lpthread -lm")
 
 add_executable(server1 GeislerWojciech/zad1/server.c GeislerWojciech/zad1/common.h)
 add_executable(client1 GeislerWojciech/zad1/client.c GeislerWojciech/zad1/common.h)
+
+add_executable(server2 GeislerWojciech/zad2/server.c GeislerWojciech/zad2/common.h)
+add_executable(client2 GeislerWojciech/zad2/client.c GeislerWojciech/zad2/common.h)

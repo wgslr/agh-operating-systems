@@ -15,8 +15,14 @@
 #include "common.h"
 
 typedef struct {
+    sa_family_t family;
+    struct sockaddr addr;
+    socklen_t addrlen;
+} conn;
+
+typedef struct {
     char name[MAX_NAME + 1];
-    int socket;
+    conn addr;
     bool responsive;
 } client;
 
@@ -38,19 +44,20 @@ char unix_socket_path[UNIX_PATH_MAX];
 int client_count;
 int op_id = 1;
 
-client clients[MAX_CLIENTS] = {{{0}, 0, 0}};
+//client clients[MAX_CLIENTS] = {{{0}, {0}, 0}};
+client clients[MAX_CLIENTS];
 
-void process_message(const message *msg, int socket);
-
-void handle_register(const char *name, int socket);
-
-void cleanup(void);
-
-int open_local_socket(const char *path);
+void process_message(const message *msg, const conn *sender);
 
 int open_network_socket(const short port);
 
-message *read_message(int socket);
+int open_local_socket(const char *path);
+
+void handle_register(const char *name, const conn *sender);
+
+void cleanup(void);
+
+message *read_message(int socket, conn *sender);
 
 void accept_connection(int socket, int epoll_fd);
 
@@ -72,11 +79,13 @@ void handle_result(const arith_resp *resp, const char *client_name);
 
 void handle_unregister(const char *name);
 
-void handle_ping(int socket) ;
+void handle_ping(const char *name);
 
-void *monitor(void *) ;
+void *monitor(void *);
 
-client *find_client_by_socket(const int socket) ;
+void send_message(const conn *addr, msg_type type, void *data, uint32_t len);
+
+client *find_client_by_name(const char *name) ;
 
 void sigint(int signum) {
     (void) signum;
@@ -134,13 +143,12 @@ void *listener(void *arg) {
         OK(epoll_wait(epoll_fd, &event, 1, -1), "Error waiting for message");
 
         int event_socket = event.data.fd;
-        if(event_socket == inet_socket || event_socket == unix_socket) {
-            accept_connection(event_socket, epoll_fd);
-        } else {
-            message *msg = read_message(event_socket);
-            if(msg != NULL) {
-                process_message(msg, event_socket);
-            }
+        conn sender = {
+                .family = event_socket == unix_socket ? AF_UNIX : AF_INET
+        };
+        message *msg = read_message(event_socket, &sender);
+        if(msg != NULL) {
+            process_message(msg, &sender);
         }
     }
 }
@@ -160,7 +168,6 @@ int open_network_socket(const short port) {
     OK(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)), "Error setting socket opt");
 
     OK(bind(fd, (const struct sockaddr *) &addr, sizeof(addr)), "Error binding inet socket");
-
     return fd;
 }
 
@@ -173,67 +180,39 @@ int open_local_socket(const char *path) {
     const int fd = socket(AF_UNIX, SOCK_DGRAM, 0);
     OK(fd, "Error opening unix socket");
     OK(bind(fd, (struct sockaddr *) &addr, sizeof(addr)), "Error binding unix socket");
-
     return fd;
 }
 
-void accept_connection(int socket, int epoll_fd) {
-    int client_fd = accept(socket, NULL, NULL);
-    OK(client_fd, "Error accepting connection");
-
-    if(client_count >= MAX_CLIENTS) {
-        fprintf(stderr, "Cannot add client, maximum number reached\n");
-        return;
-    }
-
-    struct epoll_event event = {
-            .events = EPOLLIN,
-            .data.fd = client_fd
-    };
-    OK(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event), "Error adding connection to epoll");
-
-    fprintf(stderr, "Accepted incoming connection\n");
-}
-
-message *read_message(int socket) {
+message *read_message(int socket, conn *sender) {
     ssize_t bytes;
-    message *buff = calloc(1, sizeof(message) + MAX_LEN);
-    bytes = recv(socket, buff, sizeof(message), 0);
-    OK(bytes, "Error receiving message header")
+    message *buff = calloc(1, sizeof(message));
+    sender->addrlen = sizeof(struct sockaddr);
+
+    bytes = recvfrom(socket, buff, sizeof(message), 0, &sender->addr, &sender->addrlen);
+    OK(bytes, "Error receiving message")
 
     if(bytes == 0) {
-        client *c = find_client_by_socket(socket);
-        if(c != NULL) {
-            fprintf(stderr, "Client '%s' closed connection\n", c->name);
-            handle_unregister(c->name);
-        } else {
-            fprintf(stderr, "Anonymous connection closed\n");
-            shutdown(socket, SHUT_RDWR);
-            close(socket);
-        }
-        return NULL;
+        fprintf(stderr, "Received empty message");
     }
 
-    if(buff->len > 0) {
-        bytes = recv(socket, &buff->data, buff->len, 0);
-        OK(bytes, "Error receiving message body")
-        if(bytes < (ssize_t) buff->len) {
-            fprintf(stderr, "Received truncated message, ignoring\n");
-            return NULL;
-        }
-    }
+
+
+
 
     return buff;
 }
 
-void send_message(int socket, msg_type type, void *data, size_t len) {
-    message *msg = calloc(1, sizeof(message) + len);
+void send_message(const conn *addr, msg_type type, void *data, uint32_t len) {
+    int socket = addr->family == AF_UNIX ? unix_socket : inet_socket;
+
+    message *msg = calloc(1, sizeof(message));
     msg->type = type;
     msg->len = len;
     if(len > 0) {
         memcpy(msg->data, data, len);
     }
-    OK(send(socket, msg, sizeof(message) + len, 0), "Error sending message");
+
+    OK(sendto(socket, msg, sizeof(message), 0, &addr->addr, addr->addrlen), "Error sending message");
     free(msg);
 }
 
@@ -243,10 +222,10 @@ void send_message(int socket, msg_type type, void *data, size_t len) {
 *********************************************************************************/
 
 
-void process_message(const message *msg, int socket) {
+void process_message(const message *msg, const conn *sender) {
     switch(msg->type) {
         case REGISTER:
-            handle_register(msg->client_name, socket);
+            handle_register(msg->client_name, sender);
             break;
         case RESULT:
             handle_result((const arith_resp *) msg->data, msg->client_name);
@@ -255,34 +234,34 @@ void process_message(const message *msg, int socket) {
             handle_unregister(msg->client_name);
             break;
         case PING:
-            handle_ping(socket);
+            handle_ping(msg->client_name);
             break;
         default:
-            fprintf(stderr, "Unexpected message type %#08X at socket %d\n", msg->type, socket);
+            fprintf(stderr, "Unexpected message type %#08X\n", msg->type);
     }
 }
 
 
-void handle_register(const char *name, int socket) {
+void handle_register(const char *name, const conn *sender) {
     int available_idx = -1;
     for(int i = 0; i < MAX_CLIENTS; ++i) {
-        if(available_idx == -1 && clients[i].socket <= 0) {
+        if(available_idx == -1 && clients[i].name[0] == '\0') {
             available_idx = i;
         } else if(strcmp(clients[i].name, name) == 0) {
             // name exists
             fprintf(stderr, "Refusing registration of duplicate name '%.*s'\n", MAX_NAME, name);
-            send_message(socket, NAME_TAKEN, NULL, 0);
+            send_message(sender, NAME_TAKEN, NULL, 0);
             return;
         }
     }
 
-    strncpy(clients[available_idx].name, name, MAX_NAME);
-    clients[available_idx].socket = socket;
-    clients[available_idx].responsive = true;
     ++client_count;
+    strncpy(clients[available_idx].name, name, MAX_NAME);
+    memcpy(&clients[available_idx].addr, sender, sizeof(conn));
+    clients[available_idx].responsive = true;
 
     printf("Registered client '%.*s'\n", MAX_NAME, name);
-    send_message(socket, REGISTER_ACK, NULL, 0);
+    send_message(sender, REGISTER_ACK, NULL, 0);
 }
 
 
@@ -307,21 +286,17 @@ void handle_unregister(const char *name) {
     }
 }
 
-void handle_ping(int socket) {
-    for(int i = 0; i< MAX_CLIENTS; ++i) {
-        if(clients[i].socket == socket) {
-            clients[i].responsive = true;
-            fprintf(stderr, "Client '%s' responded to ping\n", clients[i].name);
-            break;
-        }
-    }
+void handle_ping(const char *name) {
+    client *c = find_client_by_name(name);
+    c->responsive = true;
+    fprintf(stderr, "CLient '%s' responded to ping\n", c->name);
 }
 
 /*********************************************************************************
 * Input reader
 *********************************************************************************/
 
-void *reader(void * arg) {
+void *reader(void *arg) {
     (void) arg; // unused
     char *line = NULL;
     size_t n = 0;
@@ -354,7 +329,7 @@ void *reader(void * arg) {
                 printf("No client registered to handle the request\n");
             } else {
                 printf("Sending request #%d to '%.*s'\n", req.id, MAX_NAME, c->name);
-                send_message(c->socket, ARITH, &req, sizeof(arith_req));
+                send_message(&c->addr, ARITH, &req, sizeof(arith_req));
             }
         };
     }
@@ -407,7 +382,7 @@ client *get_random_client(void) {
         return NULL;
     }
     int i = rand() % MAX_CLIENTS;
-    while(clients[i].socket <= 0) {
+    while(clients[i].name[0] == '\0') {
         i = (i + 1) % MAX_CLIENTS;
     }
     return clients + i;
@@ -417,17 +392,17 @@ client *get_random_client(void) {
 * Monitor
 *********************************************************************************/
 
-void *monitor(void * arg) {
+void *monitor(void *arg) {
     (void) arg; // unused
     while(true) {
         for(int i = 0; i < MAX_CLIENTS; ++i) {
-            if(clients[i].socket <= 0)
+            if(clients[i].name[0] == '\0')
                 continue;
             if(!clients[i].responsive) {
                 fprintf(stderr, "Client '%s' did not respond to ping, removing\n", clients[i].name);
                 handle_unregister(clients[i].name);
             } else {
-                send_message(clients[i].socket, PING, NULL, 0);
+                send_message(&clients[i].addr, PING, NULL, 0);
                 clients[i].responsive = false;
             }
         }
@@ -461,22 +436,13 @@ client *find_client_by_name(const char *name) {
     return NULL;
 }
 
-client *find_client_by_socket(const int socket) {
-    for(int i = 0; i < MAX_CLIENTS; ++i) {
-        if(clients[i].socket == socket) {
-            return &clients[i];
-        }
-    }
-    return NULL;
-}
-
 void cleanup(void) {
-    for(int i = 0; i < MAX_CLIENTS; ++i) {
-        if(clients[i].socket > 0) {
-            shutdown(clients[i].socket, SHUT_RDWR);
-            close(clients[i].socket);
-        }
-    }
+//    for(int i = 0; i < MAX_CLIENTS; ++i) {
+//        if(clients[i].socket > 0) {
+//            shutdown(clients[i].socket, SHUT_RDWR);
+//            close(clients[i].socket);
+//        }
+//    }
 
     CHECK(shutdown(inet_socket, SHUT_RDWR), "Shutdown error of local socket");
     CHECK(shutdown(unix_socket, SHUT_RDWR), "Shutdown error of unix socket");

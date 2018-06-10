@@ -48,6 +48,7 @@ void connect_inet(int fd, const char *addr_str) {
             .sin_port =  htons(port),
     };
 
+    OK(bind(fd, (const struct sockaddr *) &sockaddr, sizeof(sa_family_t)), "Error binding to inet socket");
     OK(connect(fd, (const struct sockaddr *) &sockaddr, sizeof(sockaddr)), "Error connecting to inet socket");
     fprintf(stderr, "Connected to server via INET\n");
 }
@@ -59,7 +60,8 @@ void connect_local(int fd, const char *path) {
     };
     strncpy(sockaddr.sun_path, path, UNIX_PATH_MAX);
 
-    OK(connect(fd, (const struct sockaddr *) &sockaddr, sizeof(sockaddr)), "Error connecting to inet socket");
+    OK(bind(fd, (const struct sockaddr *) &sockaddr, sizeof(sa_family_t)), "Error binding to local socket");
+    OK(connect(fd, (const struct sockaddr *) &sockaddr, sizeof(sockaddr)), "Error connecting to local socket");
     fprintf(stderr, "Connected to server via UNIX\n");
 }
 
