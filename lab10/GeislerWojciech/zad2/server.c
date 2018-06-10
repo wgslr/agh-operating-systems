@@ -44,8 +44,11 @@ char unix_socket_path[UNIX_PATH_MAX];
 int client_count;
 int op_id = 1;
 
-//client clients[MAX_CLIENTS] = {{{0}, {0}, 0}};
-client clients[MAX_CLIENTS];
+client clients[MAX_CLIENTS] = {{{0}, {0}, 0}};
+
+/*********************************************************************************
+* Predeclarations
+*********************************************************************************/
 
 void process_message(const message *msg, const conn *sender);
 
@@ -87,10 +90,11 @@ void send_message(const conn *addr, msg_type type, void *data, uint32_t len);
 
 client *find_client_by_name(const char *name) ;
 
-void sigint(int signum) {
-    (void) signum;
-    exit(0);
-}
+void sigint(int signum) ;
+
+/*********************************************************************************
+* Main code
+*********************************************************************************/
 
 
 int main(int argc, char *argv[]) {
@@ -99,9 +103,10 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    srand((unsigned int) time(NULL));
     atexit(&cleanup);
     signal(SIGINT, &sigint);
-    srand((unsigned int) time(NULL));
+
     client_count = 0;
     strncpy(unix_socket_path, argv[2], UNIX_PATH_MAX);
 
@@ -195,10 +200,6 @@ message *read_message(int socket, conn *sender) {
         fprintf(stderr, "Received empty message");
     }
 
-
-
-
-
     return buff;
 }
 
@@ -208,10 +209,13 @@ void send_message(const conn *addr, msg_type type, void *data, uint32_t len) {
     message *msg = calloc(1, sizeof(message));
     msg->type = type;
     msg->len = len;
+    assert(len <= MAX_LEN);
     if(len > 0) {
         memcpy(msg->data, data, len);
     }
 
+//    if(addr->family == AF_UNIX)
+//    fprintf(stderr, "Responding on ")
     OK(sendto(socket, msg, sizeof(message), 0, &addr->addr, addr->addrlen), "Error sending message");
     free(msg);
 }
@@ -275,9 +279,9 @@ void handle_unregister(const char *name) {
         if(strcmp(clients[i].name, name) == 0) {
             printf("Client '%.*s' unregistered\n", MAX_NAME, name);
 
-            shutdown(clients[i].socket, SHUT_RDWR);
-            close(clients[i].socket);
-            clients[i].socket = 0;
+//            shutdown(clients[i].socket, SHUT_RDWR);
+//            close(clients[i].socket);
+//            clients[i].socket = 0;
             clients[i].name[0] = '\0';
             --client_count;
 
@@ -434,6 +438,11 @@ client *find_client_by_name(const char *name) {
         }
     }
     return NULL;
+}
+
+void sigint(int signum) {
+    (void) signum;
+    exit(0);
 }
 
 void cleanup(void) {

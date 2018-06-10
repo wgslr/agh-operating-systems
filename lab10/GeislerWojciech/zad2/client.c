@@ -163,8 +163,8 @@ int calculate(arith_req *req) {
 void sigint(int signo) {
     assert(signo == SIGINT);
     send_message(_socket_fd, UNREGISTER, NULL, 0);
+    exit(0);
 }
-
 
 int main(int argc, char *argv[]) {
     if(argc != 4) {
