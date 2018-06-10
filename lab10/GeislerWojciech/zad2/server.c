@@ -197,7 +197,8 @@ message *read_message(int socket, conn *sender) {
     OK(bytes, "Error receiving message")
 
     if(bytes == 0) {
-        fprintf(stderr, "Received empty message");
+        fprintf(stderr, "Received empty message\n");
+        return NULL;
     }
 
     return buff;
@@ -247,6 +248,11 @@ void process_message(const message *msg, const conn *sender) {
 
 
 void handle_register(const char *name, const conn *sender) {
+    if(client_count >= MAX_CLIENTS) {
+        fprintf(stderr, "Clients registry full, refusing registration\n");
+        return;
+    }
+
     int available_idx = -1;
     for(int i = 0; i < MAX_CLIENTS; ++i) {
         if(available_idx == -1 && clients[i].name[0] == '\0') {
@@ -264,7 +270,7 @@ void handle_register(const char *name, const conn *sender) {
     memcpy(&clients[available_idx].addr, sender, sizeof(conn));
     clients[available_idx].responsive = true;
 
-    printf("Registered client '%.*s'\n", MAX_NAME, name);
+    printf("Registered client '%.*s'. %d clients online\n", MAX_NAME, name, client_count);
     send_message(sender, REGISTER_ACK, NULL, 0);
 }
 
@@ -278,13 +284,8 @@ void handle_unregister(const char *name) {
     for(int i = 0; i < MAX_CLIENTS; ++i) {
         if(strcmp(clients[i].name, name) == 0) {
             printf("Client '%.*s' unregistered\n", MAX_NAME, name);
-
-//            shutdown(clients[i].socket, SHUT_RDWR);
-//            close(clients[i].socket);
-//            clients[i].socket = 0;
             clients[i].name[0] = '\0';
             --client_count;
-
             break;
         }
     }
@@ -446,13 +447,6 @@ void sigint(int signum) {
 }
 
 void cleanup(void) {
-//    for(int i = 0; i < MAX_CLIENTS; ++i) {
-//        if(clients[i].socket > 0) {
-//            shutdown(clients[i].socket, SHUT_RDWR);
-//            close(clients[i].socket);
-//        }
-//    }
-
     CHECK(shutdown(inet_socket, SHUT_RDWR), "Shutdown error of local socket");
     CHECK(shutdown(unix_socket, SHUT_RDWR), "Shutdown error of unix socket");
     CHECK(close(unix_socket), "Error closing local socket");

@@ -45,10 +45,9 @@ void connect_inet(int fd, const char *addr_str) {
     struct sockaddr_in sockaddr = {
             .sin_family = AF_INET,
             .sin_addr = addr,
-            .sin_port =  htons(port),
+            .sin_port = htons(port),
     };
 
-    OK(bind(fd, (const struct sockaddr *) &sockaddr, sizeof(sa_family_t)), "Error binding to inet socket");
     OK(connect(fd, (const struct sockaddr *) &sockaddr, sizeof(sockaddr)), "Error connecting to inet socket");
     fprintf(stderr, "Connected to server via INET\n");
 }
