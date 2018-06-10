@@ -38,6 +38,10 @@ char unix_socket_path[UNIX_PATH_MAX];
 int client_count;
 int op_id = 1;
 
+/*********************************************************************************
+* Predeclarations
+*********************************************************************************/
+
 client clients[MAX_CLIENTS] = {{{0}, 0, 0}};
 
 void process_message(const message *msg, int socket);
@@ -183,11 +187,6 @@ void accept_connection(int socket, int epoll_fd) {
     int client_fd = accept(socket, NULL, NULL);
     OK(client_fd, "Error accepting connection");
 
-    if(client_count >= MAX_CLIENTS) {
-        fprintf(stderr, "Cannot add client, maximum number reached\n");
-        return;
-    }
-
     struct epoll_event event = {
             .events = EPOLLIN,
             .data.fd = client_fd
@@ -266,6 +265,11 @@ void process_message(const message *msg, int socket) {
 
 
 void handle_register(const char *name, int socket) {
+    if(client_count >= MAX_CLIENTS) {
+        fprintf(stderr, "Clients registry full, refusing registration\n");
+        return;
+    }
+
     int available_idx = -1;
     for(int i = 0; i < MAX_CLIENTS; ++i) {
         if(available_idx == -1 && clients[i].socket <= 0) {
