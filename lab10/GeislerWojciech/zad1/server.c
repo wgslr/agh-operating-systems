@@ -11,7 +11,6 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <assert.h>
-#include <hdf5.h>
 #include "common.h"
 
 typedef struct {
@@ -34,6 +33,7 @@ typedef struct {
 
 int unix_socket;
 int inet_socket;
+char unix_socket_path[UNIX_PATH_MAX];
 int client_count;
 int op_id = 1;
 
@@ -62,7 +62,7 @@ arith_op char_to_op(char c);
 
 client *get_random_client(void);
 
-void *reader(void);
+void *reader(void *);
 
 // Splits string on whitespace
 tokens *tokenize(char *string);
@@ -73,7 +73,9 @@ void handle_unregister(const char *name);
 
 void handle_ping(int socket) ;
 
-void *monitor(void) ;
+void *monitor(void *) ;
+
+client *find_client_by_socket(const int socket) ;
 
 int main(int argc, char *argv[]) {
     if(argc != 3) {
@@ -81,12 +83,10 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    printf("sizeof(message): %zu\n", sizeof(message));
-    printf("sizeof(arith_req): %zu\n", sizeof(arith_req));
-
     atexit(&cleanup);
     srand((unsigned int) time(NULL));
     client_count = 0;
+    strncpy(unix_socket_path, argv[2], UNIX_PATH_MAX);
 
     listener_args *args = calloc(1, sizeof(listener_args));
     args->port = (short) atoi(argv[1]);
@@ -119,6 +119,8 @@ void *listener(void *arg) {
 
     event.data.fd = inet_socket;
     OK(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, inet_socket, &event), "Could not add inet socket to epoll");
+
+    fprintf(stderr, "Server listening at 0.0.0.0:%d and '%s'\n", args->port, args->path);
 
     while(true) {
         OK(epoll_wait(epoll_fd, &event, 1, -1), "Error waiting for message");
@@ -168,20 +170,18 @@ void accept_connection(int socket, int epoll_fd) {
     int client_fd = accept(socket, NULL, NULL);
     OK(client_fd, "Error accepting connection");
 
-    fprintf(stderr, "New connection accepted as socket %d\n", client_fd);
-
     if(client_count >= MAX_CLIENTS) {
-        fprintf(stderr, "Cannot add client, maximum number reached");
+        fprintf(stderr, "Cannot add client, maximum number reached\n");
+        return;
     }
-
 
     struct epoll_event event = {
             .events = EPOLLIN,
             .data.fd = client_fd
     };
-    OK(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event), "Could not add client socket to epoll");
+    OK(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event), "Error adding connection to epoll");
 
-    fprintf(stderr, "New connection added to epoll\n");
+    fprintf(stderr, "Accepted incoming connection\n");
 }
 
 message *read_message(int socket) {
@@ -190,18 +190,20 @@ message *read_message(int socket) {
     bytes = recv(socket, buff, sizeof(message), 0);
     OK(bytes, "Error receiving message header")
 
-    fprintf(stderr, "Received message %zub (+ %zub body) from '%s' at %d\n", bytes, buff->len, buff->client_name,
-            socket);
-
     if(bytes == 0) {
-        fprintf(stderr, "Client closed connection\n");
-        shutdown(socket, SHUT_RDWR);
-        close(socket);
+        client *c = find_client_by_socket(socket);
+        if(c != NULL) {
+            fprintf(stderr, "Client '%s' closed connection\n", c->name);
+            handle_unregister(c->name);
+        } else {
+            fprintf(stderr, "Anonymous connection closed\n");
+            shutdown(socket, SHUT_RDWR);
+            close(socket);
+        }
         return NULL;
     }
 
     if(buff->len > 0) {
-        fprintf(stderr, "Reading %zu bytes of body\n", buff->len);
         bytes = recv(socket, &buff->data, buff->len, 0);
         OK(bytes, "Error receiving message body")
         assert(bytes == (ssize_t) buff->len);
@@ -228,7 +230,6 @@ void send_message(int socket, msg_type type, void *data, size_t len) {
 void process_message(const message *msg, int socket) {
     switch(msg->type) {
         case REGISTER:
-            fprintf(stderr, "Client %s registering\n", msg->client_name);
             handle_register(msg->client_name, socket);
             break;
         case RESULT:
@@ -241,7 +242,7 @@ void process_message(const message *msg, int socket) {
             handle_ping(socket);
             break;
         default:
-            fprintf(stderr, "Unexpected message type: %d at socket %d\n", msg->type, socket);
+            fprintf(stderr, "Unexpected message type %d at socket %d\n", msg->type, socket);
     }
 }
 
@@ -249,11 +250,11 @@ void process_message(const message *msg, int socket) {
 void handle_register(const char *name, int socket) {
     int available_idx = -1;
     for(int i = 0; i < MAX_CLIENTS; ++i) {
-        if(clients[i].socket <= 0) {
+        if(available_idx == -1 && clients[i].socket <= 0) {
             available_idx = i;
         } else if(strcmp(clients[i].name, name) == 0) {
             // name exists
-            printf("Refusing registration of duplicate name '%.*s'\n", MAX_NAME, name);
+            fprintf(stderr, "Refusing registration of duplicate name '%.*s'\n", MAX_NAME, name);
             send_message(socket, NAME_TAKEN, NULL, 0);
             return;
         }
@@ -293,7 +294,6 @@ void handle_unregister(const char *name) {
 void handle_ping(int socket) {
     for(int i = 0; i< MAX_CLIENTS; ++i) {
         if(clients[i].socket == socket) {
-            fprintf(stderr, "Client '%s' responded to ping\n", clients[i].name);
             clients[i].responsive = true;
             break;
         }
@@ -304,7 +304,8 @@ void handle_ping(int socket) {
 * Input reader
 *********************************************************************************/
 
-void *reader(void) {
+void *reader(void * arg) {
+    (void) arg; // unused
     char *line = NULL;
     size_t n = 0;
     while(true) {
@@ -325,9 +326,6 @@ void *reader(void) {
                 printf("No client registered to handle the request\n");
                 continue;
             }
-
-            fprintf(stderr, "Sending request #%d to client '%s' with args %d and %d\n", req.id, c->name, req.arg1,
-                    req.arg2);
             send_message(c->socket, ARITH, &req, sizeof(arith_req));
         };
     }
@@ -365,7 +363,7 @@ arith_op char_to_op(char c) {
         case '/':
             return DIV;
         default:
-            fprintf(stderr, "Unknown arithemetic operator\n");
+            fprintf(stderr, "Unknown arithmetic operator\n");
             exit(1);
     }
 }
@@ -385,13 +383,14 @@ client *get_random_client(void) {
 * Monitor
 *********************************************************************************/
 
-void *monitor(void) {
+void *monitor(void * arg) {
+    (void) arg; // unused
     while(true) {
         for(int i = 0; i < MAX_CLIENTS; ++i) {
             if(clients[i].socket <= 0)
                 continue;
             if(!clients[i].responsive) {
-                printf("Client '%s' did not respond to ping, removing\n", clients[i].name);
+                fprintf(stderr, "Client '%s' did not respond to ping, removing\n", clients[i].name);
                 handle_unregister(clients[i].name);
             } else {
                 send_message(clients[i].socket, PING, NULL, 0);
@@ -419,6 +418,24 @@ pthread_t spawn(void *(*func)(void *), void *args) {
     return tid;
 }
 
+client *find_client_by_name(const char *name) {
+    for(int i = 0; i < MAX_CLIENTS; ++i) {
+        if(strcmp(clients[i].name, name) == 0) {
+            return &clients[i];
+        }
+    }
+    return NULL;
+}
+
+client *find_client_by_socket(const int socket) {
+    for(int i = 0; i < MAX_CLIENTS; ++i) {
+        if(clients[i].socket == socket) {
+            return &clients[i];
+        }
+    }
+    return NULL;
+}
+
 void cleanup(void) {
     for(int i = 0; i < MAX_CLIENTS; ++i) {
         if(clients[i].socket > 0) {
@@ -431,4 +448,5 @@ void cleanup(void) {
     shutdown(unix_socket, SHUT_RDWR);
     close(inet_socket);
     close(unix_socket);
+    unlink(unix_socket_path);
 }

@@ -34,8 +34,6 @@ sa_family_t connection_type(char *arg) {
 
 void connect_inet(int fd, const char *addr_str) {
     // split address and port
-    fprintf(stderr, "Splitting %s\n", addr_str);
-
     char *delim = strstr(addr_str, ":");
     *delim = '\0';
     const unsigned short port = (unsigned short) atoi(delim + 1);
@@ -48,11 +46,9 @@ void connect_inet(int fd, const char *addr_str) {
             .sin_addr = addr,
             .sin_port =  htons(port),
     };
-    fprintf(stderr, "Connecting to 0x%08x:%u\n", addr.s_addr, port);
 
     OK(connect(fd, (const struct sockaddr *) &sockaddr, sizeof(sockaddr)), "Error connecting to inet socket");
-
-    fprintf(stderr, "Connected to 0x%08X:%u\n", addr.s_addr, port);
+    fprintf(stderr, "Connected to server via INET\n");
 }
 
 
@@ -63,7 +59,7 @@ void connect_local(int fd, const char *path) {
     strncpy(sockaddr.sun_path, path, UNIX_PATH_MAX);
 
     OK(connect(fd, (const struct sockaddr *) &sockaddr, sizeof(sockaddr)), "Error connecting to inet socket");
-    fprintf(stderr, "Connected to %s\n", path);
+    fprintf(stderr, "Connected to server via UNIX\n");
 }
 
 void send_message(int socket, msg_type type, void *data, size_t len) {
@@ -73,7 +69,6 @@ void send_message(int socket, msg_type type, void *data, size_t len) {
     strncpy(msg->client_name, name, MAX_NAME);
     memcpy(msg->data, data, len);
 
-    fprintf(stderr, "Sending %zub + %zub\n", sizeof(message), len);
     OK(send(socket, msg, sizeof(message) + len, 0), "Error sending message");
     free(msg);
 }
