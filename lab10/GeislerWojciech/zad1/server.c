@@ -252,7 +252,7 @@ void process_message(const message *msg, int socket) {
             handle_ping(socket);
             break;
         default:
-            fprintf(stderr, "Unexpected message type %d at socket %d\n", msg->type, socket);
+            fprintf(stderr, "Unexpected message type %#08X at socket %d\n", msg->type, socket);
     }
 }
 
@@ -305,6 +305,7 @@ void handle_ping(int socket) {
     for(int i = 0; i< MAX_CLIENTS; ++i) {
         if(clients[i].socket == socket) {
             clients[i].responsive = true;
+            fprintf(stderr, "Client '%s' responded to ping\n", clients[i].name);
             break;
         }
     }

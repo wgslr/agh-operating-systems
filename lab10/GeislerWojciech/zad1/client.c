@@ -66,7 +66,7 @@ void connect_local(int fd, const char *path) {
 void send_message(int socket, msg_type type, void *data, size_t len) {
     message *msg = calloc(1, sizeof(message) + len);
     msg->type = type;
-    msg->len = len;
+    msg->len = (uint32_t) len;
     strncpy(msg->client_name, name, MAX_NAME);
     if(len > 0) {
         memcpy(msg->data, data, len);
@@ -126,9 +126,8 @@ void do_listen(int fd) {
                         .result = result
                 };
 
-                fprintf(stderr, "Sending response for #%d\n", req->id);
                 send_message(fd, RESULT, &resp, sizeof(arith_resp));
-                fprintf(stderr, "Sent response for #%d\n", req->id);
+                fprintf(stderr, "Sent response for #%d (%d)\n", req->id, result);
                 break;
             default:
                 fprintf(stderr, "Received unexpected message of type %d\n", buff->type);
