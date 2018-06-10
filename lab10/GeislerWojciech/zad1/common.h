@@ -14,6 +14,7 @@
 #include <netinet/in.h>
 
 #define OK(_EXPR, _ERR_MSG) if((_EXPR) < 0) { fprintf(stderr, "%s: %d %s\n", _ERR_MSG, errno, strerror(errno)); exit(1); }
+#define CHECK(_EXPR, _ERR_MSG) if((_EXPR) < 0) { fprintf(stderr, "%s: %d %s\n", _ERR_MSG, errno, strerror(errno)); }
 
 #define UNIX_PATH_MAX    108
 #define MAX_NAME 23

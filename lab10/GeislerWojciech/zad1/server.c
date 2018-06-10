@@ -219,7 +219,10 @@ message *read_message(int socket) {
     if(buff->len > 0) {
         bytes = recv(socket, &buff->data, buff->len, 0);
         OK(bytes, "Error receiving message body")
-        assert(bytes == (ssize_t) buff->len);
+        if(bytes < (ssize_t) buff->len) {
+            fprintf(stderr, "Received truncated message, ignoring\n");
+            return NULL;
+        }
     }
 
     return buff;
@@ -463,9 +466,11 @@ void cleanup(void) {
         }
     }
 
-    shutdown(inet_socket, SHUT_RDWR);
-    shutdown(unix_socket, SHUT_RDWR);
-    close(unix_socket);
-    OK(close(inet_socket), "Error closing inet socket");
-    OK(unlink(unix_socket_path), "Error unlinking local socket");
+    CHECK(shutdown(inet_socket, SHUT_RDWR), "Shutdown error of local socket");
+    CHECK(shutdown(unix_socket, SHUT_RDWR), "Shutdown error of unix socket");
+    CHECK(close(unix_socket), "Error closing local socket");
+    CHECK(close(inet_socket), "Error closing inet socket");
+    CHECK(unlink(unix_socket_path), "Error unlinking local socket");
+
+    fprintf(stderr, "Cleanup finished\n");
 }
